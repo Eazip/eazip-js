@@ -2,9 +2,11 @@ name: Publish
 
 on:
   workflow_dispatch:
-  release:
-    types:
-      - published
+    inputs:
+      npm_tag:
+        description: npm dist-tag to publish with
+        required: true
+        default: beta
 
 permissions:
   contents: read
@@ -37,4 +39,4 @@ jobs:
         run: npm run build
 
       - name: Publish client
-        run: npm publish -w @eazip/client
+        run: npm publish -w @eazip/client --tag "${{ inputs.npm_tag }}"

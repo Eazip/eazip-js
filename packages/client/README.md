@@ -5,10 +5,33 @@ Framework-independent browser SDK for Eazip Public Sessions.
 ## Install
 
 ```sh
-npm install @eazip/client
+npm install @eazip/client@beta
 ```
 
-## Create and Poll a Session
+## Create a ZIP
+
+```ts
+import { createZip } from '@eazip/client';
+
+const result = await createZip({
+  strategy: 'cloud',
+  publicKey: 'pk_ez_...',
+  files: [
+    { url: 'https://assets.example.com/photo.jpg', filename: 'photo.jpg' },
+  ],
+  zipName: 'photos.zip',
+  onStatusChange: (status) => {
+    console.log(status);
+  },
+});
+
+await result.download();
+```
+
+## Advanced Sessions
+
+Use the lower-level session client when you want to store the session id,
+customize polling, or control the download UI yourself.
 
 ```ts
 import { EazipClient } from '@eazip/client';
@@ -18,9 +41,7 @@ const client = new EazipClient({
 });
 
 const created = await client.sessions.create({
-  files: [
-    { url: 'https://assets.example.com/photo.jpg', filename: 'photo.jpg' },
-  ],
+  files: [{ url: 'https://assets.example.com/photo.jpg' }],
   zipName: 'photos.zip',
 });
 
@@ -28,22 +49,6 @@ const session = await client.sessions.poll(created.id, {
   clientSecret: created.clientSecret,
   onStatusChange: (next) => {
     console.log(next.job.status);
-  },
-});
-```
-
-## One-shot Helper
-
-```ts
-import { createZip } from '@eazip/client';
-
-await createZip({
-  strategy: 'cloud',
-  publicKey: 'pk_ez_...',
-  files: [{ url: 'https://assets.example.com/photo.jpg' }],
-  zipName: 'photos.zip',
-  onStatusChange: (status) => {
-    console.log(status);
   },
 });
 ```
@@ -73,3 +78,4 @@ try {
 - This package is browser-first and uses Public Sessions.
 - Cloud mode accepts URL source files.
 - React bindings will live in `@eazip/react`.
+- Use the beta channel while this package is in preview.

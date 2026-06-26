@@ -1,6 +1,6 @@
 {
   "name": "@eazip/client",
-  "version": "0.1.0",
+  "version": "0.1.0-beta.0",
   "description": "Browser SDK for Eazip Public Sessions",
   "type": "module",
   "license": "MIT",
