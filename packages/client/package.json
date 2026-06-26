@@ -1,0 +1,58 @@
+{
+  "name": "@eazip/client",
+  "version": "0.1.0",
+  "description": "Browser SDK for Eazip Public Sessions",
+  "type": "module",
+  "license": "MIT",
+  "author": "Eazip <oss@eazip.io>",
+  "homepage": "https://github.com/eazip/eazip-js#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eazip/eazip-js.git",
+    "directory": "packages/client"
+  },
+  "bugs": {
+    "url": "https://github.com/eazip/eazip-js/issues"
+  },
+  "keywords": [
+    "eazip",
+    "zip",
+    "browser",
+    "sdk",
+    "public-sessions"
+  ],
+  "sideEffects": false,
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./cloud": {
+      "types": "./dist/cloud/index.d.ts",
+      "import": "./dist/cloud/index.js"
+    },
+    "./shared": {
+      "types": "./dist/shared/types.d.ts",
+      "import": "./dist/shared/types.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepack": "npm run build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.9"
+  }
+}

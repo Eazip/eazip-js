@@ -1,0 +1,20 @@
+{
+  "name": "eazip-js",
+  "version": "0.0.0",
+  "private": true,
+  "description": "JavaScript and React SDKs for Eazip browser integrations",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "pack:dry-run": "npm pack --dry-run -w @eazip/client"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.9"
+  }
+}
