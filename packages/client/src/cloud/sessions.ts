@@ -1,16 +1,16 @@
-import { EazipNetworkError } from '../shared/errors';
+import { EazipNetworkError } from '../shared/errors.js';
 import type {
   CreatedCloudSession,
   CreateCloudSessionOptions,
   EazipCloudSession,
   GetCloudSessionOptions,
   PollCloudSessionOptions,
-} from '../shared/types';
-import type { ApiCreateSessionResponse, ApiSessionDetailResponse } from './api-types';
-import type { FetchLike } from './http';
-import { getFetch, normalizeApiBaseUrl, readJsonResponse } from './http';
-import { mapCreatedSession, mapSessionDetail, toCreateSessionRequest } from './mappers';
-import { pollSession, retryAfterDelay } from './polling';
+} from '../shared/types.js';
+import type { ApiCreateSessionResponse, ApiSessionDetailResponse } from './api-types.js';
+import type { FetchLike } from './http.js';
+import { getFetch, normalizeApiBaseUrl, readJsonResponse } from './http.js';
+import { mapCreatedSession, mapSessionDetail, toCreateSessionRequest } from './mappers.js';
+import { pollSession, retryAfterDelay } from './polling.js';
 
 export type SessionsClientOptions = {
   publicKey: string;

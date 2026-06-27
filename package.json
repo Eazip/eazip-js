@@ -5,14 +5,17 @@
   "description": "JavaScript and React SDKs for Eazip browser integrations",
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
+    "test:package-imports": "node scripts/check-package-imports.mjs",
     "pack:dry-run": "npm pack --dry-run -w @eazip/client",
-    "release:info": "node scripts/release-info.mjs"
+    "release:info": "node scripts/release-info.mjs",
+    "dev:client-example": "npm run dev -w @eazip/example-client"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

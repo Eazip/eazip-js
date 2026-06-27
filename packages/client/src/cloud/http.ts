@@ -4,9 +4,9 @@ import {
   EazipDownloadExpiredError,
   EazipNetworkError,
   EazipSessionExpiredError,
-} from '../shared/errors';
-import type { EazipChallenge } from '../shared/types';
-import type { ApiErrorResponse, ApiResponse } from './api-types';
+} from '../shared/errors.js';
+import type { EazipChallenge } from '../shared/types.js';
+import type { ApiErrorResponse, ApiResponse } from './api-types.js';
 
 export type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 

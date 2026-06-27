@@ -1,5 +1,5 @@
-import type { FetchLike } from './http';
-import { SessionsClient } from './sessions';
+import type { FetchLike } from './http.js';
+import { SessionsClient } from './sessions.js';
 
 export type EazipClientOptions = {
   publicKey: string;

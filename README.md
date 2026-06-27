@@ -1,6 +1,6 @@
 # Eazip JavaScript SDK
 
-Create ZIP files from browser apps with Eazip Public Sessions.
+Create ZIP files in browser apps locally or with Eazip Public Sessions.
 
 This repository contains public, browser-facing SDK packages only. Server APIs,
 dashboard code, infrastructure, and internal Eazip services are not part of
@@ -17,7 +17,43 @@ this repository.
 npm install @eazip/client@beta
 ```
 
-## Create a ZIP
+## Try the Client Example
+
+```sh
+cd examples/client
+cp .env.example .env
+npm install
+npm run dev -- --host 0.0.0.0
+```
+
+Local mode works without an Eazip public key. Set `VITE_EAZIP_PUBLIC_KEY` in
+`.env` only when testing Cloud mode. Your Public App must allow the origin you
+open, such as `http://localhost:5173` or your Tailscale URL.
+
+## Create a Local ZIP
+
+```ts
+import { createZip } from '@eazip/client';
+
+const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+const result = await createZip({
+  strategy: 'local',
+  files: [
+    ...Array.from(input.files ?? []).map((file) => ({ file, filename: file.name })),
+    { url: 'https://assets.example.com/readme.txt', filename: 'readme.txt' },
+  ],
+  zipName: 'documents.zip',
+  onProgress: (progress) => console.log(progress),
+});
+
+await result.download();
+```
+
+Local URL sources are fetched by the browser, so the remote server must allow
+CORS. Files are not uploaded to Eazip in local mode.
+
+## Create a Cloud ZIP
 
 ```ts
 import { createZip } from '@eazip/client';
@@ -25,13 +61,9 @@ import { createZip } from '@eazip/client';
 const result = await createZip({
   strategy: 'cloud',
   publicKey: 'pk_ez_...',
-  files: [
-    { url: 'https://assets.example.com/report.pdf', filename: 'report.pdf' },
-  ],
+  files: [{ url: 'https://assets.example.com/report.pdf', filename: 'report.pdf' }],
   zipName: 'documents.zip',
-  onStatusChange: (status) => {
-    console.log(status);
-  },
+  onStatusChange: (status) => console.log(status),
 });
 
 await result.download();

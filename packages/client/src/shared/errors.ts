@@ -1,4 +1,4 @@
-import type { EazipChallenge } from './types';
+import type { EazipChallenge } from './types.js';
 
 export type EazipErrorOptions = {
   status?: number | undefined;
@@ -58,6 +58,12 @@ export class EazipAbortError extends EazipErrorBase {
 }
 
 export class EazipUnsupportedError extends EazipErrorBase {
+  constructor(code: string, message: string, options: EazipErrorOptions = {}) {
+    super(code, message, options);
+  }
+}
+
+export class EazipValidationError extends EazipErrorBase {
   constructor(code: string, message: string, options: EazipErrorOptions = {}) {
     super(code, message, options);
   }

@@ -1,6 +1,6 @@
 # @eazip/client
 
-Framework-independent browser SDK for Eazip Public Sessions.
+Framework-independent browser SDK for local ZIP creation and Eazip Public Sessions.
 
 ## Install
 
@@ -8,7 +8,30 @@ Framework-independent browser SDK for Eazip Public Sessions.
 npm install @eazip/client@beta
 ```
 
-## Create a ZIP
+## Create a Local ZIP
+
+```ts
+import { createZip } from '@eazip/client';
+
+const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+const result = await createZip({
+  strategy: 'local',
+  files: [
+    ...Array.from(input.files ?? []).map((file) => ({ file, filename: file.name })),
+    { url: 'https://assets.example.com/metadata.json', filename: 'metadata.json' },
+  ],
+  zipName: 'photos.zip',
+  onProgress: (progress) => console.log(progress),
+});
+
+await result.download();
+```
+
+Local URL sources are fetched by the browser and must be CORS-accessible. They
+are not fetched by Eazip servers.
+
+## Create a Cloud ZIP
 
 ```ts
 import { createZip } from '@eazip/client';
@@ -16,13 +39,9 @@ import { createZip } from '@eazip/client';
 const result = await createZip({
   strategy: 'cloud',
   publicKey: 'pk_ez_...',
-  files: [
-    { url: 'https://assets.example.com/photo.jpg', filename: 'photo.jpg' },
-  ],
+  files: [{ url: 'https://assets.example.com/photo.jpg', filename: 'photo.jpg' }],
   zipName: 'photos.zip',
-  onStatusChange: (status) => {
-    console.log(status);
-  },
+  onStatusChange: (status) => console.log(status),
 });
 
 await result.download();
@@ -76,6 +95,7 @@ try {
 ## Notes
 
 - This package is browser-first and uses Public Sessions.
+- Local mode accepts `File`, `Blob`, and CORS-accessible URL inputs and runs in the browser.
 - Cloud mode accepts URL source files.
 - React bindings will live in `@eazip/react`.
 - Use the beta channel while this package is in preview.

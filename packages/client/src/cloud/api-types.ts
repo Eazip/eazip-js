@@ -1,4 +1,4 @@
-import type { EazipCloudJobStatus, EazipMode, EazipZipStatus } from '../shared/types';
+import type { EazipCloudJobStatus, EazipMode, EazipZipStatus } from '../shared/types.js';
 
 export type ApiErrorResponse = {
   success: false;

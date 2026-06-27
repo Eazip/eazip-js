@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420" role="img" aria-labelledby="title desc">
+  <title id="title">Color grid sample</title>
+  <desc id="desc">A simple colorful grid used as a sample remote image for Eazip local ZIP creation.</desc>
+  <rect width="640" height="420" fill="#f6f7f9"/>
+  <g transform="translate(48 48)">
+    <rect width="144" height="144" rx="18" fill="#0f766e"/>
+    <rect x="176" width="144" height="144" rx="18" fill="#7c3aed"/>
+    <rect x="352" width="144" height="144" rx="18" fill="#ea580c"/>
+    <rect y="176" width="144" height="144" rx="18" fill="#2563eb"/>
+    <rect x="176" y="176" width="144" height="144" rx="18" fill="#db2777"/>
+    <rect x="352" y="176" width="144" height="144" rx="18" fill="#65a30d"/>
+  </g>
+  <text x="48" y="388" fill="#182230" font-family="system-ui, sans-serif" font-size="22" font-weight="700">Eazip sample image</text>
+</svg>

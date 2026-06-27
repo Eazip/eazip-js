@@ -1,16 +1,16 @@
-export { EazipClient } from './cloud';
-export * from './shared/types';
-export * from './shared/errors';
+export { EazipClient } from './cloud/index.js';
+export * from './local/index.js';
+export * from './shared/types.js';
+export * from './shared/errors.js';
 
-import { EazipClient } from './cloud';
-import { EazipDownloadExpiredError, EazipUnsupportedError } from './shared/errors';
-import type { CloudCreateZipResult, CreateZipOptions, CreateZipResult, EazipCloudSession } from './shared/types';
+import { EazipClient } from './cloud/index.js';
+import { createLocalZip } from './local/index.js';
+import { EazipDownloadExpiredError } from './shared/errors.js';
+import type { CloudCreateZipResult, CreateZipOptions, CreateZipResult, EazipCloudSession } from './shared/types.js';
 
 export async function createZip(options: CreateZipOptions): Promise<CreateZipResult> {
   const strategy = options.strategy ?? 'local';
-  if (strategy !== 'cloud') {
-    throw new EazipUnsupportedError('LOCAL_NOT_IMPLEMENTED', 'Local ZIP creation is not implemented yet');
-  }
+  if (strategy === 'local') return createLocalZip(options);
   if (!options.publicKey) {
     throw new TypeError('createZip with strategy "cloud" requires publicKey');
   }
@@ -19,6 +19,7 @@ export async function createZip(options: CreateZipOptions): Promise<CreateZipRes
   const client = new EazipClient({
     publicKey: options.publicKey,
     ...(options.apiBaseUrl ? { apiBaseUrl: options.apiBaseUrl } : {}),
+    ...(options.fetch ? { fetch: options.fetch } : {}),
   });
   const createOptions = {
     files: options.files,

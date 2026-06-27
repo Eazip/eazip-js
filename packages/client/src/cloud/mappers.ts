@@ -2,8 +2,8 @@ import type {
   CreatedCloudSession,
   EazipCloudSession,
   EazipSourceFile,
-} from '../shared/types';
-import type { ApiCreateSessionResponse, ApiSessionDetailResponse } from './api-types';
+} from '../shared/types.js';
+import type { ApiCreateSessionResponse, ApiSessionDetailResponse } from './api-types.js';
 
 export function toCreateSessionRequest(options: {
   files: EazipSourceFile[];

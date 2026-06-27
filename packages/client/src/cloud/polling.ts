@@ -1,5 +1,5 @@
-import { EazipAbortError, EazipApiError } from '../shared/errors';
-import type { EazipCloudSession, PollCloudSessionOptions } from '../shared/types';
+import { EazipAbortError, EazipApiError } from '../shared/errors.js';
+import type { EazipCloudSession, PollCloudSessionOptions } from '../shared/types.js';
 
 export type PollFetchSession = (signal?: AbortSignal) => Promise<EazipCloudSession>;
 

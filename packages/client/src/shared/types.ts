@@ -14,6 +14,20 @@ export type EazipStatus =
   | 'partial'
   | 'failed';
 
+export type EazipProgressPhase = 'starting' | 'fetching' | 'adding' | 'finalizing' | 'completed';
+
+export type EazipProgress = {
+  strategy: EazipStrategy;
+  status: EazipStatus;
+  phase: EazipProgressPhase;
+  filesTotal: number;
+  filesCompleted: number;
+  bytesTotal?: number;
+  bytesProcessed?: number;
+  currentFileIndex?: number;
+  currentFileName?: string;
+};
+
 export type EazipCloudJobStatus = 'pending' | 'preparing' | 'processing' | 'completed' | 'failed';
 
 export type EazipZipStatus = 'pending' | 'processing' | 'completed' | 'failed';
@@ -113,12 +127,28 @@ export type CreateZipOptions = {
   zipName?: string;
   strategy?: EazipStrategy;
   signal?: AbortSignal;
+  compressionLevel?: number;
+  fetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
   publicKey?: string;
   apiBaseUrl?: string;
   mode?: EazipMode;
   failOnUrlError?: boolean;
   maxZipSizeBytes?: number;
   onStatusChange?: (status: EazipStatus) => void;
+  onProgress?: (progress: EazipProgress) => void;
+};
+
+export type LocalCreateZipResult = {
+  strategy: 'local';
+  status: 'completed';
+  filename: string;
+  blob: Blob;
+  size: number;
+  downloadUrl?: string;
+  zips: EazipZipOutput[];
+  errors: EazipError[];
+  download: () => Promise<void>;
+  revokeObjectUrl: () => void;
 };
 
 export type CloudCreateZipResult = {
@@ -130,4 +160,4 @@ export type CloudCreateZipResult = {
   download: () => Promise<void>;
 };
 
-export type CreateZipResult = CloudCreateZipResult;
+export type CreateZipResult = LocalCreateZipResult | CloudCreateZipResult;
