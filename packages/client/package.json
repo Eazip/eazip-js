@@ -5,14 +5,14 @@
   "type": "module",
   "license": "MIT",
   "author": "Eazip <oss@eazip.io>",
-  "homepage": "https://github.com/eazip/eazip-js#readme",
+  "homepage": "https://github.com/Eazip/eazip-js#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eazip/eazip-js.git",
+    "url": "https://github.com/Eazip/eazip-js",
     "directory": "packages/client"
   },
   "bugs": {
-    "url": "https://github.com/eazip/eazip-js/issues"
+    "url": "https://github.com/Eazip/eazip-js/issues"
   },
   "keywords": [
     "eazip",
