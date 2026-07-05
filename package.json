@@ -19,7 +19,7 @@
     "dev:react-example": "npm run dev -w @eazip/example-react"
   },
   "devDependencies": {
-    "typescript": "^5.7.2",
+    "typescript": "^6.0.3",
     "vitest": "^4.1.9"
   }
 }
