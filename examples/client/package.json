@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@eazip/client": "file:../../packages/client"
+    "@eazip/core": "file:../../packages/core"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-`@eazip/client` is currently in beta. Security fixes are shipped on the latest
+`@eazip/core` is currently in beta. Security fixes are shipped on the latest
 published beta and, after a stable release exists, on the latest stable line.
 
 ## Reporting a Vulnerability

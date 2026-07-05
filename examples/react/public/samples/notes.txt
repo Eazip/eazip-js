@@ -1,0 +1,7 @@
+Eazip local mode sample
+
+This file is served from the example app's public directory. It is fetched by
+the browser and added to the ZIP next to files selected from your machine.
+
+Because the file is on the same origin as the example app, it is easy to test
+without CORS setup.

@@ -8,8 +8,8 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@eazip/client": ["../../packages/client/src/index.ts"],
-      "@eazip/client/*": ["../../packages/client/src/*"]
+      "@eazip/core": ["../../packages/core/src/index.ts"],
+      "@eazip/core/*": ["../../packages/core/src/*"]
     },
     "strict": true,
     "target": "ES2022",

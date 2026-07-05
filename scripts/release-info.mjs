@@ -1,20 +1,22 @@
 import { readFileSync } from 'node:fs';
 
-const packageName = process.env.RELEASE_PACKAGE ?? '@eazip/client';
+const packageName = process.env.RELEASE_PACKAGE ?? '@eazip/core';
 const npmTag = process.env.NPM_TAG ?? 'beta';
 
-const packagePaths = {
-  '@eazip/client': 'packages/client/package.json',
+const packages = {
+  '@eazip/core': { path: 'packages/core/package.json', tagPrefix: 'core' },
+  '@eazip/react': { path: 'packages/react/package.json', tagPrefix: 'react' },
 };
 
-const packagePath = packagePaths[packageName];
-if (!packagePath) {
+const packageInfo = packages[packageName];
+if (!packageInfo) {
   throw new Error(`Unsupported release package: ${packageName}`);
 }
 
+const packagePath = packageInfo.path;
 const pkg = JSON.parse(readFileSync(packagePath, 'utf8'));
 const version = String(pkg.version);
-const tagName = `client-v${version}`;
+const tagName = `${packageInfo.tagPrefix}-v${version}`;
 const isPrerelease = version.includes('-');
 
 if (pkg.name !== packageName) {

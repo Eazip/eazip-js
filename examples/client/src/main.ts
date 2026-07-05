@@ -1,65 +1,54 @@
 import {
-  createZip,
+  startZip,
   EazipApiError,
   EazipChallengeRequiredError,
-  type EazipProgress,
-  type EazipStatus,
+  type EazipError,
+  type EazipSourceFile,
   type EazipZipOutput,
-  type LocalCreateZipResult,
-} from '@eazip/client';
+  type ZipJob,
+  type ZipJobSnapshot,
+} from '@eazip/core';
 import './styles.css';
 
-type Mode = 'local' | 'cloud';
+type Strategy = 'local' | 'cloud';
 
-type CloudFile = {
-  url: string;
-  filename: string;
-  selected: boolean;
-};
-
-type SampleAsset = {
-  url: string;
-  filename: string;
-  label: string;
-  kind: 'image' | 'text';
+type DemoAsset = {
+  id: string;
+  name: string;
+  ext: string;
+  size: number;
+  hue: number;
+  source: EazipSourceFile;
 };
 
 type RunState = {
   status: 'idle' | 'running' | 'completed' | 'failed';
-  sdkStatus: EazipStatus;
+  sdkStatus: string;
   message: string;
   sessionId: string | null;
   zips: EazipZipOutput[];
-  localResult: LocalCreateZipResult | null;
-  progress: EazipProgress | null;
+  errors: EazipError[];
+  progressPercent: number;
+  currentFileName: string | null;
 };
 
 const publicKey = import.meta.env.VITE_EAZIP_PUBLIC_KEY;
 const apiBaseUrl = import.meta.env.VITE_EAZIP_API_BASE_URL || 'https://api.eazip.io';
-const sampleAssets: SampleAsset[] = [
-  { url: '/samples/color-grid.svg', filename: 'color-grid.svg', label: 'Color grid', kind: 'image' },
-  { url: '/samples/receipt-card.svg', filename: 'receipt-card.svg', label: 'Receipt card', kind: 'image' },
-  { url: '/samples/notes.txt', filename: 'notes.txt', label: 'Notes text', kind: 'text' },
-];
 
-let mode: Mode = 'local';
-let zipName = 'eazip-sample.zip';
-let localFiles: File[] = [];
-let localUrlFiles: CloudFile[] = sampleAssets.map((asset) => ({
-  url: asset.url,
-  filename: asset.filename,
-  selected: true,
-}));
-let cloudFiles = createInitialCloudFiles();
-let runState: RunState = {
-  status: 'idle',
-  sdkStatus: 'idle',
-  message: 'Select local files to create a ZIP in your browser.',
-  sessionId: null,
-  zips: [],
-  localResult: null,
-  progress: null,
+const EXT_COLORS: Record<string, string> = {
+  SVG: '#3ba88a',
+  TXT: '#3b6ec4',
+  CSV: '#3ba85e',
+  URL: '#7c5cd6',
 };
+
+let assets = buildAssets();
+let selected = new Set(assets.slice(0, 6).map((asset) => asset.id));
+let strategy: Strategy = 'local';
+let zipName = 'assets.zip';
+let customUrl = '';
+let currentJob: ZipJob | null = null;
+let runState: RunState = idleState('Select tiles, then download them as a ZIP — zipped right here in the browser.');
 
 const root = document.querySelector<HTMLDivElement>('#app');
 if (!root) throw new Error('Missing #app element');
@@ -67,272 +56,271 @@ const app: HTMLDivElement = root;
 
 render();
 
-function createInitialCloudFiles(): CloudFile[] {
-  const configured = import.meta.env.VITE_EAZIP_SAMPLE_FILES_JSON;
-  if (configured) {
-    try {
-      const parsed = JSON.parse(configured) as Array<{ url?: string; filename?: string }>;
-      const files = parsed
-        .filter((file) => file.url)
-        .map((file, index) => ({
-          url: String(file.url),
-          filename: file.filename || `sample-${index + 1}`,
-          selected: true,
-        }));
-      if (files.length > 0) return files;
-    } catch {
-      // The editable defaults below keep the example usable even with bad env JSON.
-    }
-  }
+function idleState(message: string): RunState {
+  return {
+    status: 'idle',
+    sdkStatus: 'idle',
+    message,
+    sessionId: null,
+    zips: [],
+    errors: [],
+    progressPercent: 0,
+    currentFileName: null,
+  };
+}
 
+function textFile(name: string, ext: string, body: string, hue: number): DemoAsset {
+  const blob = new Blob([body], { type: 'text/plain' });
+  return {
+    id: name,
+    name,
+    ext,
+    size: blob.size,
+    hue,
+    source: { file: blob, filename: `${name.toLowerCase().replaceAll(' ', '-')}.${ext.toLowerCase()}` },
+  };
+}
+
+function repeat(line: string, times: number): string {
+  return Array.from({ length: times }, (_, index) => `${index + 1}. ${line}`).join('\n');
+}
+
+function buildAssets(): DemoAsset[] {
   return [
-    { url: 'https://example.com/', filename: 'example-home.html', selected: true },
-    { url: 'https://example.com/robots.txt', filename: 'robots.txt', selected: true },
+    {
+      id: 'color-grid',
+      name: 'Color grid',
+      ext: 'SVG',
+      size: 1600,
+      hue: 220,
+      source: { url: '/samples/color-grid.svg', filename: 'color-grid.svg' },
+    },
+    {
+      id: 'receipt-card',
+      name: 'Receipt card',
+      ext: 'SVG',
+      size: 1900,
+      hue: 160,
+      source: { url: '/samples/receipt-card.svg', filename: 'receipt-card.svg' },
+    },
+    {
+      id: 'notes',
+      name: 'Release notes',
+      ext: 'TXT',
+      size: 800,
+      hue: 30,
+      source: { url: '/samples/notes.txt', filename: 'notes.txt' },
+    },
+    textFile('Brand guidelines', 'TXT', repeat('Use the accent sparingly.', 120), 260),
+    textFile('Q3 report', 'CSV', 'quarter,revenue\nQ1,120\nQ2,180\nQ3,240\n', 200),
+    textFile('Invoice 0412', 'TXT', repeat('Line item — 42.00', 40), 10),
+    textFile('Iconography', 'TXT', repeat('icon: 24px grid', 60), 280),
+    textFile('Spec sheet', 'TXT', repeat('Tolerance ±0.2mm', 90), 120),
+    textFile('Budget model', 'CSV', repeat('cell,value', 150), 90),
+    textFile('Contract', 'TXT', repeat('The parties agree…', 200), 330),
+    textFile('Wordmark', 'TXT', 'EAZIP — wordmark usage notes\n', 240),
+    textFile('Walkthrough', 'TXT', repeat('Step-by-step notes', 80), 180),
   ];
+}
+
+function isSelectable(asset: DemoAsset): boolean {
+  return strategy === 'local' || 'url' in asset.source;
+}
+
+function selectedAssets(): DemoAsset[] {
+  return assets.filter((asset) => selected.has(asset.id) && isSelectable(asset));
 }
 
 function render() {
   const isRunning = runState.status === 'running';
-  const canCreate = mode === 'local'
-    ? (localFiles.length > 0 || localUrlFiles.some((file) => file.selected && file.url)) && !isRunning
-    : Boolean(publicKey) && cloudFiles.some((file) => file.selected && file.url) && !isRunning;
+  const chosen = selectedAssets();
+  const allSelected = assets.filter(isSelectable).every((asset) => selected.has(asset.id));
+  const canCreate = chosen.length > 0 && !isRunning && (strategy === 'local' || Boolean(publicKey));
 
   app.innerHTML = `
-    <main class="shell">
-      <header class="header">
-        <div>
-          <p class="eyebrow">@eazip/client example</p>
-          <h1>Create ZIPs in the browser or with Eazip Cloud</h1>
+    <header class="topbar">
+      <div class="topbar-row">
+        <div class="logo"><div class="logo-inner"></div></div>
+        <div class="app-name">Northwind</div>
+        <div class="app-sub">Assets · vanilla</div>
+        <div class="spacer"></div>
+        <a class="cloud-note" href="https://github.com/eazip/eazip-js" target="_blank" rel="noreferrer">@eazip/core example</a>
+      </div>
+      <div class="topbar-row">
+        <button type="button" class="select-all-btn" data-action="toggle-all">${allSelected ? 'Clear' : 'Select all'}</button>
+        <div class="sel-count">${chosen.length > 0 ? `${chosen.length} selected` : `${assets.length} items`}</div>
+        <div class="spacer"></div>
+        ${isRunning ? '<button type="button" class="cancel-btn" data-action="cancel">Cancel</button>' : ''}
+        <button type="button" class="download-btn" data-action="create" ${canCreate ? '' : 'disabled'}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          ${isRunning ? 'Creating…' : 'Download as ZIP'}
+        </button>
+      </div>
+      <div class="controls">
+        <div class="control">
+          <label for="strategy">Strategy</label>
+          <select id="strategy" data-field="strategy" ${isRunning ? 'disabled' : ''}>
+            <option value="local" ${strategy === 'local' ? 'selected' : ''}>Local</option>
+            <option value="cloud" ${strategy === 'cloud' ? 'selected' : ''} ${publicKey ? '' : 'disabled'}>
+              Cloud${publicKey ? '' : ' (set VITE_EAZIP_PUBLIC_KEY)'}
+            </option>
+          </select>
         </div>
-        <a class="ghost-button" href="https://github.com/eazip/eazip-js" target="_blank" rel="noreferrer">GitHub</a>
-      </header>
+        <div class="control">
+          <label for="zip-name">Zip name</label>
+          <input id="zip-name" type="text" data-field="zip-name" value="${escapeAttribute(zipName)}" ${isRunning ? 'disabled' : ''} />
+        </div>
+        <div class="control">
+          <label for="custom-url">Add URL</label>
+          <input id="custom-url" type="text" data-field="custom-url" placeholder="https://…" value="${escapeAttribute(customUrl)}" ${isRunning ? 'disabled' : ''} />
+          <button type="button" class="mini-btn" data-action="add-url" ${isRunning ? 'disabled' : ''}>Add</button>
+        </div>
+      </div>
+    </header>
 
-      <section class="workspace">
-        <aside class="sidebar">
-          <div class="mode-switch" role="tablist" aria-label="ZIP strategy">
-            <button class="${mode === 'local' ? 'active' : ''}" data-mode="local" type="button">Local</button>
-            <button class="${mode === 'cloud' ? 'active' : ''}" data-mode="cloud" type="button">Cloud</button>
-          </div>
+    <div class="grid">
+      ${assets.map(renderTile).join('')}
+    </div>
 
-          <label class="field">
-            <span>ZIP filename</span>
-            <input data-field="zip-name" value="${escapeAttribute(zipName)}" ${isRunning ? 'disabled' : ''} />
-          </label>
+    <p class="hint">
+      ${strategy === 'cloud'
+        ? 'Cloud strategy: only URL-based assets can be zipped, and they must be reachable from the Eazip API.'
+        : 'Local strategy: files are zipped right here in the browser — nothing is uploaded. URL tiles are fetched by the browser (CORS applies); failures are skipped and reported.'}
+    </p>
 
-          ${mode === 'local' ? renderLocalControls(isRunning) : renderCloudControls(isRunning)}
-
-          <button class="primary-button" data-action="create" type="button" ${canCreate ? '' : 'disabled'}>
-            ${isRunning ? 'Creating ZIP...' : mode === 'local' ? 'Create Local ZIP' : 'Create Cloud ZIP'}
-          </button>
-        </aside>
-
-        <section class="main-panel">
-          ${renderStatus()}
-          ${renderCode()}
-        </section>
-      </section>
-    </main>
+    <div class="panels">
+      ${renderRunPanel()}
+      ${renderCodePanel()}
+    </div>
   `;
 
   bindEvents();
 }
 
-function renderLocalControls(isRunning: boolean) {
+function renderTile(asset: DemoAsset): string {
+  const selectable = isSelectable(asset);
+  const isSelected = selected.has(asset.id) && selectable;
   return `
-    <section class="control-block">
-      <div class="dropzone">
-        <input id="file-picker" data-field="local-files" type="file" multiple ${isRunning ? 'disabled' : ''} />
-        <label for="file-picker">
-          <strong>Select files</strong>
-          <span>ZIP creation stays in this browser. No upload, no public key.</span>
-        </label>
+    <button type="button" class="tile${isSelected ? ' selected' : ''}" data-asset="${escapeAttribute(asset.id)}" ${selectable ? '' : 'disabled'}>
+      <div class="thumb" style="background: linear-gradient(150deg, hsl(${asset.hue}, 24%, 88%), hsl(${asset.hue}, 28%, 78%));">
+        ${isSelected ? `
+          <div class="check">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12l4 4L19 7" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        ` : ''}
+        <span class="ext-badge" style="background: ${EXT_COLORS[asset.ext] ?? '#6b7177'};">${escapeHtml(asset.ext)}</span>
       </div>
-      ${localFiles.length ? `
-        <div class="file-stack">
-          ${localFiles.map((file, index) => `
-            <div class="file-item">
-              <span class="file-index">${index + 1}</span>
-              <div>
-                <strong>${escapeHtml(file.name || `file-${index + 1}`)}</strong>
-                <p>${formatBytes(file.size)}</p>
-              </div>
+      <div class="tile-meta">
+        <div class="tile-name">${escapeHtml(asset.name)}</div>
+        <div class="tile-size">${asset.size > 0 ? formatBytes(asset.size) : 'remote'}</div>
+      </div>
+    </button>
+  `;
+}
+
+function renderRunPanel(): string {
+  return `
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Run</h2>
+        <div class="line"></div>
+        <span class="status-pill status-${runState.status}">${escapeHtml(runState.sdkStatus)}</span>
+      </div>
+      <p class="message">${escapeHtml(runState.message)}</p>
+      <div class="progress-track" aria-label="Progress"><div style="width: ${runState.progressPercent}%"></div></div>
+      ${runState.currentFileName ? `<p class="meta">Current: <code>${escapeHtml(runState.currentFileName)}</code></p>` : ''}
+      ${runState.sessionId ? `<p class="meta">Session: <code>${escapeHtml(runState.sessionId)}</code></p>` : ''}
+      ${runState.zips.length ? `<div class="zip-list">${runState.zips.map(renderZipRow).join('')}</div>` : ''}
+      ${runState.errors.length ? `
+        <div class="zip-list">
+          ${runState.errors.map((error) => `
+            <div class="skipped-row">
+              <span class="dot"></span>
+              <strong>${escapeHtml(error.filename ?? `file #${(error.fileIndex ?? 0) + 1}`)}</strong>
+              <span>${escapeHtml(error.message)}</span>
             </div>
           `).join('')}
         </div>
-      ` : '<p class="hint">Pick one or more files from your machine to test local mode first.</p>'}
-
-      <div class="section-heading">
-        <h2>Sample remote files</h2>
-      </div>
-      <div class="sample-grid">
-        ${sampleAssets.map((asset) => renderSampleAsset(asset, isRunning)).join('')}
-      </div>
-
-      <div class="section-heading">
-        <h2>Custom URLs</h2>
-        <button class="icon-button" data-action="add-local-url" type="button" aria-label="Add local URL" ${isRunning ? 'disabled' : ''}>+</button>
-      </div>
-      <p class="hint">URL sources are fetched by this browser, so the remote server must allow CORS.</p>
-      <div class="url-list">
-        ${localUrlFiles.map((file, index) => renderUrlRow(file, index, 'local', isRunning, sampleAssets.some((asset) => asset.url === file.url))).join('')}
-      </div>
+      ` : ''}
     </section>
   `;
 }
 
-function renderSampleAsset(asset: SampleAsset, disabled: boolean) {
-  const index = localUrlFiles.findIndex((file) => file.url === asset.url);
-  const selected = index >= 0 && localUrlFiles[index]?.selected;
-  return `
-    <label class="sample-card ${selected ? 'selected' : ''}">
-      <input data-sample-url="${escapeAttribute(asset.url)}" type="checkbox" ${selected ? 'checked' : ''} ${disabled ? 'disabled' : ''} />
-      <span class="sample-preview ${asset.kind}">
-        ${asset.kind === 'image'
-          ? `<img src="${escapeAttribute(asset.url)}" alt="" />`
-          : '<span>TXT</span>'}
-      </span>
-      <span>
-        <strong>${escapeHtml(asset.label)}</strong>
-        <small>${escapeHtml(asset.filename)}</small>
-      </span>
-    </label>
-  `;
-}
-
-function renderCloudControls(isRunning: boolean) {
-  return `
-    <section class="control-block">
-      <div class="cloud-note ${publicKey ? 'ready' : ''}">
-        <strong>${publicKey ? 'Public key configured' : 'Public key missing'}</strong>
-        <span>${publicKey ? 'Cloud mode will call Public Sessions.' : 'Set VITE_EAZIP_PUBLIC_KEY in .env.'}</span>
-      </div>
-      <div class="section-heading">
-        <h2>Source URLs</h2>
-        <button class="icon-button" data-action="add-cloud-file" type="button" aria-label="Add URL" ${isRunning ? 'disabled' : ''}>+</button>
-      </div>
-      <div class="url-list">
-        ${cloudFiles.map((file, index) => renderUrlRow(file, index, 'cloud', isRunning)).join('')}
-      </div>
-    </section>
-  `;
-}
-
-function renderUrlRow(file: CloudFile, index: number, scope: 'local' | 'cloud', disabled: boolean, readonly = false) {
-  return `
-    <div class="url-row ${readonly ? 'sample-url-row' : ''}">
-      <label class="checkbox-cell">
-        <input data-${scope}-selected="${index}" type="checkbox" ${file.selected ? 'checked' : ''} ${disabled ? 'disabled' : ''} />
-      </label>
-      <label class="field compact">
-        <span>URL</span>
-        <input data-${scope}-url="${index}" value="${escapeAttribute(file.url)}" ${disabled || readonly ? 'disabled' : ''} />
-      </label>
-      <label class="field compact">
-        <span>Name</span>
-        <input data-${scope}-name="${index}" value="${escapeAttribute(file.filename)}" ${disabled || readonly ? 'disabled' : ''} />
-      </label>
-    </div>
-  `;
-}
-
-function renderStatus() {
-  const progressPercent = runState.progress?.bytesTotal
-    ? Math.min(100, Math.round(((runState.progress.bytesProcessed ?? 0) / runState.progress.bytesTotal) * 100))
-    : runState.status === 'completed'
-      ? 100
-      : 0;
-
-  return `
-    <section class="panel status-panel">
-      <div class="section-heading">
-        <h2>Run</h2>
-        <span class="status-pill status-${runState.status}">${runState.sdkStatus}</span>
-      </div>
-      <p class="message">${escapeHtml(runState.message)}</p>
-      <div class="progress-track" aria-label="Progress">
-        <div style="width: ${progressPercent}%"></div>
-      </div>
-      ${runState.progress?.currentFileName ? `<p class="meta">Current: <code>${escapeHtml(runState.progress.currentFileName)}</code></p>` : ''}
-      ${runState.sessionId ? `<p class="meta">Session: <code>${escapeHtml(runState.sessionId)}</code></p>` : ''}
-      ${runState.zips.length ? `<div class="zip-list">${runState.zips.map(renderZip).join('')}</div>` : ''}
-    </section>
-  `;
-}
-
-function renderZip(zip: EazipZipOutput) {
-  const size = zip.size == null ? '' : `<span>${formatBytes(zip.size)}</span>`;
+function renderZipRow(zip: EazipZipOutput): string {
+  const size = zip.size == null ? zip.status : `${zip.status} · ${formatBytes(zip.size)}`;
   const download = zip.downloadUrl
-    ? `<a class="secondary-button" href="${escapeAttribute(zip.downloadUrl)}" download="${escapeAttribute(zip.filename)}">Download</a>`
+    ? `<a class="dl-btn" href="${escapeAttribute(zip.downloadUrl)}" download="${escapeAttribute(zip.filename)}">Download</a>`
     : '';
   return `
     <div class="zip-row">
       <div>
         <strong>${escapeHtml(zip.filename)}</strong>
-        <p>${escapeHtml(zip.status)} ${size}</p>
+        <p>${escapeHtml(size)}</p>
       </div>
       ${download}
     </div>
   `;
 }
 
-function renderCode() {
+function renderCodePanel(): string {
   return `
     <section class="panel code-panel">
-      <div class="section-heading">
+      <div class="panel-heading">
         <h2>Code</h2>
+        <div class="line"></div>
       </div>
-      <pre><code>${escapeHtml(mode === 'local' ? localExampleCode() : cloudExampleCode())}</code></pre>
+      <pre><code>${escapeHtml(strategy === 'local' ? localExampleCode() : cloudExampleCode())}</code></pre>
     </section>
   `;
 }
 
 function bindEvents() {
-  app.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => {
-    button.addEventListener('click', () => {
-      mode = button.dataset.mode as Mode;
-      resetRunState(mode === 'local'
-        ? 'Select local files to create a ZIP in your browser.'
-        : 'Configure a public key and source URLs to create a cloud ZIP.');
+  app.querySelectorAll<HTMLButtonElement>('[data-asset]').forEach((tile) => {
+    tile.addEventListener('click', () => {
+      const id = tile.dataset.asset!;
+      if (selected.has(id)) selected.delete(id);
+      else selected.add(id);
       render();
     });
+  });
+
+  app.querySelector('[data-action="toggle-all"]')?.addEventListener('click', () => {
+    const selectable = assets.filter(isSelectable);
+    const allSelected = selectable.every((asset) => selected.has(asset.id));
+    selected = allSelected ? new Set() : new Set(selectable.map((asset) => asset.id));
+    render();
+  });
+
+  app.querySelector<HTMLSelectElement>('[data-field="strategy"]')?.addEventListener('change', (event) => {
+    strategy = (event.currentTarget as HTMLSelectElement).value as Strategy;
+    resetRun(strategy === 'local'
+      ? 'Select tiles, then download them as a ZIP — zipped right here in the browser.'
+      : 'Cloud strategy selected: the zip is built by the Eazip API and polled until ready.');
+    render();
   });
 
   app.querySelector<HTMLInputElement>('[data-field="zip-name"]')?.addEventListener('input', (event) => {
-    zipName = inputValue(event);
+    zipName = (event.currentTarget as HTMLInputElement).value;
   });
 
-  app.querySelector<HTMLInputElement>('[data-field="local-files"]')?.addEventListener('change', (event) => {
-    localFiles = Array.from((event.currentTarget as HTMLInputElement).files ?? []);
-    resetRunState(`${localFiles.length} local file${localFiles.length === 1 ? '' : 's'} selected.`);
-    render();
+  app.querySelector<HTMLInputElement>('[data-field="custom-url"]')?.addEventListener('input', (event) => {
+    customUrl = (event.currentTarget as HTMLInputElement).value;
   });
 
-  app.querySelectorAll<HTMLInputElement>('[data-sample-url]').forEach((input) => {
-    input.addEventListener('change', () => {
-      const asset = sampleAssets.find((candidate) => candidate.url === input.dataset.sampleUrl);
-      if (!asset) return;
-      const existing = localUrlFiles.find((file) => file.url === asset.url);
-      if (existing) {
-        existing.selected = input.checked;
-      } else {
-        localUrlFiles.unshift({
-          url: asset.url,
-          filename: asset.filename,
-          selected: input.checked,
-        });
-      }
-      resetRunState(input.checked ? `${asset.label} sample selected.` : `${asset.label} sample skipped.`);
-      render();
-    });
-  });
-
-  app.querySelector('[data-action="add-local-url"]')?.addEventListener('click', () => {
-    localUrlFiles.push({ url: '', filename: `remote-${localUrlFiles.length + 1}`, selected: true });
-    render();
-  });
-
-  app.querySelector('[data-action="add-cloud-file"]')?.addEventListener('click', () => {
-    cloudFiles.push({ url: '', filename: `file-${cloudFiles.length + 1}`, selected: true });
+  app.querySelector('[data-action="add-url"]')?.addEventListener('click', () => {
+    const url = customUrl.trim();
+    if (!url) return;
+    const name = filenameFromUrl(url) ?? `remote-${assets.length + 1}`;
+    assets = [...assets, {
+      id: `url-${assets.length}-${name}`,
+      name,
+      ext: 'URL',
+      size: 0,
+      hue: 265,
+      source: { url, filename: name },
+    }];
+    selected.add(`url-${assets.length - 1}-${name}`);
+    customUrl = '';
     render();
   });
 
@@ -340,118 +328,90 @@ function bindEvents() {
     void runCreateZip();
   });
 
-  bindUrlRows(localUrlFiles, 'local');
-  bindUrlRows(cloudFiles, 'cloud');
-}
-
-function bindUrlRows(files: CloudFile[], scope: 'local' | 'cloud') {
-  files.forEach((file, index) => {
-    app.querySelector<HTMLInputElement>(`[data-${scope}-selected="${index}"]`)?.addEventListener('change', (event) => {
-      file.selected = inputChecked(event);
-      render();
-    });
-    app.querySelector<HTMLInputElement>(`[data-${scope}-url="${index}"]`)?.addEventListener('input', (event) => {
-      file.url = inputValue(event);
-    });
-    app.querySelector<HTMLInputElement>(`[data-${scope}-name="${index}"]`)?.addEventListener('input', (event) => {
-      file.filename = inputValue(event);
-    });
+  app.querySelector('[data-action="cancel"]')?.addEventListener('click', () => {
+    currentJob?.abort();
+    resetRun('Export cancelled.');
+    render();
   });
 }
 
 async function runCreateZip() {
+  resetRun('');
   runState = {
+    ...idleState(strategy === 'local' ? 'Zipping in this browser…' : 'Creating a Public Session…'),
     status: 'running',
-    sdkStatus: 'creating',
-    message: mode === 'local' ? 'Creating a ZIP in this browser...' : 'Creating a Public Session...',
-    sessionId: null,
-    zips: [],
-    localResult: null,
-    progress: null,
+    sdkStatus: 'starting',
   };
   render();
 
-  try {
-    const result = mode === 'local'
-      ? await createZip({
-          strategy: 'local',
-          files: [
-            ...localFiles.map((file) => ({ file, filename: file.name })),
-            ...localUrlFiles
-              .filter((file) => file.selected && file.url)
-              .map((file) => ({ url: file.url, filename: file.filename || undefined })),
-          ],
-          zipName,
-          onStatusChange: handleStatus,
-          onProgress: handleProgress,
-        })
-      : await createZip({
-          strategy: 'cloud',
-          publicKey,
-          apiBaseUrl,
-          files: cloudFiles
-            .filter((file) => file.selected && file.url)
-            .map((file) => ({ url: file.url, filename: file.filename || undefined })),
-          zipName,
-          onStatusChange: handleStatus,
-        });
+  const files = selectedAssets().map((asset) => asset.source);
+  const job = strategy === 'local'
+    ? startZip({ files, zipName })
+    : startZip({ strategy: 'cloud', publicKey, apiBaseUrl, files, zipName });
+  currentJob = job;
 
+  const unsubscribe = job.subscribe(() => {
+    if (currentJob !== job) return;
+    applySnapshot(job.getSnapshot());
+    render();
+  });
+
+  try {
+    const result = await job.done;
+    if (currentJob !== job) return;
     runState = {
+      ...runState,
       status: 'completed',
-      sdkStatus: 'completed',
-      message: result.strategy === 'local' ? 'Local ZIP is ready.' : 'Cloud ZIP is ready.',
-      sessionId: result.strategy === 'cloud' ? result.sessionId : null,
+      sdkStatus: result.status,
+      progressPercent: 100,
+      currentFileName: null,
+      message: result.status === 'partial'
+        ? `ZIP is ready — ${result.skippedCount} file${result.skippedCount === 1 ? '' : 's'} skipped.`
+        : result.strategy === 'local' ? 'ZIP is ready.' : 'Cloud ZIP is ready.',
       zips: result.zips,
-      localResult: result.strategy === 'local' ? result : null,
-      progress: runState.progress,
+      errors: result.errors,
     };
     render();
   } catch (error) {
+    if (currentJob !== job) return;
     runState = {
+      ...idleState(errorMessage(error)),
       status: 'failed',
-      sdkStatus: 'failed',
-      message: errorMessage(error),
-      sessionId: null,
-      zips: [],
-      localResult: null,
-      progress: null,
+      sdkStatus: job.getSnapshot().status,
     };
     render();
+  } finally {
+    unsubscribe();
   }
 }
 
-function handleStatus(status: EazipStatus) {
+function applySnapshot(snapshot: ZipJobSnapshot) {
+  const cloudStatus = snapshot.session?.jobStatus;
+  const progress = snapshot.progress;
   runState = {
     ...runState,
-    sdkStatus: status,
-    message: status === 'creating' ? 'Preparing ZIP creation...' : `Status: ${status}`,
+    sdkStatus: cloudStatus ? `${snapshot.status} · ${cloudStatus}` : snapshot.status,
+    sessionId: snapshot.session?.sessionId ?? runState.sessionId,
+    zips: snapshot.zips,
+    errors: snapshot.errors,
+    currentFileName: progress?.currentFileName ?? null,
+    progressPercent: progress?.bytesTotal
+      ? Math.min(100, Math.round(((progress.bytesProcessed ?? 0) / progress.bytesTotal) * 100))
+      : runState.progressPercent,
+    message: snapshot.status === 'processing'
+      ? progress
+        ? `${progress.phase}: ${progress.filesCompleted}/${progress.filesTotal} files`
+        : cloudStatus
+          ? `Cloud job ${cloudStatus}…`
+          : 'Working…'
+      : runState.message,
   };
-  render();
 }
 
-function handleProgress(progress: EazipProgress) {
-  const files = `${progress.filesCompleted}/${progress.filesTotal}`;
-  runState = {
-    ...runState,
-    progress,
-    message: progress.phase === 'completed'
-      ? 'Final ZIP is ready.'
-      : `${progress.phase}: ${files} files`,
-  };
-  render();
-}
-
-function resetRunState(message: string) {
-  runState.localResult?.revokeObjectUrl?.();
-  runState = {
-    status: 'idle',
-    sdkStatus: 'idle',
-    message,
-    sessionId: null,
-    zips: [],
-    localResult: null,
-    progress: null,
-  };
+function resetRun(message: string) {
+  currentJob?.dispose();
+  currentJob = null;
+  runState = idleState(message);
 }
 
 function errorMessage(error: unknown) {
@@ -466,56 +426,50 @@ function errorMessage(error: unknown) {
 }
 
 function localExampleCode() {
-  const urlFiles = localUrlFiles
-    .filter((file) => file.selected && file.url)
-    .map((file) => `  { url: '${file.url}', filename: '${file.filename}' }`)
-    .join(',\n');
+  return `import { createZip } from '@eazip/core';
 
-  return `import { createZip } from '@eazip/client';
-
-const input = document.querySelector('input[type="file"]');
-const selectedFiles = Array.from(input.files).map((file) => ({
-  file,
-  filename: file.name,
-}));
-
+// One function: zips in the browser and reports per-file skips.
 const result = await createZip({
-  strategy: 'local',
-  files: [
-    ...selectedFiles${urlFiles ? `,\n${urlFiles}` : ''}
-  ],
+  files: selectedFiles,   // File[], FileList, URLs, Blobs…
   zipName: '${zipName}',
-  onProgress: (progress) => console.log(progress),
 });
 
-await result.download();`;
+result.download();
+console.log(result.status, result.errors); // 'completed' | 'partial'`;
 }
 
 function cloudExampleCode() {
-  const files = cloudFiles
-    .filter((file) => file.selected && file.url)
-    .map((file) => `    { url: '${file.url}', filename: '${file.filename}' }`)
-    .join(',\n');
+  return `import { startZip } from '@eazip/core';
 
-  return `import { createZip } from '@eazip/client';
-
-const result = await createZip({
+const job = startZip({
   strategy: 'cloud',
   publicKey: import.meta.env.VITE_EAZIP_PUBLIC_KEY,
-  files: [
-${files || "    { url: 'https://assets.example.com/report.pdf', filename: 'report.pdf' }"}
-  ],
+  files: selectedUrls,
   zipName: '${zipName}',
-  onStatusChange: (status) => console.log(status),
 });
 
-await result.download();`;
+job.subscribe(() => {
+  const { status, session } = job.getSnapshot();
+  console.log(status, session?.sessionId); // resumable across reloads
+});
+
+const result = await job.done;
+result.download();`;
+}
+
+function filenameFromUrl(url: string): string | undefined {
+  try {
+    const segment = new URL(url).pathname.split('/').filter(Boolean).pop();
+    return segment ? decodeURIComponent(segment) : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function formatBytes(value: number) {
-  if (value < 1024) return `${value} B`;
-  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
-  return `${(value / 1024 / 1024).toFixed(1)} MB`;
+  if (value < 1000) return `${value} B`;
+  if (value < 1_000_000) return `${(value / 1000).toFixed(1)} KB`;
+  return `${(value / 1_000_000).toFixed(1)} MB`;
 }
 
 function escapeHtml(value: string) {
@@ -533,12 +487,4 @@ function escapeHtml(value: string) {
 
 function escapeAttribute(value: string) {
   return escapeHtml(value);
-}
-
-function inputValue(event: Event) {
-  return (event.currentTarget as HTMLInputElement).value;
-}
-
-function inputChecked(event: Event) {
-  return (event.currentTarget as HTMLInputElement).checked;
 }

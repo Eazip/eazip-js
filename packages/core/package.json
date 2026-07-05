@@ -1,0 +1,66 @@
+{
+  "name": "@eazip/core",
+  "version": "0.2.0-beta.1",
+  "description": "Zip downloads for browser apps — local zipping engine with an optional Eazip cloud strategy",
+  "type": "module",
+  "license": "MIT",
+  "author": "Eazip <oss@eazip.io>",
+  "homepage": "https://github.com/Eazip/eazip-js#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Eazip/eazip-js",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/Eazip/eazip-js/issues"
+  },
+  "keywords": [
+    "zip",
+    "download",
+    "browser",
+    "archive",
+    "eazip",
+    "zip64"
+  ],
+  "sideEffects": false,
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./local": {
+      "types": "./dist/local/index.d.ts",
+      "import": "./dist/local/index.js"
+    },
+    "./cloud": {
+      "types": "./dist/cloud/index.d.ts",
+      "import": "./dist/cloud/index.js"
+    },
+    "./shared": {
+      "types": "./dist/shared/index.d.ts",
+      "import": "./dist/shared/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepack": "npm run build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.9"
+  },
+  "dependencies": {
+    "@zip.js/zip.js": "^2.8.26"
+  }
+}

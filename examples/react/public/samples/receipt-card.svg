@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420" role="img" aria-labelledby="title desc">
+  <title id="title">Receipt card sample</title>
+  <desc id="desc">A sample receipt-like card used to test adding remote files to local ZIPs.</desc>
+  <rect width="640" height="420" fill="#edf2f7"/>
+  <rect x="170" y="42" width="300" height="336" rx="18" fill="#ffffff" stroke="#cfd6e1"/>
+  <text x="202" y="96" fill="#0f766e" font-family="system-ui, sans-serif" font-size="24" font-weight="800">Eazip Receipt</text>
+  <line x1="202" y1="124" x2="438" y2="124" stroke="#dfe3ea" stroke-width="3"/>
+  <text x="202" y="166" fill="#475467" font-family="system-ui, sans-serif" font-size="17">Images</text>
+  <text x="390" y="166" fill="#182230" font-family="system-ui, sans-serif" font-size="17" font-weight="700">$12</text>
+  <text x="202" y="210" fill="#475467" font-family="system-ui, sans-serif" font-size="17">Docs</text>
+  <text x="398" y="210" fill="#182230" font-family="system-ui, sans-serif" font-size="17" font-weight="700">$8</text>
+  <text x="202" y="254" fill="#475467" font-family="system-ui, sans-serif" font-size="17">ZIP</text>
+  <text x="398" y="254" fill="#182230" font-family="system-ui, sans-serif" font-size="17" font-weight="700">$0</text>
+  <line x1="202" y1="286" x2="438" y2="286" stroke="#dfe3ea" stroke-width="3"/>
+  <text x="202" y="330" fill="#182230" font-family="system-ui, sans-serif" font-size="19" font-weight="800">Total</text>
+  <text x="386" y="330" fill="#182230" font-family="system-ui, sans-serif" font-size="19" font-weight="800">$20</text>
+</svg>

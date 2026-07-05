@@ -6,10 +6,11 @@ on:
       package:
         description: Package to publish
         required: true
-        default: '@eazip/client'
+        default: '@eazip/core'
         type: choice
         options:
-          - '@eazip/client'
+          - '@eazip/core'
+          - '@eazip/react'
       npm_tag:
         description: npm dist-tag to publish with
         required: true
@@ -101,7 +102,7 @@ jobs:
       - name: Validate package contents
         run: npm run pack:dry-run
 
-      - name: Publish client
+      - name: Publish package
         run: npm publish -w "${{ steps.release.outputs.package_name }}" --tag "${{ inputs.npm_tag }}"
 
       - name: Create git tag
@@ -118,12 +119,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG_NAME: ${{ steps.release.outputs.tag_name }}
           VERSION: ${{ steps.release.outputs.version }}
+          PACKAGE_NAME: ${{ steps.release.outputs.package_name }}
           PRERELEASE: ${{ steps.release.outputs.prerelease }}
         run: |
           args=(
             "$TAG_NAME"
-            --title "@eazip/client $VERSION"
-            --notes "Published @eazip/client@$VERSION to npm with dist-tag ${{ inputs.npm_tag }}."
+            --title "$PACKAGE_NAME $VERSION"
+            --notes "Published $PACKAGE_NAME@$VERSION to npm with dist-tag ${{ inputs.npm_tag }}."
           )
           if [ "$PRERELEASE" = "true" ]; then
             args+=(--prerelease)

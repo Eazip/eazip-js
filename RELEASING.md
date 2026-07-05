@@ -9,12 +9,12 @@ This repository publishes public browser SDK packages only.
 
 Each npm release also gets a Git tag and GitHub Release:
 
-- `client-v0.1.0-beta.1`
-- `client-v0.1.0`
+- `core-v0.1.0-beta.1`
+- `core-v0.1.0`
 
 ## One-time npm setup
 
-Configure npm Trusted Publishing for `@eazip/client` before using the GitHub
+Configure npm Trusted Publishing for `@eazip/core` before using the GitHub
 Actions release workflow:
 
 - Publisher: GitHub Actions
@@ -29,22 +29,22 @@ require two-factor authentication and disallow classic/granular tokens.
 
 ## Beta release
 
-1. Update `packages/client/package.json` to the next prerelease version.
+1. Update `packages/core/package.json` to the next prerelease version.
 2. Run `npm install --package-lock-only` to sync `package-lock.json`.
 3. Merge the version bump to `main`.
 4. Run the `Publish` workflow from `main` with:
-   - Package: `@eazip/client`
+   - Package: `@eazip/core`
    - npm dist-tag: `beta`
 
 The workflow validates that `beta` is only used with `*-beta.N` versions.
 
 ## Stable release
 
-1. Update `packages/client/package.json` to a stable version.
+1. Update `packages/core/package.json` to a stable version.
 2. Run `npm install --package-lock-only` to sync `package-lock.json`.
 3. Merge the version bump to `main`.
 4. Run the `Publish` workflow from `main` with:
-   - Package: `@eazip/client`
+   - Package: `@eazip/core`
    - npm dist-tag: `latest`
 
 The workflow rejects prerelease versions published as `latest`.
@@ -58,7 +58,7 @@ version; npm versions are immutable.
 If a bad version is published, prefer:
 
 ```sh
-npm deprecate @eazip/client@VERSION "Use VERSION_OR_NEWER instead"
+npm deprecate @eazip/core@VERSION "Use VERSION_OR_NEWER instead"
 ```
 
 Then publish a fixed patch or beta version.

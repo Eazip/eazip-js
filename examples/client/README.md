@@ -1,6 +1,6 @@
 # Eazip Client Example
 
-Minimal browser example for `@eazip/client`.
+Minimal browser example for `@eazip/core`.
 
 The default Local mode creates a ZIP from files selected on your machine and
 URLs fetched by your browser. It does not require an Eazip public key. Cloud

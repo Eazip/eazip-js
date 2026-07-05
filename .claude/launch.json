@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "react-example",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "-w", "@eazip/example-react", "--", "--host", "0.0.0.0"],
+      "port": 5174
+    },
+    {
+      "name": "client-example",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "-w", "@eazip/example-client"],
+      "port": 5173
+    }
+  ]
+}

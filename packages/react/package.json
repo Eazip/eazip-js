@@ -1,0 +1,64 @@
+{
+  "name": "@eazip/react",
+  "version": "0.1.0-beta.1",
+  "description": "React hooks and components for zip downloads with Eazip",
+  "type": "module",
+  "license": "MIT",
+  "author": "Eazip <oss@eazip.io>",
+  "homepage": "https://github.com/Eazip/eazip-js#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Eazip/eazip-js",
+    "directory": "packages/react"
+  },
+  "bugs": {
+    "url": "https://github.com/Eazip/eazip-js/issues"
+  },
+  "keywords": [
+    "eazip",
+    "zip",
+    "react",
+    "hooks",
+    "download",
+    "browser"
+  ],
+  "sideEffects": false,
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepack": "npm run build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@eazip/core": "^0.2.0-beta.1"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "jsdom": "^25.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.9"
+  }
+}
