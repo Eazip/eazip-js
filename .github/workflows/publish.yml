@@ -87,14 +87,16 @@ jobs:
           PACKAGE_NAME: ${{ steps.release.outputs.package_name }}
           VERSION: ${{ steps.release.outputs.version }}
 
+      # Build first: workspace packages resolve each other through dist
+      # (e.g. @eazip/react typechecks against @eazip/core's declarations).
+      - name: Build
+        run: npm run build
+
       - name: Type check
         run: npm run typecheck
 
       - name: Test
         run: npm run test
-
-      - name: Build
-        run: npm run build
 
       - name: Validate package imports
         run: npm run test:package-imports
