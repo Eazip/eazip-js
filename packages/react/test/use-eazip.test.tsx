@@ -23,7 +23,7 @@ describe('useEazip', () => {
 
     let id = '';
     act(() => {
-      id = hook.result.current.download([new File(['a'], 'a.txt')]);
+      id = hook.result.current.download({ files: [new File(['a'], 'a.txt')] });
     });
     expect(hook.result.current.task).toMatchObject({ id, state: 'processing' });
     expect(hook.result.current.isBusy).toBe(true);
@@ -50,7 +50,7 @@ describe('useEazip', () => {
     const hookB = renderHook(() => useEazip(), { wrapper: providerWrapper(storeB) });
 
     act(() => {
-      hookA.result.current.download([new File(['a'], 'a.txt')]);
+      hookA.result.current.download({ files: [new File(['a'], 'a.txt')] });
       a.jobs[0]!.complete();
     });
     expect(hookA.result.current.task?.state).toBe('completed');

@@ -126,11 +126,20 @@ export function App() {
   const handleDownload = () => {
     if (selectedAssets.length === 0 || !cloudReady) return;
     const files: EazipSourceFile[] = selectedAssets.map((asset) => asset.source);
-    zip.download(files, {
+    if (strategy === 'cloud') {
+      zip.download({
+        strategy: 'cloud',
+        publicKey,
+        files,
+        zipName: 'assets.zip',
+        ...(API_BASE_URL ? { apiBaseUrl: API_BASE_URL } : {}),
+      });
+      return;
+    }
+    zip.download({
+      strategy: 'local',
+      files,
       zipName: 'assets.zip',
-      strategy,
-      ...(strategy === 'cloud' && publicKey ? { publicKey } : {}),
-      ...(strategy === 'cloud' && API_BASE_URL ? { apiBaseUrl: API_BASE_URL } : {}),
     });
   };
 
@@ -371,11 +380,11 @@ export function App() {
             <button
               type="button"
               onClick={() => {
-                addAssets(samplePhotos(12, remoteAssets.length));
+                addAssets(samplePhotos(remoteAssets.length));
                 setAddPanelOpen(false);
               }}
             >
-              Add 12 sample photos
+              Add sample images
             </button>
             <div className="spacer" />
             <button type="button" onClick={() => setAddPanelOpen(false)}>

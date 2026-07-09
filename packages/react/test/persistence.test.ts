@@ -10,7 +10,7 @@ const NOW = Date.parse('2026-07-02T01:00:00.000Z');
 function completeCloudTask(storage?: Storage) {
   const { deps, jobs, storage: ownStorage } = makeDeps(storage ? { storage } : {});
   const store = new EazipStore(deps, { publicKey: 'pk_test', strategy: 'cloud', autoDownload: false });
-  store.download(['https://example.com/a.png']);
+  store.download({ files: ['https://example.com/a.png'] });
   jobs[0]!.emitSession();
   jobs[0]!.complete({
     zips: [{
@@ -91,7 +91,7 @@ describe('persistence & resume', () => {
   it('resumes a processing task via resumeZip without auto-download', () => {
     const { deps, jobs, storage } = makeDeps();
     const store = new EazipStore(deps, { publicKey: 'pk_test', strategy: 'cloud' });
-    store.download(['https://example.com/a.png']);
+    store.download({ files: ['https://example.com/a.png'] });
     jobs[0]!.emitSession();
     // Reload happens while the job is still processing.
     expect(JSON.parse(storage.getItem('eazip-tray-v1')!).task.state).toBe('processing');
@@ -114,10 +114,47 @@ describe('persistence & resume', () => {
     expect(resumedJobs[0]!.download).not.toHaveBeenCalled();
   });
 
+  it('restores backend-created sessions without requiring a public key or retry request', () => {
+    const { deps, storage, resumeZip } = makeDeps();
+    storage.setItem('eazip-tray-v1', JSON.stringify({
+      v: 1,
+      expanded: false,
+      task: {
+        id: 't-backend',
+        state: 'processing',
+        zipName: 'exports.zip',
+        filesTotal: 500,
+        createdAt: NOW,
+        expiresAt: null,
+        sessionId: 'sess_backend',
+        clientSecret: 'secret_backend',
+        apiBaseUrl: 'https://api.backend-created.test',
+        downloadStarted: false,
+        zips: [],
+        skippedCount: 0,
+      },
+    }));
+
+    const restoredStore = new EazipStore(deps);
+    restoredStore.hydrate();
+
+    expect(resumeZip).toHaveBeenCalledWith(expect.objectContaining({
+      sessionId: 'sess_backend',
+      clientSecret: 'secret_backend',
+      apiBaseUrl: 'https://api.backend-created.test',
+    }));
+    expect(restoredStore.getSnapshot().tasks[0]).toMatchObject({
+      state: 'processing',
+      strategy: 'cloud',
+      filesTotal: 500,
+      canRetry: false,
+    });
+  });
+
   it('maps a session-expired failure during resume to the expired state', () => {
     const { deps, jobs, storage } = makeDeps();
     const store = new EazipStore(deps, { publicKey: 'pk_test', strategy: 'cloud' });
-    store.download(['https://example.com/a.png']);
+    store.download({ files: ['https://example.com/a.png'] });
     jobs[0]!.emitSession();
 
     const { deps: freshDeps, resumedJobs } = makeDeps({ storage });
@@ -134,7 +171,7 @@ describe('persistence & resume', () => {
 
     const { deps, jobs } = makeDeps({ storage });
     const store = new EazipStore(deps, { autoDownload: false });
-    store.download([new File(['a'], 'a.txt')]);
+    store.download({ files: [new File(['a'], 'a.txt')] });
     jobs[0]!.complete();
     expect(store.getSnapshot().tasks[0]?.state).toBe('completed');
     expect(storage.getItem('eazip-tray-v1')).toBeNull();
@@ -148,7 +185,7 @@ describe('persistence & resume', () => {
       autoDownload: false,
       persist: false,
     });
-    store.download(['https://example.com/a.png']);
+    store.download({ files: ['https://example.com/a.png'] });
     jobs[0]!.emitSession();
     jobs[0]!.complete();
     expect(storage.getItem('eazip-tray-v1')).toBeNull();

@@ -9,7 +9,7 @@ function Gallery({ selectedFiles }: { selectedFiles: File[] }) {
   const zip = useEazip();
   return (
     <>
-      <button onClick={() => zip.download(selectedFiles)}>Download as ZIP</button>
+      <button onClick={() => zip.download({ files: selectedFiles })}>Download as ZIP</button>
       <EazipTray placement="corner" />
     </>
   );
@@ -36,7 +36,7 @@ is uploaded.
 ```ts
 const zip = useEazip();
 
-zip.download(files, options?); // start an export, returns a task id
+zip.download(options);         // start an export, returns a task id
 zip.task;                      // current task (state, progress, zips, errors) or null
 zip.isBusy;                    // true while an export is processing
 zip.cancel();                  // abort the running export
@@ -49,10 +49,13 @@ zip.downloadAll();             // download every zip
 `files` accepts `File[]`, a `FileList`, URL strings, or `@eazip/core` source objects:
 
 ```ts
-zip.download([
-  { file: blob, filename: 'notes.txt' },
-  { url: 'https://assets.example.com/hero.png' },
-]);
+zip.download({
+  files: [
+    { file: blob, filename: 'notes.txt' },
+    { url: 'https://assets.example.com/hero.png' },
+  ],
+  zipName: 'assets.zip',
+});
 ```
 
 Errors never reject the call — they land on `zip.task` and render as a calm, recoverable
@@ -104,7 +107,29 @@ and dies with the tab. For hundreds or thousands of files — or multi-gigabyte 
 switch the same API to [Eazip](https://eazip.io) Public Sessions:
 
 ```tsx
-zip.download(urls, { strategy: 'cloud', publicKey: 'pk_ez_...' });
+zip.download({ strategy: 'cloud', publicKey: 'pk_ez_...', files: urls });
+```
+
+For very large exports, your backend can create the Public Session so the
+browser never receives the full URL list:
+
+```tsx
+zip.download({
+  strategy: 'cloud',
+  zipName: 'export.zip',
+  filesTotal: 50_000,
+  createSession: async ({ signal, zipName, mode }) => {
+    const response = await fetch('/api/exports/123/eazip-session', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      signal,
+      body: JSON.stringify({ zipName, mode }),
+    });
+    if (!response.ok) throw new Error('Failed to create Eazip session');
+    return response.json(); // { sessionId, clientSecret, apiBaseUrl? }
+  },
+});
 ```
 
 With the cloud strategy the zip is built server-side and the tray gains superpowers:

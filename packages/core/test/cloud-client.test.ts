@@ -293,6 +293,55 @@ describe('startCloudZip', () => {
     expect(result.skippedCount).toBe(2);
   });
 
+  it('can use an app-provided createSession callback instead of sending URLs from the browser', async () => {
+    const fetch = fetchQueue([
+      () => jsonResponse(sessionBody({ url_count: 500, file_count: 500, zip_filename: 'exports.zip' })),
+    ]);
+    const createSession = vi.fn(async (context) => {
+      expect(context.signal).toBeInstanceOf(AbortSignal);
+      expect(context).toMatchObject({
+        zipName: 'exports.zip',
+        mode: 'stream',
+        failOnUrlError: true,
+        maxZipSizeBytes: 1_000_000,
+      });
+      return {
+        sessionId: 'zs_backend',
+        clientSecret: 'zcs_backend',
+        apiBaseUrl: 'https://api.backend-created.test',
+        createdAt: '2026-06-10T00:00:00.000Z',
+        expiresAt: '2026-06-10T12:00:00.000Z',
+      };
+    });
+
+    const job = startCloudZip({
+      strategy: 'cloud',
+      createSession,
+      filesTotal: 500,
+      zipName: 'exports.zip',
+      failOnUrlError: true,
+      maxZipSizeBytes: 1_000_000,
+      polling: FAST_POLLING,
+      fetch,
+    });
+
+    expect(job.getSnapshot().filesTotal).toBe(500);
+    const result = await job.done;
+
+    expect(createSession).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledWith('https://api.backend-created.test/v1/sessions/zs_backend', expect.objectContaining({
+      method: 'GET',
+      headers: { Authorization: 'Bearer zcs_backend' },
+    }));
+    expect(job.getSnapshot().session).toMatchObject({
+      sessionId: 'zs_123',
+      clientSecret: 'zcs_backend',
+      apiBaseUrl: 'https://api.backend-created.test',
+      jobStatus: 'completed',
+    });
+    expect(result.zips[0]).toMatchObject({ filename: 'docs.zip' });
+  });
+
   it('retries once with a token from onChallenge', async () => {
     const fetch = fetchQueue([
       () => jsonResponse({

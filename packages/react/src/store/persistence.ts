@@ -33,7 +33,7 @@ export type PersistedTask = {
   expiresAt: number | null;
   sessionId: string;
   clientSecret: string;
-  publicKey: string;
+  publicKey?: string;
   apiBaseUrl?: string;
   downloadStarted: boolean;
   zips: PersistedZip[];
@@ -88,7 +88,6 @@ function isEnvelope(value: unknown): value is PersistedEnvelope {
     typeof record['id'] === 'string' &&
     typeof record['sessionId'] === 'string' &&
     typeof record['clientSecret'] === 'string' &&
-    typeof record['publicKey'] === 'string' &&
     typeof record['filesTotal'] === 'number' &&
     Array.isArray(record['zips']) &&
     TASK_STATES.includes(record['state'] as EazipTaskState)

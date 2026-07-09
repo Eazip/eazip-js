@@ -9,6 +9,8 @@ import {
 import { toSourceFiles } from '../shared/input.js';
 import { JobController } from '../shared/job.js';
 import type {
+  CloudCreateSessionContext,
+  CloudSessionZipOptions,
   CloudZipOptions,
   CloudZipResult,
   CreateCloudSessionOptions,
@@ -25,23 +27,30 @@ import { SessionsClient } from './sessions.js';
 export const DEFAULT_API_BASE_URL = 'https://api.eazip.io';
 
 export function startCloudZip(options: CloudZipOptions): ZipJob<CloudZipResult> {
-  if (!options.publicKey) {
-    throw new EazipValidationError(
-      'PUBLIC_KEY_REQUIRED',
-      'The cloud strategy requires a publicKey (create one at https://eazip.io)',
-    );
-  }
-  const files = toSourceFiles(options.files).map((file) => {
+  const hasCustomCreateSession = isCloudSessionZipOptions(options);
+  const files = hasCustomCreateSession ? null : toSourceFiles(options.files).map((file) => {
     if (!('url' in file)) {
       throw new EazipValidationError('CLOUD_URL_SOURCES_ONLY', 'Cloud sessions only support URL source files');
     }
     return file;
   });
-  const job = new JobController<CloudZipResult>('cloud', { filesTotal: files.length }, options.signal);
+  if (!hasCustomCreateSession && !options.publicKey) {
+    throw new EazipValidationError(
+      'PUBLIC_KEY_REQUIRED',
+      'The cloud strategy requires a publicKey (create one at https://eazip.io)',
+    );
+  }
+  const job = new JobController<CloudZipResult>('cloud', {
+    filesTotal: hasCustomCreateSession ? options.filesTotal ?? 0 : files!.length,
+  }, options.signal);
   queueMicrotask(() => {
     void runCloud(job, files, options);
   });
   return job;
+}
+
+function isCloudSessionZipOptions(options: CloudZipOptions): options is CloudSessionZipOptions {
+  return typeof options.createSession === 'function';
 }
 
 export function resumeZip(options: ResumeZipOptions): ZipJob<CloudZipResult> {
@@ -64,7 +73,7 @@ export function resumeZip(options: ResumeZipOptions): ZipJob<CloudZipResult> {
 
 async function runCloud(
   job: JobController<CloudZipResult>,
-  files: { url: string; filename?: string }[],
+  files: { url: string; filename?: string }[] | null,
   options: CloudZipOptions,
 ): Promise<void> {
   const engine = new AbortController();
@@ -72,43 +81,19 @@ async function runCloud(
   if (options.onChange) job.subscribe(() => options.onChange?.(job.getSnapshot()));
 
   try {
-    const apiBaseUrl = normalizeApiBaseUrl(options.apiBaseUrl ?? DEFAULT_API_BASE_URL);
+    const created = await createSession(files, options, engine.signal);
     const client = new SessionsClient({
-      publicKey: options.publicKey,
-      apiBaseUrl,
+      publicKey: isCloudSessionZipOptions(options) ? '' : options.publicKey,
+      apiBaseUrl: created.apiBaseUrl,
       ...(options.fetch ? { fetch: options.fetch } : {}),
     });
-
-    const createOptions: CreateCloudSessionOptions = {
-      files,
-      signal: engine.signal,
-      // The SDK defaults to stream mode: no storage upload to wait for, so the
-      // download is ready sooner. Pass mode: 'stored' for persisted archives.
-      mode: options.mode ?? 'stream',
-      ...(options.zipName ? { zipName: options.zipName } : {}),
-      ...(options.failOnUrlError != null ? { failOnUrlError: options.failOnUrlError } : {}),
-      ...(options.maxZipSizeBytes != null ? { maxZipSizeBytes: options.maxZipSizeBytes } : {}),
-      ...(options.turnstileToken ? { turnstileToken: options.turnstileToken } : {}),
-    };
-
-    let created: CreatedCloudSession;
-    try {
-      created = await client.create(createOptions);
-    } catch (error) {
-      if (error instanceof EazipChallengeRequiredError && options.onChallenge) {
-        const token = await options.onChallenge(error.challenge);
-        created = await client.create({ ...createOptions, turnstileToken: token });
-      } else {
-        throw error;
-      }
-    }
 
     job.patch({
       status: 'processing',
       session: {
         sessionId: created.id,
         clientSecret: created.clientSecret,
-        apiBaseUrl,
+        apiBaseUrl: created.apiBaseUrl,
         createdAt: created.createdAt,
         expiresAt: created.expiresAt,
         jobStatus: created.status,
@@ -117,11 +102,70 @@ async function runCloud(
     });
 
     const session = await pollToCompletion(job, client, created.id, created.clientSecret, options.polling, engine.signal);
-    finishCloud(job, session, created.clientSecret, apiBaseUrl);
+    finishCloud(job, session, created.clientSecret, created.apiBaseUrl);
   } catch (error) {
     engine.abort();
     if (isAbortLike(error)) return;
     job.fail(toEazipError(error));
+  }
+}
+
+type CreatedSessionWithApiBaseUrl = CreatedCloudSession & {
+  apiBaseUrl: string;
+};
+
+async function createSession(
+  files: { url: string; filename?: string }[] | null,
+  options: CloudZipOptions,
+  signal: AbortSignal,
+): Promise<CreatedSessionWithApiBaseUrl> {
+  const apiBaseUrl = normalizeApiBaseUrl(options.apiBaseUrl ?? DEFAULT_API_BASE_URL);
+  const mode = options.mode ?? 'stream';
+  const sharedCreateContext: Omit<CloudCreateSessionContext, 'signal'> = {
+    mode,
+    ...(options.zipName ? { zipName: options.zipName } : {}),
+    ...(options.failOnUrlError != null ? { failOnUrlError: options.failOnUrlError } : {}),
+    ...(options.maxZipSizeBytes != null ? { maxZipSizeBytes: options.maxZipSizeBytes } : {}),
+  };
+
+  if (isCloudSessionZipOptions(options)) {
+    const created = await options.createSession({ ...sharedCreateContext, signal });
+    return {
+      id: created.sessionId,
+      clientSecret: created.clientSecret,
+      status: created.status ?? 'pending',
+      createdAt: created.createdAt ?? '',
+      expiresAt: created.expiresAt ?? '',
+      apiBaseUrl: normalizeApiBaseUrl(created.apiBaseUrl ?? apiBaseUrl),
+    };
+  }
+
+  const client = new SessionsClient({
+    publicKey: options.publicKey,
+    apiBaseUrl,
+    ...(options.fetch ? { fetch: options.fetch } : {}),
+  });
+
+  const createOptions: CreateCloudSessionOptions = {
+    files: files ?? [],
+    signal,
+    // The SDK defaults to stream mode: no storage upload to wait for, so the
+    // download is ready sooner. Pass mode: 'stored' for persisted archives.
+    mode,
+    ...(sharedCreateContext.zipName ? { zipName: sharedCreateContext.zipName } : {}),
+    ...(sharedCreateContext.failOnUrlError != null ? { failOnUrlError: sharedCreateContext.failOnUrlError } : {}),
+    ...(sharedCreateContext.maxZipSizeBytes != null ? { maxZipSizeBytes: sharedCreateContext.maxZipSizeBytes } : {}),
+    ...(options.turnstileToken ? { turnstileToken: options.turnstileToken } : {}),
+  };
+
+  try {
+    return { ...(await client.create(createOptions)), apiBaseUrl };
+  } catch (error) {
+    if (error instanceof EazipChallengeRequiredError && options.onChallenge) {
+      const token = await options.onChallenge(error.challenge);
+      return { ...(await client.create({ ...createOptions, turnstileToken: token })), apiBaseUrl };
+    }
+    throw error;
   }
 }
 

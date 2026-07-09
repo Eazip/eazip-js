@@ -6,8 +6,10 @@ export { EazipTray, type EazipTrayProps } from './tray/EazipTray.js';
 
 export type {
   EazipConfig,
-  EazipDownloadInput,
+  EazipCloudSessionDownloadOptions,
+  EazipCloudSourceDownloadOptions,
   EazipDownloadOptions,
+  EazipLocalDownloadOptions,
   EazipSnapshot,
   EazipTask,
   EazipTaskError,

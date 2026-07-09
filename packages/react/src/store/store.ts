@@ -13,14 +13,14 @@ import {
   triggerDownload,
 } from '@eazip/core';
 import type {
+  CloudSessionZipOptions,
   CloudZipOptions,
-  EazipSourceFile,
   LocalZipOptions,
+  StartZipOptions,
   ZipJob,
 } from '@eazip/core';
 import type {
   EazipConfig,
-  EazipDownloadInput,
   EazipDownloadOptions,
   EazipSnapshot,
   EazipTask,
@@ -48,8 +48,18 @@ export type EazipStoreDeps = {
 };
 
 type RetryRequest = {
-  files: EazipSourceFile[];
   options: EazipDownloadOptions;
+};
+
+type ResolvedDownload = {
+  startOptions: StartZipOptions;
+  request: RetryRequest;
+  strategy: 'local' | 'cloud';
+  zipName: string | null;
+  filesTotal: number;
+  publicKey: string | null;
+  apiBaseUrl: string | null;
+  autoDownload: boolean;
 };
 
 type InternalTask = {
@@ -128,9 +138,9 @@ export class EazipStore {
     this.restoreFromEnvelope(envelope);
   };
 
-  download = (input: EazipDownloadInput, options: EazipDownloadOptions = {}): string => {
-    const files = toSourceFiles(input);
-    return this.startTask(files, options);
+  download = (options: EazipDownloadOptions): string => {
+    const resolved = this.resolveDownloadOptions(options);
+    return this.startTask(resolved);
   };
 
   cancel = (taskId?: string): void => {
@@ -147,7 +157,7 @@ export class EazipStore {
   retry = (taskId?: string): void => {
     const internal = this.currentMatching(taskId);
     if (!internal?.request) return;
-    this.startTask(internal.request.files, internal.request.options);
+    this.download(internal.request.options);
   };
 
   downloadZip = (taskId: string, zipIndex: number): void => {
@@ -226,18 +236,15 @@ export class EazipStore {
     return this.current;
   }
 
-  private startTask(files: EazipSourceFile[], options: EazipDownloadOptions): string {
+  private startTask(resolved: ResolvedDownload): string {
     this.disposeCurrent();
     const id = this.deps.generateId();
-    const strategy = options.strategy ?? this.config.strategy ?? 'local';
-    const publicKey = options.publicKey ?? this.config.publicKey ?? null;
-    const apiBaseUrl = options.apiBaseUrl ?? this.config.apiBaseUrl ?? null;
     const task: EazipTask = {
       id,
       state: 'processing',
-      strategy,
-      zipName: options.zipName ?? this.config.defaults?.zipName ?? null,
-      filesTotal: files.length,
+      strategy: resolved.strategy,
+      zipName: resolved.zipName,
+      filesTotal: resolved.filesTotal,
       progress: null,
       zips: [],
       skippedCount: 0,
@@ -252,12 +259,12 @@ export class EazipStore {
       task,
       job: null,
       unsubscribeJob: null,
-      request: { files, options },
+      request: resolved.request,
       sessionId: null,
       clientSecret: null,
-      publicKey: strategy === 'cloud' ? publicKey : null,
-      apiBaseUrl,
-      autoDownload: options.autoDownload ?? this.config.autoDownload ?? true,
+      publicKey: resolved.publicKey,
+      apiBaseUrl: resolved.apiBaseUrl,
+      autoDownload: resolved.autoDownload,
       restored: false,
     };
     this.expanded = false;
@@ -265,7 +272,7 @@ export class EazipStore {
 
     let job: ZipJob;
     try {
-      job = this.deps.startZip(this.buildZipOptions(files, options, strategy, publicKey, apiBaseUrl));
+      job = this.deps.startZip(resolved.startOptions);
     } catch (error) {
       if (error instanceof EazipValidationError && (error.code === 'EMPTY_INPUT' || error.code === 'INVALID_INPUT')) {
         this.current = null;
@@ -283,38 +290,94 @@ export class EazipStore {
     return id;
   }
 
-  private buildZipOptions(
-    files: EazipSourceFile[],
-    options: EazipDownloadOptions,
-    strategy: 'local' | 'cloud',
-    publicKey: string | null,
-    apiBaseUrl: string | null,
-  ): LocalZipOptions | CloudZipOptions {
+  private resolveDownloadOptions(options: EazipDownloadOptions): ResolvedDownload {
     const defaults = this.config.defaults ?? {};
     const zipName = options.zipName ?? defaults.zipName;
     const failOnUrlError = options.failOnUrlError ?? defaults.failOnUrlError;
     const maxZipSizeBytes = options.maxZipSizeBytes ?? defaults.maxZipSizeBytes;
+    const strategy = options.strategy ?? this.config.strategy ?? ('createSession' in options ? 'cloud' : 'local');
+    const autoDownload = options.autoDownload ?? this.config.autoDownload ?? true;
+    const request: RetryRequest = { options };
     const shared = {
-      files,
       ...(zipName ? { zipName } : {}),
       ...(failOnUrlError != null ? { failOnUrlError } : {}),
       ...(maxZipSizeBytes != null ? { maxZipSizeBytes } : {}),
+      ...(options.signal ? { signal: options.signal } : {}),
+      ...(options.fetch ? { fetch: options.fetch } : {}),
+      ...(options.onChange ? { onChange: options.onChange } : {}),
     };
-    if (strategy === 'cloud') {
+
+    if (isCloudSessionDownloadOptions(options)) {
+      const apiBaseUrl = options.apiBaseUrl ?? this.config.apiBaseUrl ?? null;
       const mode = options.mode ?? defaults.mode;
-      return {
+      const startOptions: CloudZipOptions = {
         ...shared,
         strategy: 'cloud',
+        createSession: options.createSession,
+        ...(apiBaseUrl ? { apiBaseUrl } : {}),
+        ...(mode ? { mode } : {}),
+        ...(options.filesTotal != null ? { filesTotal: options.filesTotal } : {}),
+        ...(options.polling ? { polling: options.polling } : {}),
+      };
+      return {
+        startOptions,
+        request,
+        strategy: 'cloud',
+        zipName: zipName ?? null,
+        filesTotal: options.filesTotal ?? 0,
+        publicKey: null,
+        apiBaseUrl,
+        autoDownload,
+      };
+    }
+
+    const files = toSourceFiles(options.files);
+    if (strategy === 'cloud') {
+      const publicKey = ('publicKey' in options ? options.publicKey : undefined) ?? this.config.publicKey ?? null;
+      const apiBaseUrl = ('apiBaseUrl' in options ? options.apiBaseUrl : undefined) ?? this.config.apiBaseUrl ?? null;
+      const mode = ('mode' in options ? options.mode : undefined) ?? defaults.mode;
+      const startOptions: CloudZipOptions = {
+        ...shared,
+        strategy: 'cloud',
+        files,
         publicKey: publicKey ?? '',
         ...(apiBaseUrl ? { apiBaseUrl } : {}),
         ...(mode ? { mode } : {}),
+        ...('turnstileToken' in options && options.turnstileToken ? { turnstileToken: options.turnstileToken } : {}),
+        ...('onChallenge' in options && options.onChallenge ? { onChallenge: options.onChallenge } : {}),
+        ...('polling' in options && options.polling ? { polling: options.polling } : {}),
+      };
+      return {
+        startOptions,
+        request,
+        strategy: 'cloud',
+        zipName: zipName ?? null,
+        filesTotal: files.length,
+        publicKey,
+        apiBaseUrl,
+        autoDownload,
       };
     }
-    const compressionLevel = options.compressionLevel ?? defaults.compressionLevel;
-    return {
+
+    const compressionLevel = ('compressionLevel' in options ? options.compressionLevel : undefined) ??
+      defaults.compressionLevel;
+    const startOptions: LocalZipOptions = {
       ...shared,
       strategy: 'local',
+      files,
       ...(compressionLevel != null ? { compressionLevel } : {}),
+      ...('concurrency' in options && options.concurrency != null ? { concurrency: options.concurrency } : {}),
+      ...('onProgress' in options && options.onProgress ? { onProgress: options.onProgress } : {}),
+    };
+    return {
+      startOptions,
+      request,
+      strategy: 'local',
+      zipName: zipName ?? null,
+      filesTotal: files.length,
+      publicKey: null,
+      apiBaseUrl: null,
+      autoDownload,
     };
   }
 
@@ -407,7 +470,7 @@ export class EazipStore {
       request,
       sessionId: persisted.sessionId,
       clientSecret: persisted.clientSecret,
-      publicKey: persisted.publicKey,
+      publicKey: persisted.publicKey ?? null,
       apiBaseUrl: persisted.apiBaseUrl ?? null,
       autoDownload: false,
       restored: true,
@@ -488,8 +551,7 @@ export class EazipStore {
       !internal ||
       internal.task.strategy !== 'cloud' ||
       !internal.sessionId ||
-      !internal.clientSecret ||
-      !internal.publicKey
+      !internal.clientSecret
     ) {
       clearEnvelope(storage, key);
       return;
@@ -514,7 +576,7 @@ function serializeTask(internal: InternalTask): PersistedTask {
     expiresAt: task.expiresAt,
     sessionId: internal.sessionId as string,
     clientSecret: internal.clientSecret as string,
-    publicKey: internal.publicKey as string,
+    ...(internal.publicKey ? { publicKey: internal.publicKey } : {}),
     ...(internal.apiBaseUrl ? { apiBaseUrl: internal.apiBaseUrl } : {}),
     downloadStarted: task.downloadStarted,
     zips: task.zips.map((zip) => ({
@@ -530,12 +592,22 @@ function serializeTask(internal: InternalTask): PersistedTask {
 
 function persistableRequest(request: RetryRequest | null): PersistedRequest | undefined {
   if (!request) return undefined;
+  if (!('files' in request.options)) return undefined;
+  const input = request.options.files;
+  if (input == null) return undefined;
   const files: PersistedRequest['files'] = [];
-  for (const file of request.files) {
+  let sourceFiles: ReturnType<typeof toSourceFiles>;
+  try {
+    sourceFiles = toSourceFiles(input);
+  } catch {
+    return undefined;
+  }
+  for (const file of sourceFiles) {
     if (!('url' in file)) return undefined;
     files.push({ url: file.url, ...(file.filename ? { filename: file.filename } : {}) });
   }
-  const { zipName, mode, failOnUrlError, maxZipSizeBytes } = request.options;
+  const { zipName, failOnUrlError, maxZipSizeBytes } = request.options;
+  const mode = 'mode' in request.options ? request.options.mode : undefined;
   return {
     files,
     options: {
@@ -549,16 +621,23 @@ function persistableRequest(request: RetryRequest | null): PersistedRequest | un
 
 function requestFromPersisted(persisted: PersistedTask): RetryRequest | null {
   if (!persisted.request) return null;
+  if (!persisted.publicKey) return null;
   return {
-    files: persisted.request.files.map((file) => ({
-      url: file.url,
-      ...(file.filename ? { filename: file.filename } : {}),
-    })),
     options: {
       ...persisted.request.options,
       strategy: 'cloud',
       publicKey: persisted.publicKey,
+      files: persisted.request.files.map((file) => ({
+        url: file.url,
+        ...(file.filename ? { filename: file.filename } : {}),
+      })),
       ...(persisted.apiBaseUrl ? { apiBaseUrl: persisted.apiBaseUrl } : {}),
     },
   };
+}
+
+function isCloudSessionDownloadOptions(
+  options: EazipDownloadOptions,
+): options is CloudSessionZipOptions & { autoDownload?: boolean } {
+  return 'createSession' in options && typeof options.createSession === 'function';
 }

@@ -81,6 +81,29 @@ const result = await job.done;    // polls with backoff; pauses in hidden tabs
 result.download();                // signed URL, valid for 24h by default
 ```
 
+If your backend already knows the source URLs, keep that list off the browser
+and provide a session creator instead. The SDK still owns polling, completion,
+downloads, and cancellation:
+
+```ts
+const job = startZip({
+  strategy: 'cloud',
+  zipName: 'export.zip',
+  filesTotal: 50_000,              // optional initial UI count
+  createSession: async ({ signal, zipName, mode }) => {
+    const response = await fetch('/api/exports/123/eazip-session', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      signal,
+      body: JSON.stringify({ zipName, mode }),
+    });
+    if (!response.ok) throw new Error('Failed to create Eazip session');
+    return response.json();        // { sessionId, clientSecret, apiBaseUrl? }
+  },
+});
+```
+
 Cloud zips default to **stream mode**: the archive is generated on demand at
 download time, so it's ready sooner — a good fit for interactive, front-end
 exports. Each download regenerates the zip; pass `mode: 'stored'` to build it

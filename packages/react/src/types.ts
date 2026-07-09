@@ -1,20 +1,65 @@
 'use client';
 
-import type { EazipMode, EazipProgress, EazipStrategy, ZipInput } from '@eazip/core';
+import type {
+  CloudCreateSessionContext,
+  CloudCreateSessionResult,
+  EazipChallenge,
+  EazipMode,
+  EazipProgress,
+  EazipStrategy,
+  FetchLike,
+  PollingOptions,
+  ZipInput,
+  ZipJobSnapshot,
+} from '@eazip/core';
 
-export type EazipDownloadInput = ZipInput;
-
-export type EazipDownloadOptions = {
+type EazipBaseDownloadOptions = {
   zipName?: string;
-  strategy?: EazipStrategy;
-  compressionLevel?: number;
-  mode?: EazipMode;
   failOnUrlError?: boolean;
   maxZipSizeBytes?: number;
-  publicKey?: string;
-  apiBaseUrl?: string;
+  signal?: AbortSignal;
+  fetch?: FetchLike;
+  onChange?: (snapshot: ZipJobSnapshot) => void;
   autoDownload?: boolean;
 };
+
+export type EazipLocalDownloadOptions = EazipBaseDownloadOptions & {
+  strategy?: 'local';
+  files: ZipInput;
+  compressionLevel?: number;
+  concurrency?: number;
+  onProgress?: (progress: EazipProgress) => void;
+};
+
+export type EazipCloudSourceDownloadOptions = EazipBaseDownloadOptions & {
+  strategy: 'cloud';
+  files: ZipInput;
+  publicKey?: string;
+  apiBaseUrl?: string;
+  mode?: EazipMode;
+  turnstileToken?: string;
+  onChallenge?: (challenge: EazipChallenge) => Promise<string>;
+  polling?: PollingOptions;
+  createSession?: never;
+};
+
+export type EazipCloudSessionDownloadOptions = EazipBaseDownloadOptions & {
+  strategy: 'cloud';
+  createSession: (context: CloudCreateSessionContext) => Promise<CloudCreateSessionResult>;
+  apiBaseUrl?: string;
+  mode?: EazipMode;
+  polling?: PollingOptions;
+  filesTotal?: number;
+  files?: never;
+  publicKey?: never;
+  turnstileToken?: never;
+  onChallenge?: never;
+};
+
+export type EazipDownloadOptions =
+  | EazipLocalDownloadOptions
+  | EazipCloudSourceDownloadOptions
+  | EazipCloudSessionDownloadOptions;
 
 export type EazipTaskState = 'processing' | 'completed' | 'partial' | 'failed' | 'expired';
 
@@ -54,7 +99,7 @@ export type EazipTask = {
 
 export type UseEazipResult = {
   /** Start a zip download. Fire & forget: returns the task id; errors surface on the task. */
-  download: (files: EazipDownloadInput, options?: EazipDownloadOptions) => string;
+  download: (options: EazipDownloadOptions) => string;
   task: EazipTask | null;
   tasks: EazipTask[];
   isBusy: boolean;
@@ -69,9 +114,13 @@ export type EazipConfig = {
   publicKey?: string;
   apiBaseUrl?: string;
   strategy?: EazipStrategy;
-  defaults?: Partial<
-    Pick<EazipDownloadOptions, 'zipName' | 'compressionLevel' | 'mode' | 'failOnUrlError' | 'maxZipSizeBytes'>
-  >;
+  defaults?: {
+    zipName?: string;
+    compressionLevel?: number;
+    mode?: EazipMode;
+    failOnUrlError?: boolean;
+    maxZipSizeBytes?: number;
+  };
   autoDownload?: boolean;
   persist?: boolean;
   storageKey?: string;

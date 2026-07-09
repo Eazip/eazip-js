@@ -48,7 +48,7 @@ function Gallery({ selectedFiles }: { selectedFiles: File[] }) {
   const zip = useEazip();
   return (
     <>
-      <button onClick={() => zip.download(selectedFiles)}>Download as ZIP</button>
+      <button onClick={() => zip.download({ files: selectedFiles })}>Download as ZIP</button>
       <EazipTray placement="corner" />
     </>
   );
@@ -72,6 +72,26 @@ result.download();
 
 Cloud exports survive page reloads (`resumeZip`), split into multiple zips
 automatically, and keep download links live for 24 hours.
+
+For very large exports where the browser should not receive every source URL,
+let your backend create the Public Session and pass only the session credential
+back to the SDK:
+
+```ts
+const job = startZip({
+  strategy: 'cloud',
+  zipName: 'export.zip',
+  createSession: async ({ signal }) => {
+    const response = await fetch('/api/exports/123/eazip-session', {
+      method: 'POST',
+      credentials: 'include',
+      signal,
+    });
+    if (!response.ok) throw new Error('Failed to create Eazip session');
+    return response.json(); // { sessionId, clientSecret, apiBaseUrl? }
+  },
+});
+```
 
 ## Try the Examples
 

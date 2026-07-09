@@ -28,7 +28,7 @@ describe('EazipTray', () => {
     renderTray(store);
 
     act(() => {
-      store.download([new File(['a'], 'a.txt'), new File(['b'], 'b.txt')]);
+      store.download({ files: [new File(['a'], 'a.txt'), new File(['b'], 'b.txt')] });
     });
 
     expect(screen.getByText('Preparing 2 files')).toBeTruthy();
@@ -52,7 +52,7 @@ describe('EazipTray', () => {
     renderTray(store);
 
     act(() => {
-      store.download([new File(['a'], 'a.txt')]);
+      store.download({ files: [new File(['a'], 'a.txt')] });
       store.setExpanded(true);
     });
     fireEvent.click(screen.getByText('Cancel export'));
@@ -65,7 +65,7 @@ describe('EazipTray', () => {
     renderTray(store);
 
     act(() => {
-      store.download([new File(['a'], 'a.txt')]);
+      store.download({ files: [new File(['a'], 'a.txt')] });
       jobs[0]!.complete();
     });
     expect(screen.getByText('Download ready')).toBeTruthy();
@@ -82,7 +82,7 @@ describe('EazipTray', () => {
     renderTray(store);
 
     act(() => {
-      store.download(['https://example.com/a.png', 'https://example.com/big.psd']);
+      store.download({ files: ['https://example.com/a.png', 'https://example.com/big.psd'] });
       jobs[0]!.complete({
         errors: [{ code: 'LOCAL_SOURCE_FETCH_FAILED', message: 'Too large', filename: 'big.psd' }],
       });
@@ -103,7 +103,7 @@ describe('EazipTray', () => {
     renderTray(store);
 
     act(() => {
-      store.download([new File(['a'], 'a.txt')]);
+      store.download({ files: [new File(['a'], 'a.txt')] });
       jobs[0]!.failJob(new EazipValidationError('UNKNOWN', 'boom'));
     });
     expect(screen.getByText('Download failed')).toBeTruthy();
@@ -122,7 +122,7 @@ describe('EazipTray', () => {
     renderTray(store, { locale: 'ja' });
 
     act(() => {
-      store.download(['https://example.com/a.png']);
+      store.download({ files: ['https://example.com/a.png'] });
       jobs[0]!.emitSession();
       jobs[0]!.failJob(new EazipSessionExpiredError());
     });
@@ -136,7 +136,7 @@ describe('EazipTray', () => {
     renderTray(store, { messages: { downloadReadyTitle: 'Ready to grab' }, className: 'my-tray' });
 
     act(() => {
-      store.download([new File(['a'], 'a.txt')]);
+      store.download({ files: [new File(['a'], 'a.txt')] });
       jobs[0]!.complete();
     });
     expect(screen.getByText('Ready to grab')).toBeTruthy();
@@ -149,7 +149,7 @@ describe('EazipTray', () => {
     renderTray(store);
 
     act(() => {
-      store.download([new File(['a'], 'a.txt')]);
+      store.download({ files: [new File(['a'], 'a.txt')] });
       jobs[0]!.complete();
     });
     expect(screen.getByText('Download ready')).toBeTruthy();
@@ -173,7 +173,7 @@ describe('EazipTray', () => {
       renderTray(store, { autoHideMs: 5000 });
 
       act(() => {
-        store.download([new File(['a'], 'a.txt')]);
+        store.download({ files: [new File(['a'], 'a.txt')] });
         jobs[0]!.complete();
       });
       expect(store.getSnapshot().tasks[0]?.downloadStarted).toBe(true);
@@ -193,7 +193,7 @@ describe('EazipTray', () => {
     renderTray(store, { placement: 'bar', theme: 'dark', accent: '#ff0000', zIndex: 42 });
 
     act(() => {
-      store.download([new File(['a'], 'a.txt')]);
+      store.download({ files: [new File(['a'], 'a.txt')] });
       jobs[0]!.complete();
     });
     expect(screen.getByText('Download ready')).toBeTruthy();

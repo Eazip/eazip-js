@@ -145,7 +145,6 @@ export type PollingOptions = {
 };
 
 type BaseZipOptions = {
-  files: ZipInput;
   zipName?: string;
   /**
    * false (local default): failed URL sources are skipped and reported in
@@ -164,7 +163,11 @@ type BaseZipOptions = {
   onChange?: (snapshot: ZipJobSnapshot) => void;
 };
 
-export type LocalZipOptions = BaseZipOptions & {
+type FileZipOptions = BaseZipOptions & {
+  files: ZipInput;
+};
+
+export type LocalZipOptions = FileZipOptions & {
   strategy?: 'local';
   /** 0-9, default 6. */
   compressionLevel?: number;
@@ -173,9 +176,8 @@ export type LocalZipOptions = BaseZipOptions & {
   onProgress?: (progress: EazipProgress) => void;
 };
 
-export type CloudZipOptions = BaseZipOptions & {
+type CloudBaseZipOptions = BaseZipOptions & {
   strategy: 'cloud';
-  publicKey: string;
   apiBaseUrl?: string;
   /**
    * 'stream' (default): the zip is generated on demand at download time —
@@ -183,6 +185,29 @@ export type CloudZipOptions = BaseZipOptions & {
    * in storage. The Public App's allowed modes still apply.
    */
   mode?: EazipMode;
+  polling?: PollingOptions;
+};
+
+export type CloudCreateSessionContext = {
+  signal: AbortSignal;
+  zipName?: string;
+  mode: EazipMode;
+  failOnUrlError?: boolean;
+  maxZipSizeBytes?: number;
+};
+
+export type CloudCreateSessionResult = {
+  sessionId: string;
+  clientSecret: string;
+  apiBaseUrl?: string;
+  createdAt?: string;
+  expiresAt?: string;
+  status?: EazipCloudJobStatus;
+};
+
+export type CloudSourceZipOptions = FileZipOptions & CloudBaseZipOptions & {
+  publicKey: string;
+  createSession?: never;
   /** Pre-obtained Turnstile token, sent with the first create request. */
   turnstileToken?: string;
   /**
@@ -190,8 +215,19 @@ export type CloudZipOptions = BaseZipOptions & {
    * and the SDK retries the create once; a second challenge propagates.
    */
   onChallenge?: (challenge: EazipChallenge) => Promise<string>;
-  polling?: PollingOptions;
 };
+
+export type CloudSessionZipOptions = CloudBaseZipOptions & {
+  createSession: (context: CloudCreateSessionContext) => Promise<CloudCreateSessionResult>;
+  files?: never;
+  publicKey?: never;
+  turnstileToken?: never;
+  onChallenge?: never;
+  /** Optional initial count for UI before the first poll returns url_count. */
+  filesTotal?: number;
+};
+
+export type CloudZipOptions = CloudSourceZipOptions | CloudSessionZipOptions;
 
 export type StartZipOptions = LocalZipOptions | CloudZipOptions;
 

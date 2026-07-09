@@ -13,7 +13,8 @@ strategies behind one API:
 - **local** — files are fetched/read and zipped inside the browser
   (`@zip.js/zip.js`, ZIP64).
 - **cloud** — a zip job runs on the Eazip API (Public Sessions); the browser
-  polls until signed download URLs are ready.
+  either creates the Public Session from URL sources or asks the app backend to
+  create it, then polls until signed download URLs are ready.
 
 ```
 packages/core    @eazip/core   — framework-independent engine (the heart)
@@ -140,9 +141,10 @@ with jitter (2s → 10s, ×1.5), pauses while the tab is hidden, honors
 
 Flow in [`cloud/engine.ts`](packages/core/src/cloud/engine.ts):
 
-1. `create` — on `PUBLIC_APP_CHALLENGE_REQUIRED` with an `onChallenge` handler,
-   retry exactly once with the returned Turnstile token; a second challenge
-   propagates.
+1. `create` — either call `POST /v1/sessions` with URL sources and a Public App
+   key, or call the app-provided `createSession` callback. On
+   `PUBLIC_APP_CHALLENGE_REQUIRED` in the direct Public App path, retry exactly
+   once with the returned Turnstile token; a second challenge propagates.
 2. Commit the session into the snapshot immediately (the resume contract).
 3. Poll to terminal; every poll updates `snapshot.session.jobStatus`/`zips`.
 4. `partial` is computed client-side as `url_count - file_count` (the public
@@ -150,6 +152,13 @@ Flow in [`cloud/engine.ts`](packages/core/src/cloud/engine.ts):
 
 `resumeZip` runs the same engine minus the create step. `SessionsClient` stays
 exported as the low-level escape hatch.
+
+`createSession` is for exports where the browser should not receive every source
+URL (for example, very large authorized downloads). The callback returns
+`{ sessionId, clientSecret, apiBaseUrl? }`; after that, polling/download behavior
+is identical to a session created by the SDK. Because callbacks cannot survive a
+reload, React persistence stores only the returned session credential, not the
+creator function.
 
 Product-opinionated defaults live in the engine layer, not in `SessionsClient`:
 the engine sends `mode: 'stream'` unless the caller chooses otherwise (front-end

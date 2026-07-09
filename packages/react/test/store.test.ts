@@ -8,7 +8,7 @@ describe('local downloads', () => {
     const { deps, jobs, startZip } = makeDeps();
     const store = new EazipStore(deps);
 
-    const id = store.download([new File(['a'], 'a.txt')], { zipName: 'docs.zip' });
+    const id = store.download({ files: [new File(['a'], 'a.txt')],  zipName: 'docs.zip'  });
     expect(store.getSnapshot().tasks[0]).toMatchObject({ id, state: 'processing', strategy: 'local', filesTotal: 1 });
     expect(startZip).toHaveBeenCalledWith(expect.objectContaining({
       strategy: 'local',
@@ -30,7 +30,7 @@ describe('local downloads', () => {
     const { deps, jobs } = makeDeps();
     const store = new EazipStore(deps, { autoDownload: false });
 
-    store.download(['https://example.com/a.png']);
+    store.download({ files: ['https://example.com/a.png'] });
     jobs[0]!.complete();
     expect(jobs[0]!.download).not.toHaveBeenCalled();
     expect(store.getSnapshot().tasks[0]?.downloadStarted).toBe(false);
@@ -40,7 +40,7 @@ describe('local downloads', () => {
     const { deps, jobs } = makeDeps();
     const store = new EazipStore(deps, { autoDownload: false });
 
-    store.download(['https://example.com/a.png', 'https://example.com/big.psd']);
+    store.download({ files: ['https://example.com/a.png', 'https://example.com/big.psd'] });
     jobs[0]!.complete({
       errors: [
         { code: 'LOCAL_SOURCE_FETCH_FAILED', message: 'Request failed', filename: 'big.psd' },
@@ -56,7 +56,7 @@ describe('local downloads', () => {
     const { deps, jobs } = makeDeps();
     const store = new EazipStore(deps);
 
-    const id = store.download([new File(['a'], 'a.txt')]);
+    const id = store.download({ files: [new File(['a'], 'a.txt')] });
     jobs[0]!.emit({
       status: 'processing',
       progress: { phase: 'adding', filesTotal: 4, filesCompleted: 2 },
@@ -72,7 +72,7 @@ describe('local downloads', () => {
     const { deps, jobs } = makeDeps();
     const store = new EazipStore(deps);
 
-    store.download([new File(['a'], 'a.txt')]);
+    store.download({ files: [new File(['a'], 'a.txt')] });
     jobs[0]!.failJob(new EazipValidationError('ZIP_TOO_LARGE', 'Zip exceeds the size limit'));
     expect(store.getSnapshot().tasks[0]?.state).toBe('failed');
     expect(store.getSnapshot().tasks[0]?.error).toEqual({
@@ -90,7 +90,7 @@ describe('local downloads', () => {
     });
     const store = new EazipStore(deps);
 
-    store.download(['https://example.com/a.png'], { strategy: 'cloud' });
+    store.download({ files: ['https://example.com/a.png'],  strategy: 'cloud'  });
     expect(store.getSnapshot().tasks[0]?.state).toBe('failed');
     expect(store.getSnapshot().tasks[0]?.error?.code).toBe('PUBLIC_KEY_REQUIRED');
   });
@@ -98,7 +98,7 @@ describe('local downloads', () => {
   it('rejects empty input synchronously', () => {
     const { deps } = makeDeps();
     const store = new EazipStore(deps);
-    expect(() => store.download([])).toThrowError(/At least one file/);
+    expect(() => store.download({ files: [] })).toThrowError(/At least one file/);
     expect(store.getSnapshot().tasks).toEqual([]);
   });
 
@@ -106,7 +106,7 @@ describe('local downloads', () => {
     const { deps, jobs } = makeDeps();
     const store = new EazipStore(deps);
 
-    const id = store.download([new File(['a'], 'a.txt')]);
+    const id = store.download({ files: [new File(['a'], 'a.txt')] });
     store.cancel(id);
     expect(jobs[0]!.abort).toHaveBeenCalled();
     expect(jobs[0]!.dispose).toHaveBeenCalled();
@@ -117,8 +117,8 @@ describe('local downloads', () => {
     const { deps, jobs } = makeDeps();
     const store = new EazipStore(deps, { autoDownload: false });
 
-    const firstId = store.download([new File(['a'], 'a.txt')]);
-    const secondId = store.download([new File(['b'], 'b.txt')]);
+    const firstId = store.download({ files: [new File(['a'], 'a.txt')] });
+    const secondId = store.download({ files: [new File(['b'], 'b.txt')] });
     expect(jobs[0]!.abort).toHaveBeenCalled();
     expect(store.getSnapshot().tasks).toHaveLength(1);
     expect(store.getSnapshot().tasks[0]?.id).toBe(secondId);
@@ -134,7 +134,7 @@ describe('local downloads', () => {
     const { deps, jobs, startZip } = makeDeps();
     const store = new EazipStore(deps, { autoDownload: false });
 
-    store.download(['https://example.com/a.png'], { zipName: 'photos.zip' });
+    store.download({ files: ['https://example.com/a.png'], zipName: 'photos.zip' });
     jobs[0]!.failJob(new EazipValidationError('NETWORK', 'boom'));
     store.retry();
     expect(startZip).toHaveBeenCalledTimes(2);
@@ -145,6 +145,31 @@ describe('local downloads', () => {
     jobs[1]!.complete();
     expect(store.getSnapshot().tasks[0]?.state).toBe('completed');
   });
+
+  it('retry re-resolves provider config instead of reusing unresolved cloud placeholders', () => {
+    let starts = 0;
+    const { deps, startZip } = makeDeps({
+      onStartZip: (zipOptions) => {
+        starts += 1;
+        if (starts === 1) {
+          expect(zipOptions).toMatchObject({ strategy: 'cloud', publicKey: '' });
+          throw new EazipValidationError('PUBLIC_KEY_REQUIRED', 'The cloud strategy requires a publicKey');
+        }
+        expect(zipOptions).toMatchObject({ strategy: 'cloud', publicKey: 'pk_later' });
+        return new FakeZipJob({ strategy: 'cloud', status: 'processing' });
+      },
+    });
+    const store = new EazipStore(deps, { autoDownload: false });
+
+    store.download({ files: ['https://example.com/a.png'], strategy: 'cloud' });
+    expect(store.getSnapshot().tasks[0]?.state).toBe('failed');
+
+    store.setConfig({ publicKey: 'pk_later' });
+    store.retry();
+
+    expect(startZip).toHaveBeenCalledTimes(2);
+    expect(store.getSnapshot().tasks[0]).toMatchObject({ state: 'processing', strategy: 'cloud' });
+  });
 });
 
 describe('cloud downloads', () => {
@@ -152,7 +177,7 @@ describe('cloud downloads', () => {
     const { deps, jobs, storage, startZip } = makeDeps();
     const store = new EazipStore(deps, { publicKey: 'pk_test', strategy: 'cloud', autoDownload: false });
 
-    store.download(['https://example.com/a.png', 'https://example.com/b.png']);
+    store.download({ files: ['https://example.com/a.png', 'https://example.com/b.png'] });
     expect(startZip).toHaveBeenCalledWith(expect.objectContaining({
       strategy: 'cloud',
       publicKey: 'pk_test',
@@ -189,18 +214,62 @@ describe('cloud downloads', () => {
     const { deps, jobs } = makeDeps();
     const store = new EazipStore(deps, { publicKey: 'pk_test', autoDownload: false });
 
-    store.download(['https://example.com/a.png'], { strategy: 'cloud' });
+    store.download({ files: ['https://example.com/a.png'],  strategy: 'cloud'  });
     jobs[0]!.emitSession();
     jobs[0]!.complete({ skippedCount: 2 });
     expect(store.getSnapshot().tasks[0]?.state).toBe('partial');
     expect(store.getSnapshot().tasks[0]?.skippedCount).toBe(2);
   });
 
+  it('starts backend-created cloud sessions via createSession without persisting a public key', () => {
+    const { deps, jobs, storage, startZip } = makeDeps();
+    const store = new EazipStore(deps);
+    const createSession = vi.fn();
+
+    const id = store.download({
+      strategy: 'cloud',
+      createSession,
+      filesTotal: 500,
+      zipName: 'exports.zip',
+      autoDownload: false,
+    });
+
+    expect(store.getSnapshot().tasks[0]).toMatchObject({
+      id,
+      state: 'processing',
+      strategy: 'cloud',
+      filesTotal: 500,
+      zipName: 'exports.zip',
+      canRetry: true,
+    });
+    expect(startZip).toHaveBeenCalledWith(expect.objectContaining({
+      strategy: 'cloud',
+      createSession,
+      filesTotal: 500,
+      zipName: 'exports.zip',
+    }));
+
+    jobs[0]!.emitSession({
+      sessionId: 'sess_backend',
+      clientSecret: 'secret_backend',
+      apiBaseUrl: 'https://api.backend-created.test',
+    });
+    const persisted = JSON.parse(storage.getItem('eazip-tray-v1')!);
+    expect(persisted.task).toMatchObject({
+      state: 'processing',
+      sessionId: 'sess_backend',
+      clientSecret: 'secret_backend',
+      apiBaseUrl: 'https://api.backend-created.test',
+    });
+    expect(persisted.task.publicKey).toBeUndefined();
+    expect(persisted.task.request).toBeUndefined();
+  });
+
   it('maps session revocation to the expired state', () => {
     const { deps, jobs } = makeDeps();
     const store = new EazipStore(deps, { publicKey: 'pk_test', strategy: 'cloud' });
 
-    store.download(['https://example.com/a.png']);
+    store.download({ files: ['https://example.com/a.png'] });
     jobs[0]!.emitSession();
     jobs[0]!.failJob(new EazipSessionRevokedError());
     expect(store.getSnapshot().tasks[0]?.state).toBe('expired');
@@ -211,7 +280,7 @@ describe('cloud downloads', () => {
     const { deps, jobs } = makeDeps();
     const store = new EazipStore(deps, { publicKey: 'pk_test', strategy: 'cloud', autoDownload: false });
 
-    const id = store.download(['https://example.com/a.png']);
+    const id = store.download({ files: ['https://example.com/a.png'] });
     jobs[0]!.emitSession();
     jobs[0]!.complete({
       zips: [
@@ -284,7 +353,7 @@ describe('cloud downloads', () => {
       const { deps, jobs } = makeDeps({ now: () => Date.now() });
       const store = new EazipStore(deps, { publicKey: 'pk_test', strategy: 'cloud', autoDownload: false });
 
-      store.download(['https://example.com/a.png']);
+      store.download({ files: ['https://example.com/a.png'] });
       jobs[0]!.emitSession({ expiresAt: '2026-07-03T00:00:00.000Z' });
       jobs[0]!.complete();
       expect(store.getSnapshot().tasks[0]?.state).toBe('completed');
