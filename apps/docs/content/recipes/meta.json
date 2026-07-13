@@ -1,0 +1,12 @@
+{
+  "title": "Recipes",
+  "pages": [
+    "index",
+    "download-selected-files",
+    "create-zip-from-remote-urls",
+    "zip-s3-or-r2-objects",
+    "progress-cancel-retry",
+    "gb-scale-url-jobs",
+    "zero-egress-exports"
+  ]
+}

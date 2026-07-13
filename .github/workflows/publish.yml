@@ -14,11 +14,11 @@ on:
       npm_tag:
         description: npm dist-tag to publish with
         required: true
-        default: beta
+        default: latest
         type: choice
         options:
-          - beta
           - latest
+          - beta
 
 permissions:
   contents: read

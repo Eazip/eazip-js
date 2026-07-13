@@ -31,6 +31,48 @@ function repeat(line: string, times: number): string {
   return Array.from({ length: times }, (_, index) => `${index + 1}. ${line}`).join('\n');
 }
 
+const GITHUB_SAMPLE_IMAGES = [
+  {
+    name: 'React',
+    ext: 'PNG',
+    size: 41453,
+    url: 'https://raw.githubusercontent.com/github/explore/main/topics/react/react.png',
+    filename: 'react.png',
+    hue: 210,
+  },
+  {
+    name: 'TypeScript',
+    ext: 'PNG',
+    size: 5730,
+    url: 'https://raw.githubusercontent.com/github/explore/main/topics/typescript/typescript.png',
+    filename: 'typescript.png',
+    hue: 220,
+  },
+  {
+    name: 'Vite',
+    ext: 'PNG',
+    size: 29060,
+    url: 'https://raw.githubusercontent.com/github/explore/main/topics/vite/vite.png',
+    filename: 'vite.png',
+    hue: 260,
+  },
+  {
+    name: 'Node.js',
+    ext: 'PNG',
+    size: 26259,
+    url: 'https://raw.githubusercontent.com/github/explore/main/topics/nodejs/nodejs.png',
+    filename: 'nodejs.png',
+    hue: 120,
+  },
+] satisfies Array<{
+  name: string;
+  ext: string;
+  size: number;
+  url: string;
+  filename: string;
+  hue: number;
+}>;
+
 export function buildAssets(): DemoAsset[] {
   const samples: DemoAsset[] = [
     {
@@ -77,20 +119,19 @@ export function buildAssets(): DemoAsset[] {
   return [...samples, ...generated];
 }
 
-/** Publicly hosted demo photos — reachable by both the browser and the Eazip API. */
-export function samplePhotos(count: number, offset = 0): DemoAsset[] {
-  return Array.from({ length: count }, (_, index) => {
-    const seed = `eazip-${offset + index + 1}`;
-    const url = `https://picsum.photos/seed/${seed}/640/480`;
+/** Publicly hosted demo images — reachable by both the browser and the Eazip API. */
+export function samplePhotos(offset = 0): DemoAsset[] {
+  return GITHUB_SAMPLE_IMAGES.map((image, index) => {
+    const number = offset + index + 1;
     return {
-      id: `photo-${seed}`,
-      name: `Photo ${offset + index + 1}`,
-      ext: 'JPG',
-      size: 0,
+      id: `photo-${number}-${image.filename}`,
+      name: image.name,
+      ext: image.ext,
+      size: image.size,
       kind: 'remote' as const,
-      source: { url, filename: `photo-${offset + index + 1}.jpg` },
-      hue: (offset + index) * 30 % 360,
-      thumbUrl: `https://picsum.photos/seed/${seed}/320/240`,
+      source: { url: image.url, filename: image.filename },
+      hue: image.hue,
+      thumbUrl: image.url,
       removable: true,
     };
   });

@@ -1,0 +1,25 @@
+---
+title: Create a ZIP from remote URLs
+description: Fetch and zip files straight from their URLs.
+---
+
+Pass plain URL strings (or `{ url, filename }` sources) to `createZip` or
+`zip.download({ files })` and Eazip fetches each one, adds it to the archive,
+and skips — rather than fails — any URL that errors, so a handful of bad
+links don't sink the whole export. See [`@eazip/core`](/docs/core) for the
+underlying engine.
+
+## In short
+
+```ts
+import { createZip } from '@eazip/core';
+
+const result = await createZip({
+  files: ['https://cdn.example.com/a.pdf', 'https://cdn.example.com/b.png'],
+  zipName: 'export.zip',
+});
+
+result.download();
+```
+
+A step-by-step walkthrough is coming soon.

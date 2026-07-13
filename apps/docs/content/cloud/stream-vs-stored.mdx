@@ -1,0 +1,58 @@
+---
+title: "Stream vs stored"
+description: "The two delivery modes, the stream default, and link expiry."
+---
+
+Cloud sessions build the archive one of two ways, chosen with `mode`:
+
+```ts
+zip.download({ strategy: 'cloud', publicKey, files: urls, mode: 'stored' });
+```
+
+**`'stream'`** — the SDK's default whenever it creates the session for you
+— generates the zip on demand, at download time, so there's no storage
+upload to wait for and the session tends to be ready sooner. Each download
+regenerates the archive from the same source list; nothing sits in storage
+between downloads.
+
+**`'stored'`** builds the archive once and keeps it, so repeat downloads of
+the same session serve the same bytes instead of rebuilding. Reach for it
+when the same export gets downloaded more than once, or when you want a
+stable artifact independent of the original sources still being reachable.
+
+Either way it's the same `EazipZipOutput[]` shape in `result.zips` /
+`session.job.zips` — `mode` only changes how the bytes behind
+`downloadUrl` get produced, not the shape of the result. Your Public App's
+allowed modes still apply, so a `mode` your dashboard policy doesn't permit
+is rejected the same way an invalid origin would be — see
+[Public keys & origins](/docs/cloud/keys-and-origins).
+
+## Expiry
+
+Both modes' download links — and the session itself — are valid for a
+limited time (24 hours by default). The expiry lives on the job, not just
+the session: `result.expiresAt` reflects it, and `@eazip/react`'s tray
+watches it and switches to a calm `'expired'` state once it passes rather
+than leaving a dead link behind. Re-run the export for fresh links; see
+[Sessions & resume](/docs/core/resume) for resuming a still-in-progress job
+instead.
+
+## Zero egress either way
+
+Downloads through Eazip Cloud carry no egress fees regardless of `mode` —
+you pay for the zip job, not for bandwidth out. See
+[Zero-egress exports](/docs/recipes/zero-egress-exports) and
+[pricing](https://eazip.io/cloud/#pricing).
+
+## Using `SessionsClient` directly
+
+The engine's `mode: 'stream'` default is an SDK-level choice, not a server
+one — call [`SessionsClient`](/docs/core/resume) directly and omit `mode`
+entirely, and the API's own default applies instead:
+
+```ts
+import { SessionsClient } from '@eazip/core/cloud';
+
+const client = new SessionsClient({ publicKey, apiBaseUrl: 'https://api.eazip.io' });
+await client.create({ files }); // no `mode` sent — server default applies
+```

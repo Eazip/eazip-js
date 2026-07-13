@@ -1,0 +1,23 @@
+---
+title: Zero-egress exports
+description: Eazip Cloud ships downloads with zero egress fees — stream or store, pay only for what you use.
+---
+
+Eazip Cloud zips default to stream mode — generated on demand at download
+time, so exports are ready sooner and nothing sits around racking up storage
+costs. Pass `mode: 'stored'` when you'd rather keep a built archive around
+for repeat downloads. Either way, egress (bandwidth-out fees) is free: you
+pay only for what you use. Learn more at [eazip.io](https://eazip.io/cloud).
+
+## In short
+
+```ts
+zip.download({
+  strategy: 'cloud',
+  publicKey,
+  files: urls,
+  mode: 'stored', // keep a built archive around for repeat downloads
+});
+```
+
+A step-by-step walkthrough is coming soon.

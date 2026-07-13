@@ -1,0 +1,51 @@
+name: Docs CI
+
+# Quality gate for the docs app. Deployment is NOT done here: the production
+# worker is built and deployed by Cloudflare Workers Builds (connected to this
+# repo, watching apps/docs), so no credentials live in this repository.
+on:
+  pull_request:
+    paths:
+      - 'apps/docs/**'
+      - 'packages/core/**'
+      - 'packages/react/**'
+      - 'package-lock.json'
+      - '.github/workflows/docs-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/docs/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build workspace packages
+        run: npm run build -w @eazip/core -w @eazip/react
+
+      - name: Type check docs
+        run: npm run typecheck -w @eazip/docs
+
+      - name: Build docs site
+        run: npm run build:docs -w @eazip/docs
+
+      - name: Build Cloudflare worker
+        run: npm run build:worker -w @eazip/docs

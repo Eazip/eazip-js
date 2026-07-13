@@ -1,0 +1,68 @@
+---
+title: "Inputs & sources"
+description: "Files, Blobs, FileLists, and remote URLs — what goes in and how names are resolved."
+---
+
+`files` is intentionally loose. It accepts any of:
+
+```ts
+type EazipSourceFile =
+  | { url: string; filename?: string }
+  | { file: File | Blob; filename?: string };
+
+type ZipInput =
+  | readonly (string | File | Blob | EazipSourceFile)[]
+  | FileList
+  | File
+  | Blob;
+```
+
+In practice: a `FileList` straight off an `<input type="file" multiple />`,
+a `File[]`/`Blob[]` array, an array of URL strings, a mix of all of the
+above in one array, or even a single bare `File`/`Blob` with no array at
+all. Use the object forms — `{ url, filename }` / `{ file, filename }` —
+when you want to name an entry explicitly.
+
+```ts
+await createZip({
+  files: [
+    'https://cdn.example.com/report.pdf',
+    { url: 'https://cdn.example.com/data.csv', filename: 'exports/data.csv' },
+    { file: selectedBlob, filename: 'notes.txt' },
+  ],
+  zipName: 'bundle.zip',
+});
+```
+
+An empty list throws `EazipValidationError('EMPTY_INPUT')`; an unrecognized
+item shape throws `EazipValidationError('INVALID_INPUT')` — both
+synchronously, before any job is created.
+
+## Filename resolution
+
+Every source resolves to a zip entry name in this order: an explicit
+`filename`, then (for `File`s) `webkitRelativePath` — so directory-picker
+selections keep their folder structure — then `.name`, then (for URLs) the
+last path segment, then a generic `file-N` fallback. The result is
+sanitized: backslashes become `/`, null bytes and any `..`/`.`/empty path
+segments are stripped, and a Windows drive prefix is removed, so a hostile
+or messy name can never escape the archive root. If two sources resolve to
+the same entry name, later ones get a ` (2)`, ` (3)`, … suffix inserted
+before the extension — the same way a browser dedupes downloaded files.
+
+## Remote URLs
+
+For the `local` strategy, URL sources are fetched **by the browser**, with
+`credentials: 'omit'` — no cookies, no auth headers — so the source must
+allow CORS for an anonymous request. Fetches run through a small pool,
+`concurrency` at a time (default `4`), while a single writer adds them to
+the zip in your original input order, so archive ordering stays
+deterministic regardless of which fetch finishes first. Pass your own
+`fetch` (option `fetch`) to add headers, use a polyfill, or route through a
+proxy.
+
+The `cloud` strategy only accepts URL sources — the Eazip API fetches
+them, not the browser — so a `File`/`Blob` source throws
+`EazipValidationError('CLOUD_URL_SOURCES_ONLY')`. See
+[Why Eazip Cloud](/docs/cloud) for what "fetched by the API" implies for CORS
+and allowed hosts.

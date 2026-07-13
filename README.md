@@ -17,9 +17,9 @@ this repository.
 ## Install
 
 ```sh
-npm install @eazip/core@beta
+npm install @eazip/core
 # or, for React apps
-npm install @eazip/react@beta
+npm install @eazip/react
 ```
 
 ## Quickstart (vanilla)
@@ -49,7 +49,7 @@ function Gallery({ selectedFiles }: { selectedFiles: File[] }) {
   return (
     <>
       <button onClick={() => zip.download({ files: selectedFiles })}>Download as ZIP</button>
-      <EazipTray placement="corner" />
+      <EazipTray />
     </>
   );
 }

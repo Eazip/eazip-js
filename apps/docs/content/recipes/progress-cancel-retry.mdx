@@ -1,0 +1,29 @@
+---
+title: Add progress, cancel, and retry
+description: Let the tray narrate every state for you.
+---
+
+`<EazipTray />` already renders progress, completion, partial results,
+failures, and expiry — drop it in once and it owns its own states. Reach for
+`useEazip()`'s `task`, `isBusy`, `cancel()`, and `retry()` directly when you
+need custom UI instead of (or alongside) the tray. See
+[Getting started](/docs/getting-started) for the `<EazipTray />` props reference.
+
+## In short
+
+```tsx
+import { useEazip } from '@eazip/react';
+
+function ExportControls() {
+  const { task, cancel, retry } = useEazip();
+
+  return (
+    <>
+      {task && task.state === 'processing' && <button onClick={() => cancel()}>Cancel</button>}
+      {task && task.state === 'failed' && task.canRetry && <button onClick={() => retry()}>Retry</button>}
+    </>
+  );
+}
+```
+
+A step-by-step walkthrough is coming soon.

@@ -12,6 +12,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "-w", "@eazip/example-client"],
       "port": 5173
+    },
+    {
+      "name": "docs",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "-w", "@eazip/docs", "--", "-p", "3002", "-H", "0.0.0.0"],
+      "port": 3002
     }
   ]
 }

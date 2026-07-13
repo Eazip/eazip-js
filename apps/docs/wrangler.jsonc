@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "eazip-docs",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-06-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  }
+  // No "routes" here on purpose: the eazip.io/* route is attached to
+  // this Worker by the maintainers' zone configuration, which lives outside
+  // this repository. This repo never holds zone-level settings.
+}

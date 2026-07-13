@@ -1,0 +1,69 @@
+---
+title: "Headless usage"
+description: "Task state without the tray — build your own UI on useEazip()."
+---
+
+`<EazipTray />` is optional — everything it renders is derived from
+`useEazip()`'s `task`, so any part of it (or all of it) is easy to
+reimplement in your own design system.
+
+```tsx
+import { useEazip } from '@eazip/react';
+
+function ExportButton({ files }: { files: File[] }) {
+  const zip = useEazip();
+  const task = zip.task;
+
+  if (!task) {
+    return (
+      <button disabled={zip.isBusy} onClick={() => zip.download({ files })}>
+        Download as ZIP
+      </button>
+    );
+  }
+
+  return (
+    <div>
+      {task.state === 'processing' ? (
+        <>
+          {task.progress ? (
+            <progress value={task.progress.filesCompleted} max={task.progress.filesTotal} />
+          ) : (
+            <progress />
+          )}
+          <button onClick={() => zip.cancel()}>Cancel</button>
+        </>
+      ) : null}
+
+      {task.state === 'completed' || task.state === 'partial' ? (
+        <button onClick={() => zip.downloadAll()}>
+          {task.zips.length > 1 ? `Download ${task.zips.length} zips` : 'Save file'}
+        </button>
+      ) : null}
+
+      {task.state === 'failed' && task.canRetry ? (
+        <button onClick={() => zip.retry()}>Try again</button>
+      ) : null}
+    </div>
+  );
+}
+```
+
+A few things worth knowing before you build on this:
+
+- `task.progress` is only ever populated for `local` jobs — cloud jobs poll
+  a session, not a byte stream, so render an indeterminate spinner for
+  `task.strategy === 'cloud'` instead of a percentage.
+- `task.zips[]` carries `filename`/`size`/`downloadUrl` per part; use
+  `downloadZip(task.id, index)` to trigger one specific part instead of
+  `downloadAll()`.
+- `task.skipped` (populated once `state` is `'partial'`) is the per-file
+  reason list — see [Partial results & errors](/docs/core/partial-results) for
+  what `reason` means on `local` versus `cloud`, where only a count is
+  available.
+- `task.canRetry` reflects whether the original request is still
+  replayable — see [Persistence & reload-resume](/docs/react/persistence) for
+  the one case (a restored, backend-created session) where it isn't.
+
+`isBusy` is just `task?.state === 'processing'` — reach for it when all you
+need is a boolean, and `task` directly for anything richer.

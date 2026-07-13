@@ -1,0 +1,19 @@
+# Next.js build output
+.next/
+out/
+
+# Fumadocs MDX generated source map
+.source/
+
+# Next.js type helper (regenerated on every dev/build)
+next-env.d.ts
+
+# tsc --incremental cache
+*.tsbuildinfo
+
+# Local env files
+.env*.local
+.open-next/
+
+# Wrangler/Miniflare local state (preview cache, sqlite)
+.wrangler/

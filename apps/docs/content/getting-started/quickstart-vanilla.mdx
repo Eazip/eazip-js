@@ -1,0 +1,74 @@
+---
+title: "Quickstart (vanilla)"
+description: "Zip files in any browser app with @eazip/core — no framework required."
+---
+
+Not using React? [`@eazip/core`](/docs/core) is the framework-agnostic engine
+behind Eazip — ESM-only, tree-shakeable, and it needs nothing but a
+browser's `fetch`/`Blob` to zip files client-side.
+
+## Install
+
+```sh
+npm install @eazip/core
+```
+
+## Zip and download
+
+`createZip` is the one-function version: hand it files, await the result,
+download it.
+
+```ts
+import { createZip } from '@eazip/core';
+
+const result = await createZip({
+  files: fileInput.files ?? [], // a FileList, File[], Blob[], URL strings, or a mix
+  zipName: 'export.zip',
+});
+
+result.download();
+```
+
+`files` accepts whatever you're likely to have on hand: a `FileList`
+straight off an `<input type="file" multiple />`, `File`/`Blob` objects,
+plain URL strings, or `{ url | file, filename }` source objects — see
+[Inputs & sources](/docs/core/inputs) for exactly how each shape resolves to a
+zip entry name.
+
+## Progress, cancellation, and subscriptions
+
+`createZip` is a thin wrapper over `startZip`, which returns a `ZipJob`
+synchronously so you can observe it as it runs:
+
+```ts
+import { startZip } from '@eazip/core';
+
+const job = startZip({ files: fileInput.files ?? [], zipName: 'export.zip' });
+
+const unsubscribe = job.subscribe(() => {
+  const { status, progress } = job.getSnapshot();
+  console.log(status, progress?.filesCompleted, '/', progress?.filesTotal);
+});
+
+// job.abort() cancels fetching/zipping at any point
+const result = await job.done;
+result.download();
+unsubscribe();
+```
+
+See [`createZip`, `startZip` & `ZipJob`](/docs/core/zip-job) for the full job
+API — `getSnapshot`, `subscribe`, `download`, `downloadAll`, `abort`, and
+`dispose`.
+
+## Partial results
+
+A bad URL doesn't sink the export: by default, a source that fails to fetch
+is skipped and recorded in `result.errors` instead of throwing, and
+`result.status` comes back `'partial'` rather than `'completed'`. See
+[Partial results & errors](/docs/core/partial-results) for the full error shape
+and how to opt into fail-fast instead.
+
+Building a React app instead? [`@eazip/react`](/docs/react) wraps this exact
+engine in a hook and a drop-in progress tray — see
+[Getting started](/docs/getting-started).
+

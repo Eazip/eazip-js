@@ -1,0 +1,84 @@
+.section {
+  margin-top: 92px;
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  background: var(--ez-cta-bg);
+  border: 1px solid var(--ez-cta-border);
+  border-radius: 20px;
+  padding: 48px 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.glow {
+  position: absolute;
+  top: -120px;
+  right: -80px;
+  width: 420px;
+  height: 320px;
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--ez-accent) 32%, transparent), transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.text {
+  position: relative;
+  max-width: 440px;
+}
+
+.h2 {
+  font-size: 29px;
+  font-weight: 700;
+  color: var(--ez-cta-fg);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.body {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ez-cta-fg2);
+  margin: 12px 0 0;
+}
+
+.actions {
+  position: relative;
+  display: flex;
+  gap: 11px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.btnSolid {
+  border: none;
+  background: var(--ez-cta-btn);
+  color: var(--ez-cta-btn-fg);
+  border-radius: 10px;
+  padding: 0 22px;
+  height: 46px;
+  font-size: 14.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.btnOutline {
+  border: 1px solid var(--ez-cta-border);
+  background: transparent;
+  color: var(--ez-cta-fg);
+  border-radius: 10px;
+  padding: 0 20px;
+  height: 46px;
+  font-size: 14.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}

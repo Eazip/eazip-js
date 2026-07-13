@@ -1,0 +1,52 @@
+---
+title: "Why Eazip Cloud"
+description: "When the browser is not enough: server-side zipping with the same API."
+---
+
+The `local` strategy zips inside the tab: everything it fetches and writes
+lives in that tab's memory, and the export dies if the tab closes or
+reloads. That's fine for a handful of files — it stops being fine somewhere
+around thousands of files or multi-gigabyte totals, where the browser
+itself becomes the bottleneck.
+
+`cloud` runs the same job on the Eazip API instead: your file list becomes
+a Public Session, the API fetches the sources and builds the archive
+server-side, and the SDK polls until signed download links are ready. Same
+`startZip`/`createZip` (or `zip.download()`), one different option:
+
+```ts
+zip.download({ strategy: 'cloud', publicKey: 'pk_ez_...', files: urls });
+```
+
+## What actually changes
+
+- **Sources must be URLs.** The API fetches files itself — it can't reach
+  into your tab for a `File`/`Blob` — so `cloud` only accepts URL sources
+  (signed S3/R2 links work well; see
+  [Zip S3 or R2 objects](/docs/recipes/zip-s3-or-r2-objects)). A `publicKey`
+  identifies which Public App's policy governs the request — see
+  [Public keys & origins](/docs/cloud/keys-and-origins).
+- **The job has a session.** Creating it returns `{ sessionId, clientSecret }`
+  immediately, before the zip is built — persist those and the export
+  survives a reload; see [Sessions & resume](/docs/core/resume) and, for React,
+  [Persistence & reload-resume](/docs/react/persistence).
+- **Big exports split automatically**, the same `maxZipSizeBytes` contract
+  as `local` — see [Multi-zip splitting](/docs/core/splitting).
+- **Nothing sits in tab memory.** The SDK only ever holds progress numbers
+  and signed URLs, never the archive bytes, so tab memory stops being a
+  limit at any file count.
+
+## Same UX
+
+`<EazipTray />` doesn't change shape for `cloud` — it narrates the same
+five states, just fed by session polling instead of local progress events.
+The one visible addition is expiry: signed download links (and the session
+itself) are valid for a limited time, and the tray shows a calm "expired"
+state once they lapse instead of a broken link — see
+[Stream vs stored](/docs/cloud/stream-vs-stored).
+
+Get a public key and see plan limits at
+[eazip.io](https://eazip.io/cloud/#pricing). For hands-on examples, see
+[Zip GB-scale, 1,000+ URL jobs](/docs/recipes/gb-scale-url-jobs) and
+[Zero-egress exports](/docs/recipes/zero-egress-exports).
+

@@ -1,0 +1,96 @@
+---
+title: "useEazip()"
+description: "The hook: download, task state, and the actions around them."
+---
+
+```ts
+const zip = useEazip();
+```
+
+returns:
+
+| Member | Description |
+| --- | --- |
+| `download(options)` | Starts an export. Fire & forget — returns the new task's id immediately. |
+| `task` | The current task, or `null` if nothing has run yet. |
+| `tasks` | The same task as a one-element array (`useEazip` is single-task today; the array shape is forward-compatible). |
+| `isBusy` | `true` while `task.state === 'processing'`. |
+| `cancel(taskId?)` | Aborts the job and clears the task. |
+| `retry(taskId?)` | Re-runs the original `download()` call, if it's still retryable (`task.canRetry`). |
+| `dismiss(taskId?)` | Clears the task. Today, identical to `cancel()`. |
+| `downloadZip(taskId, zipIndex)` | Triggers one zip's download from a multi-zip result. |
+| `downloadAll(taskId?)` | Triggers every zip's download. |
+
+`taskId` is optional on every action — pass it if you're tracking your own
+reference; otherwise it defaults to whatever the current task is.
+
+## `download(options)`
+
+`options` is one of three shapes:
+
+```ts
+// 1. Local (default strategy)
+zip.download({ files, zipName: 'export.zip' });
+
+// 2. Cloud, SDK-created session — files go to the browser
+zip.download({ strategy: 'cloud', publicKey: 'pk_ez_...', files: urls });
+
+// 3. Cloud, backend-created session — files never reach the browser
+zip.download({
+  strategy: 'cloud',
+  zipName: 'export.zip',
+  filesTotal: 50_000,
+  createSession: async ({ signal, zipName, mode }) => {
+    const response = await fetch('/api/eazip-session', {
+      method: 'POST',
+      signal,
+      body: JSON.stringify({ zipName, mode }),
+    });
+    return response.json(); // { sessionId, clientSecret, apiBaseUrl? }
+  },
+});
+```
+
+Shapes 1 and 2 take `files: ZipInput` — see [Inputs & sources](/docs/core/inputs)
+for everything that accepts. Shape 3 takes a `createSession` callback
+instead of `files`/`publicKey`; see
+[Backend-created sessions](/docs/cloud/backend-sessions). All three share
+`zipName`, `failOnUrlError`, `maxZipSizeBytes`, `signal`, `fetch`,
+`onChange`, and `autoDownload` (default `true` — set it `false` to skip the
+automatic browser download and drive it yourself via
+`downloadZip`/`downloadAll`).
+
+## Fire-and-forget, with one exception
+
+Engine and network errors never throw from `download()` — they land on
+`task.error` and render as a recoverable state, in the tray or in your own
+UI. The one exception is an empty or unrecognized `files` list
+(`EMPTY_INPUT` / `INVALID_INPUT`): that throws synchronously from
+`download()` itself, the same way passing garbage to any other function
+would — validate `files` before calling it if the list can legitimately be
+empty.
+
+## Provider-optional
+
+`useEazip()` works with no setup — it falls back to a shared, lazily
+created store. Wrap your app in `EazipProvider` to share config (so every
+`download()` call doesn't need to repeat `publicKey`), or to isolate state
+between roots/tests:
+
+```tsx
+import { EazipProvider } from '@eazip/react';
+
+<EazipProvider
+  config={{
+    strategy: 'cloud',
+    publicKey: 'pk_ez_...',
+    defaults: { zipName: 'export.zip' },
+  }}
+>
+  <App />
+</EazipProvider>;
+```
+
+`config` fields (`publicKey`, `apiBaseUrl`, `strategy`, `defaults`,
+`autoDownload`, `persist`, `storageKey`) all act as fallbacks — anything
+passed directly to `download()` takes precedence.

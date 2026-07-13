@@ -1,0 +1,23 @@
+---
+title: Zip GB-scale, 1,000+ URL jobs
+description: Offload huge, many-file archives to the cloud strategy.
+---
+
+Browser-side zipping holds everything in memory and dies with the tab. Flip
+`strategy: 'cloud'` and the same `files` list is handed to Eazip Cloud, which
+builds the archive server-side, splits huge exports into multiple zips
+automatically, and keeps the tray narrating progress — including resuming
+after a page reload. See [Scale to the cloud](/docs/getting-started#scale-to-the-cloud)
+for the minimal example.
+
+## In short
+
+```ts
+zip.download({
+  strategy: 'cloud',
+  publicKey,
+  files: urls, // thousands of URLs — Eazip Cloud builds the archive server-side
+});
+```
+
+A step-by-step walkthrough is coming soon.

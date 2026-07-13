@@ -10,7 +10,7 @@ function Gallery({ selectedFiles }: { selectedFiles: File[] }) {
   return (
     <>
       <button onClick={() => zip.download({ files: selectedFiles })}>Download as ZIP</button>
-      <EazipTray placement="corner" />
+      <EazipTray />
     </>
   );
 }
@@ -24,7 +24,7 @@ import, no provider, no configuration required.
 ## Install
 
 ```sh
-npm install @eazip/react@beta
+npm install @eazip/react
 ```
 
 Requires React 18+. Files are zipped in the browser by default (via

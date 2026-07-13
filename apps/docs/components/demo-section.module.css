@@ -1,0 +1,41 @@
+.section {
+  margin-top: 52px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 26px;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.grid > * {
+  min-width: 0;
+}
+
+.caption {
+  text-align: center;
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: var(--ez-fg3);
+}
+
+.caption code {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  background: var(--ez-pill);
+  border: 1px solid var(--ez-border);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.caption strong {
+  color: var(--ez-fg2);
+  font-weight: 600;
+}

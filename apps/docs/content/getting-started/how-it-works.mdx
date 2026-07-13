@@ -1,0 +1,55 @@
+---
+title: "How Eazip works"
+description: "The mental model: local and cloud strategies, and the ZipJob that unifies them."
+---
+
+Eazip ships two ways to turn a list of files into a ZIP, behind one API.
+
+## Two strategies
+
+**`local`** (the default) fetches and zips everything inside the browser
+tab, using `@zip.js/zip.js` — no server, no upload, nothing to configure.
+It's bounded by what the tab can hold in memory, and the export stops if
+the tab closes or reloads mid-run.
+
+**`cloud`** hands the same file list to an Eazip Public Session: the API
+fetches the sources and builds the archive server-side while the SDK polls
+the session until it's done. Because the session lives on a server, it
+survives a reload, scales past what a browser can hold, and splits huge
+exports into multiple zips automatically. See [Why Eazip Cloud](/docs/cloud).
+
+Both strategies return the same shape of result and go through the same
+`startZip`/`createZip` functions — only `strategy: 'cloud'` and a
+`publicKey` change.
+
+## `ZipJob`: one object, either strategy
+
+Whichever strategy runs, `startZip()` hands back a `ZipJob` synchronously.
+It's the one abstraction worth understanding:
+
+- `getSnapshot()` / `subscribe()` — an immutable state snapshot and a
+  subscribe function, deliberately shaped for `useSyncExternalStore`.
+- `done` — a promise that resolves once the zip is ready (`'completed'` or
+  `'partial'`) and rejects only on abort or a fatal error. Safe to ignore.
+- `abort()` — cancels local fetching/zipping, or stops polling a cloud job
+  (the server-side job keeps running either way).
+
+`createZip()` is sugar for `startZip(options).done`. See
+[`createZip`, `startZip` & `ZipJob`](/docs/core/zip-job) for the full API.
+
+## Picking a strategy
+
+Reach for `local` first — it's the default, needs no account, and covers
+most exports: a handful to a few hundred files, tens to low hundreds of
+megabytes. Move to `cloud` when:
+
+- the export is large enough that holding it all in memory risks the tab,
+- files number in the thousands, or
+- the export needs to survive a page reload.
+
+`@eazip/react` makes switching a one-line change:
+`zip.download({ strategy: 'cloud', publicKey, files })`. Same
+`<EazipTray />`, same task shape — the tray just gains resumable progress
+and multi-zip output. See [Why Eazip Cloud](/docs/cloud) for what changes under
+the hood.
+

@@ -1,0 +1,49 @@
+---
+title: "Public keys & origins"
+description: "Creating a public key and allowing your origins and source hosts."
+---
+
+Every direct `cloud` call — one where the SDK creates the session itself,
+rather than a [backend-created session](/docs/cloud/backend-sessions) — needs a
+`publicKey`, created from your Eazip dashboard at
+[eazip.io](https://eazip.io/cloud):
+
+```ts
+zip.download({ strategy: 'cloud', publicKey: 'pk_ez_...', files: urls });
+```
+
+## It's meant to be public
+
+Unlike a secret API key, `publicKey` is designed to sit in client-side code
+— it ships in your JS bundle and is sent as a plain request header
+(`X-Eazip-Public-Key`) from the browser on every session-create call. Ship
+it the same way you'd ship a Stripe publishable key or a Google Maps
+browser key: safe to read in devtools, safe to commit alongside your
+frontend config, never a substitute for server-side authorization on your
+own endpoints.
+
+What keeps a public key from being usable by anyone who copies it is the
+Public App policy behind it, configured on the dashboard rather than in the
+SDK:
+
+- **Allowed origins.** The API validates the request's origin against an
+  allowlist you configure per Public App, so your key only creates sessions
+  from the site(s) you've named — copying it into an unrelated app's
+  frontend doesn't work.
+- **Allowed source hosts.** Because `cloud` sources are URLs the *API*
+  fetches (see [Why Eazip Cloud](/docs/cloud)), the Public App also scopes which
+  hosts it's willing to fetch from — add your CDN, bucket, or asset domain
+  there before pointing a session at it.
+
+A request from an origin or a source host outside those allowlists is
+rejected with an API error, caught the same way as any other: an
+`EazipApiError` (or a dedicated subclass) with a server-provided `code` —
+see [Partial results & errors](/docs/core/partial-results) for the general
+shape. If you hit one, the fix lives on the dashboard side (add the origin
+or source host), not in SDK options.
+
+## Scoping further
+
+Create separate public keys per Public App if you want different origin or
+source-host policies for different parts of your product — a key is only
+ever as permissive as the Public App behind it.

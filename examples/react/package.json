@@ -11,12 +11,12 @@
   "dependencies": {
     "@eazip/core": "file:../../packages/core",
     "@eazip/react": "file:../../packages/react",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^4.3.4",
     "typescript": "^5.7.2",
     "vite": "^7.3.0"

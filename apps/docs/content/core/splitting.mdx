@@ -1,0 +1,59 @@
+---
+title: "Multi-zip splitting"
+description: "maxZipSizeBytes, part naming, and ZIP64 — how large exports split."
+---
+
+Pass `maxZipSizeBytes` and a large export splits into multiple zips, each
+kept under the cap on a best-effort basis, instead of producing one huge
+archive:
+
+```ts
+const result = await createZip({
+  files,
+  zipName: 'export.zip',
+  maxZipSizeBytes: 1_000_000_000, // 1 GB
+});
+
+result.zips; // one entry per part
+```
+
+The option is shared by both strategies. For `cloud`, splitting happens on
+the server — the same cap, reflected back as `multiZip`, `zipCount`, and
+one `zips[]` entry per part on the polled job. The rest of this page
+describes what the **local** engine in this repository does; treat it as
+the reference behavior the cloud API mirrors, not as cloud's own
+implementation.
+
+## How the estimate works
+
+Before adding each file, the local engine estimates how much it will add to
+the current part — uncompressed size, plus a worst-case deflate expansion,
+plus per-entry header overhead — and starts a new part if that would push
+the running total over the cap. The estimate is deliberately conservative
+(it assumes the file barely compresses), then corrected with the file's
+*actual* compressed size right after it's written, so later files in the
+same part are sized against real numbers instead of the worst case.
+
+## The one exception: oversized files
+
+A single file bigger than `maxZipSizeBytes` can't be split — ZIP entries
+aren't chunked — so it gets a part of its own, over the cap, rather than
+producing an error. Splitting never fails an export; at worst it produces
+one oversized part.
+
+## Part naming
+
+Under the cap — no `maxZipSizeBytes`, or everything fit in one part — the
+single output keeps `zipName` exactly (`export.zip`). Once local splitting
+produces a second part, every part is renamed `<stem>_partNN.zip` (`NN`
+zero-padded to at least 2 digits, wider past 100 parts): `export_part01.zip`,
+`export_part02.zip`, and so on. Names are assigned only after every part is
+closed — safe, since a zip's filename isn't stored inside its own bytes.
+
+## ZIP64
+
+The local engine always writes ZIP64 extensions, regardless of size, so
+entry counts and offsets never hit the legacy 32-bit ZIP ceiling as an
+export grows — there's no option to turn it off. Every modern unzip tool,
+including the ones built into macOS, Windows, and Linux, reads ZIP64
+archives transparently.

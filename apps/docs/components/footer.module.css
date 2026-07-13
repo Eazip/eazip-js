@@ -1,0 +1,87 @@
+.footer {
+  padding: 56px 44px 44px;
+}
+
+.top {
+  display: flex;
+  gap: 56px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  max-width: 230px;
+  flex-shrink: 0;
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+}
+
+.wordmark {
+  font-size: 16.5px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ez-fg);
+}
+
+.blurb {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ez-fg3);
+  margin: 14px 0 0;
+}
+
+.columns {
+  display: flex;
+  flex: 1;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.column {
+  min-width: 140px;
+}
+
+.heading {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ez-fg3);
+  margin: 0;
+}
+
+.links {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.links a {
+  font-size: 13.5px;
+  color: var(--ez-fg2);
+  text-decoration: none;
+}
+
+.links a:hover {
+  color: var(--ez-fg);
+}
+
+.bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--ez-border);
+  font-size: 12.5px;
+  color: var(--ez-fg3);
+}

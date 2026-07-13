@@ -1,0 +1,64 @@
+---
+title: "Backend-created sessions"
+description: "Create the session on your server; hand the browser only the session handle."
+---
+
+For very large or sensitive exports, you may not want the full source URL
+list to ever reach the browser — a report with thousands of internal
+signed links, say, or a listing your users shouldn't be able to read
+directly out of your JS bundle. `cloud` supports this: instead of `files` +
+`publicKey`, pass a `createSession` callback that asks your own backend to
+create the Public Session, and hand the SDK only the resulting handle.
+
+```ts
+const job = startZip({
+  strategy: 'cloud',
+  zipName: 'export.zip',
+  filesTotal: 50_000, // optional — an initial count for UI before the first poll
+  createSession: async ({ signal, zipName, mode, failOnUrlError, maxZipSizeBytes }) => {
+    const response = await fetch('/api/exports/123/eazip-session', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      signal,
+      body: JSON.stringify({ zipName, mode }),
+    });
+    if (!response.ok) throw new Error('Failed to create Eazip session');
+    return response.json(); // { sessionId, clientSecret, apiBaseUrl? }
+  },
+});
+```
+
+The same option exists on `@eazip/react`'s `download()` —
+[`useEazip()`](/docs/react/use-eazip) documents the exact shape
+(`EazipCloudSessionDownloadOptions`).
+
+## How it fits together
+
+Your backend endpoint (`/api/exports/123/eazip-session` above) is where the
+real work happens — it holds the full URL list and whatever server-side
+credential the Eazip API requires to create a session on your behalf, and
+returns `{ sessionId, clientSecret, apiBaseUrl? }`. None of that is part of
+this SDK: creating a session with a secret, server-side credential is
+explicitly out of scope for `@eazip/core` and `@eazip/react`, which stay
+browser-first by design. Once your endpoint returns the handle,
+`createSession`'s job is done — the SDK takes over exactly as if it had
+created the session itself: it polls to completion, populates
+`job.getSnapshot().session`, and drives `download()`/`downloadAll()` off
+the same signed links.
+
+`publicKey` and `files` aren't used on this path — the type forbids passing
+them alongside `createSession` — because your backend is the thing
+authorized to create the session, not the browser.
+
+## Persistence
+
+`@eazip/react` persists backend-created sessions the same way as any other
+cloud task — `sessionId` + `clientSecret`, enough to `resumeZip()` after a
+reload — with one difference: because the original request lived in a
+closure your backend executed, not a plain `files` array, it isn't
+replayed. A restored backend-created task can resume an in-progress job,
+but after a reload `retry()` is no longer available for it — trigger a fresh
+`download()` call instead. (During the original session, `retry()` works as
+usual: the store still holds your `createSession` callback.) See
+[Persistence & reload-resume](/docs/react/persistence).

@@ -1,0 +1,71 @@
+---
+title: "createZip, startZip & ZipJob"
+description: "One-shot promises or a subscribable job — the core execution model."
+---
+
+Every export in `@eazip/core` — local or cloud — goes through the same
+object: `ZipJob`. Two functions produce one.
+
+```ts
+import { createZip, startZip } from '@eazip/core';
+
+// One-shot: await the result.
+const result = await createZip({ files, zipName: 'export.zip' });
+
+// Or get the job itself, synchronously, and observe it as it runs.
+const job = startZip({ files, zipName: 'export.zip' });
+```
+
+`createZip` is sugar for `startZip(options).done` — reach for it when you
+just want the finished zip. Reach for `startZip` for progress, cancellation,
+or to drive UI off the job as it runs — this is exactly what
+`@eazip/react`'s `useEazip()` does internally. Both take the same options;
+add `strategy: 'cloud'` and a `publicKey` and the same call runs against
+[Eazip Cloud](/docs/cloud) instead of zipping in the tab — see
+[How Eazip works](/docs/getting-started/how-it-works).
+
+## The `ZipJob` API
+
+`startZip()` returns a job synchronously — work begins on the next
+microtask, so it's safe to subscribe before anything happens:
+
+```ts
+const job = startZip({ files, zipName: 'export.zip' });
+const unsubscribe = job.subscribe(() => {
+  console.log(job.getSnapshot().status);
+});
+await job.done;
+unsubscribe();
+```
+
+| Member | Description |
+| --- | --- |
+| `id` / `strategy` | Stable job id and `'local'`/`'cloud'`, fixed for the job's lifetime. |
+| `getSnapshot()` | The current, immutable snapshot — same reference until the next state change. |
+| `subscribe(listener)` | Registers a listener called on every change; returns an unsubscribe function. |
+| `done` | Resolves with the result on `'completed'`/`'partial'`; rejects with `EazipAbortError` on abort or the fatal error on `'failed'`. Safe to ignore — an internal handler prevents unhandled-rejection warnings. |
+| `abort()` | Local: stops fetching/zipping. Cloud: stops polling — the server-side job keeps running. |
+| `download(zipIndex?)` | Triggers a browser download for one zip (default: the first). Throws `EazipValidationError('NOT_READY')` before the job finishes. |
+| `downloadAll()` | Triggers every zip's download, staggered to avoid popup blockers. |
+| `dispose()` | Local: revokes the object URLs backing `zips[].downloadUrl`. Cloud: no-op. |
+
+`getSnapshot`/`subscribe` are deliberately shaped for React's
+`useSyncExternalStore` — `@eazip/react`'s store wraps a `ZipJob` with no
+adapter layer, and any other framework can do the same.
+
+## Reading a snapshot
+
+| Field | Description |
+| --- | --- |
+| `status` | `'starting'` → `'processing'` → `'completed'` \| `'partial'` \| `'failed'` \| `'aborted'`. Terminal states are set exactly once. |
+| `progress` | Local only — phase, files/bytes completed vs. total. `null` for cloud jobs. |
+| `zips` | The zip(s) produced so far — see [Multi-zip splitting](/docs/core/splitting). |
+| `errors` / `skippedCount` | Per-file skips — see [Partial results & errors](/docs/core/partial-results). |
+| `error` | The fatal error, set only when `status === 'failed'`. |
+| `session` | Cloud only — `{ sessionId, clientSecret, ... }`, populated as soon as the session exists. See [Sessions & resume](/docs/core/resume). |
+| `result` | The full `ZipResult`, set once `status` is `'completed'` or `'partial'`. |
+
+`job.download()`/`job.downloadAll()` are shortcuts for
+`snapshot.result.download()` — nothing you couldn't call yourself once
+`result` is populated.
+

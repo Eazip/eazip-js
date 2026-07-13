@@ -1,0 +1,70 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* ---------------------------------------------------------------------
+ * Marketing homepage design tokens (app/page.tsx and components/*).
+ * Namespaced --ez-* to stay clear of fumadocs' own --color-fd-* tokens.
+ * Theme is driven by next-themes' `class` attribute on <html> (fumadocs
+ * RootProvider default): `.dark` / `.light`. Dark is the site default.
+ * Accent, code-window and CTA-block colors are constant across themes.
+ * ------------------------------------------------------------------- */
+:root {
+  --ez-accent: #6366f1;
+  --ez-ok: #42c179;
+
+  --ez-code-bg: #0e0f12;
+  --ez-code-border: #22252b;
+
+  --ez-cta-bg: #141518;
+  --ez-cta-fg: #f2f3f5;
+  --ez-cta-fg2: #a2a8b0;
+  --ez-cta-border: #2c3037;
+  --ez-cta-btn: #f4f5f6;
+  --ez-cta-btn-fg: #141517;
+}
+
+:root,
+.dark {
+  --ez-page: #0a0b0d;
+  --ez-surface: #141518;
+  --ez-border: #25282e;
+  --ez-pill: #181a1e;
+  --ez-grid: rgba(255, 255, 255, 0.045);
+  --ez-fg: #f2f3f5;
+  --ez-fg2: #a2a8b0;
+  --ez-fg3: #6d737b;
+}
+
+.light {
+  --ez-page: #fbfbfc;
+  --ez-surface: #ffffff;
+  --ez-border: #e8eaee;
+  --ez-pill: #f4f5f7;
+  --ez-grid: rgba(20, 24, 31, 0.05);
+  --ez-fg: #14161a;
+  --ez-fg2: #565d66;
+  --ez-fg3: #8b929b;
+  --ez-ok: #178a4c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}

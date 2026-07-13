@@ -6,7 +6,8 @@
   "type": "module",
   "workspaces": [
     "packages/*",
-    "examples/*"
+    "examples/*",
+    "apps/*"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
@@ -16,7 +17,8 @@
     "pack:dry-run": "npm pack --dry-run -w @eazip/core -w @eazip/react",
     "release:info": "node scripts/release-info.mjs",
     "dev:client-example": "npm run dev -w @eazip/example-client",
-    "dev:react-example": "npm run dev -w @eazip/example-react"
+    "dev:react-example": "npm run dev -w @eazip/example-react",
+    "dev:docs": "npm run dev -w @eazip/docs"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

@@ -1,0 +1,74 @@
+---
+title: "Partial results & errors"
+description: "Per-file skips, the partial status, and the error taxonomy."
+---
+
+A single broken link shouldn't sink a 200-file export. By default
+(`failOnUrlError: false`), a source that fails to fetch or read is skipped
+— not thrown — and the zip is still built from everything else:
+
+```ts
+const result = await createZip({ files: urls });
+
+result.status;       // 'completed' | 'partial'
+result.errors;        // EazipError[] — one entry per skipped file
+result.skippedCount;  // errors.length
+```
+
+Each skip is an `EazipError`: `{ code, message, fileIndex?, filename?, cause? }`.
+`code` is one of `LOCAL_SOURCE_FETCH_FAILED` (the request failed or
+returned a non-2xx status) or `LOCAL_SOURCE_READ_FAILED` (the response
+couldn't be read as a `Blob`). Set `failOnUrlError: true` to make the
+*first* such failure reject the whole job instead — useful when every file
+is required and a partial zip isn't a useful outcome.
+
+If literally every source fails, a `partial` zip with zero files inside
+would just be noise — so the job fails outright instead, with
+`EazipValidationError('ALL_SOURCES_FAILED')` (the skipped-file list is
+attached as `cause`).
+
+This per-file detail is a **local-strategy** feature. Cloud results also
+expose `errors` and `skippedCount` on `ZipResult`, but the Public Sessions
+API only reports a skipped *count*, not per-file detail — so for cloud jobs
+`errors` is always `[]`, and `skippedCount` is derived from
+`urlCount - fileCount`.
+
+## Error taxonomy
+
+Everything `@eazip/core` throws or rejects with extends `EazipErrorBase`
+(`code`, optional `status`/`retryAfterMs`; `isEazipError()` narrows to it).
+Dedicated subclasses exist only where callers realistically branch on one —
+every other wire code stays a generic `EazipApiError` with `code` preserved:
+
+| Class | `code` | When you'll see it |
+| --- | --- | --- |
+| `EazipValidationError` | varies (`EMPTY_INPUT`, `INVALID_INPUT`, `ALL_SOURCES_FAILED`, `NOT_READY`, …) | Bad input or misuse — synchronous or via `job.done`, never from the network. |
+| `EazipAbortError` | `ABORT_ERR` | `job.abort()` was called, or the `signal` you passed fired. |
+| `EazipNetworkError` | `NETWORK_ERROR` | `fetch` itself threw (offline, DNS, CORS preflight failure), or no `fetch` implementation was found. |
+| `EazipChallengeRequiredError` | `PUBLIC_APP_CHALLENGE_REQUIRED` | Cloud only — the Public App requires a Turnstile token; carries `.challenge`. |
+| `EazipSessionExpiredError` | `SESSION_EXPIRED` | Cloud only — the session aged out before the job finished. |
+| `EazipSessionRevokedError` | `SESSION_REVOKED` | Cloud only — the session was revoked server-side. |
+| `EazipDownloadExpiredError` | `DOWNLOAD_URL_EXPIRED` | Cloud only — a signed download link was used after it expired. |
+| `EazipRateLimitError` | e.g. `PUBLIC_APP_RATE_LIMITED` | Cloud only — too many requests; carries `retryAfterMs`. |
+| `EazipQuotaError` | e.g. `QUOTA_EXCEEDED` | Cloud only — a plan or quota limit was hit. |
+| `EazipJobFailedError` | `JOB_FAILED` | Cloud only — the server-side job itself failed. |
+| `EazipApiError` | any other wire code | Fallback for any API error without a dedicated subclass. |
+
+```ts
+import { createZip, isEazipError, EazipRateLimitError } from '@eazip/core';
+
+try {
+  await createZip({ strategy: 'cloud', publicKey, files });
+} catch (error) {
+  if (error instanceof EazipRateLimitError) {
+    console.log('retry after', error.retryAfterMs);
+  } else if (isEazipError(error)) {
+    console.log(error.code, error.message);
+  }
+}
+```
+
+See [Why Eazip Cloud](/docs/cloud) for the challenge/Turnstile flow behind
+`EazipChallengeRequiredError`, and [Sessions & resume](/docs/core/resume) for
+the session-expiry errors.
+

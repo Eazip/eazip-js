@@ -1,0 +1,81 @@
+---
+title: "<EazipTray />"
+description: "Props, placements, theming, and how the tray behaves."
+---
+
+```tsx
+<EazipTray />
+```
+
+Drop it in once, anywhere in your tree. It renders through a portal, stays
+invisible until a `download()` call starts a task, and empties again once
+the task is cleared. No CSS import — styles ship as an injected `<style>`
+tag scoped to the tray's own class names.
+
+## Props
+
+| Prop | Default | Description |
+| --- | --- | --- |
+| `placement` | `'corner'` | `'corner'` (bottom-right), `'bar'` (bottom-center), or `'anchored'` (top-right, chevron flipped) |
+| `theme` | `'auto'` | `'light'`, `'dark'`, or `'auto'` (follows `prefers-color-scheme`, live) |
+| `accent` | `'#3056d3'` | Accent color for progress fills and highlights — the SDK default; brand it as your own |
+| `autoDownload` | `true` | Auto-start the browser download once a zip is ready. This prop only sets the shared default — a `download({ autoDownload: false })` call always wins. |
+| `autoHideMs` | `20000` | Delay before an idle, downloaded tray dismisses itself; `0` disables it |
+| `locale` | `'en'` | `'en'` or `'ja'` — see [Localization](/docs/react/i18n) |
+| `messages` | — | Partial override of any tray string |
+| `className` | — | Extra class on the tray root |
+| `zIndex` | `9999` | Stacking context for the tray |
+| `offset` | — | `{ x?, y? }` pixel shift from the default anchor |
+| `container` | `document.body` | Portal target |
+| `onStateChange` | — | Called with the task on every id/state transition |
+
+## Placements and theming
+
+All three placements are `position: fixed`, so by default the tray floats
+over your whole viewport regardless of where `<EazipTray />` sits in the
+tree. `theme="auto"` reads `prefers-color-scheme` on mount and keeps
+listening for changes; pass `'light'`/`'dark'` to pin it. `accent` only
+recolors progress bars, icons, and links — the neutral surface/border
+palette follows `theme` and isn't affected.
+
+## Embedding inside a panel
+
+`container` changes *where in the DOM* the tray portals to, not its CSS
+positioning — a `position: fixed` element still measures against the
+viewport unless its container establishes a new containing block. Give the
+container `contain: layout paint` (or `contain: strict`) and the tray
+positions itself relative to that element instead. This is how this site's
+own live demo pins the tray inside its little app-window mockup rather than
+the real corner of the page:
+
+```tsx
+import { useState } from 'react';
+import { EazipTray } from '@eazip/react';
+
+function EmbeddedTray() {
+  const [panelEl, setPanelEl] = useState<HTMLDivElement | null>(null);
+
+  return (
+    <div ref={setPanelEl} style={{ position: 'relative', contain: 'layout paint' }}>
+      {/* ... your panel content ... */}
+      <EazipTray container={panelEl} accent="#6366f1" />
+    </div>
+  );
+}
+```
+
+## Auto-hide
+
+Once a task reaches `'completed'` *and* its download has actually started,
+an idle tray dismisses itself after `autoHideMs`. Hovering, focusing, or
+touching the tray pauses the timer while you're interacting with it. This
+is `'completed'` specifically — a `'partial'` result stays put until
+dismissed, since it's carrying information worth reading.
+
+## Accessibility
+
+The tray root is `role="status"` with `aria-live="polite"`, so state
+changes are announced without stealing focus. The expand/collapse chevron
+carries `aria-expanded`/`aria-controls`, and `Escape` collapses an expanded
+tray. All animation respects `prefers-reduced-motion`.
+

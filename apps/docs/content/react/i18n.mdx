@@ -1,0 +1,61 @@
+---
+title: "Localization"
+description: "Built-in en/ja catalogs and per-string overrides."
+---
+
+`<EazipTray />` ships two full message catalogs, `en` (default) and `ja` —
+covering every state the tray can be in, from the initial "preparing N
+files" title through partial-result banners and expiry copy:
+
+```tsx
+<EazipTray locale="ja" />
+```
+
+Every string the tray renders — titles, subtitles, button labels, the
+processing description, error copy — comes from the active catalog. There
+are no hardcoded strings in the tray components, so `locale` recolors the
+entire UI in one prop, including plural-aware phrasing (`1 file` vs.
+`12 files`) and locale-formatted numbers.
+
+## Overriding individual strings
+
+Pass `messages` to override any subset of the catalog — unlisted keys keep
+their default (`en` or `ja`) value:
+
+```tsx
+<EazipTray
+  locale="en"
+  messages={{
+    download: 'Save ZIP',
+    downloadReadyTitle: 'Your export is ready',
+    processingDescription: (filesTotal) => `Packing ${filesTotal} files…`,
+  }}
+/>
+```
+
+`messages` is typed as `Partial<EazipTrayMessages>`, exported from
+`@eazip/react` — your editor autocompletes every available key, and
+function-valued strings (like `processingDescription` above, or
+`readySubtitle(zipCount, totalSize)`) keep their real parameter types, so a
+mismatched override is a type error, not a silent no-op.
+
+## Building your own catalog
+
+`EazipTrayMessages`, and the `en`/`ja` catalogs themselves, are exported
+from `@eazip/react` — spread one as a starting point for a third locale, or
+borrow its copy when building your own UI [headless](/docs/react/headless):
+
+```ts
+import { en, type EazipTrayMessages } from '@eazip/react';
+
+const fr: EazipTrayMessages = {
+  ...en,
+  download: 'Télécharger',
+  downloadReadyTitle: 'Téléchargement prêt',
+  // ...override every other key, or ship the rest of `en` as a fallback
+};
+```
+
+Pass `fr` as `messages` on `<EazipTray />` the same way as any partial
+override — the component doesn't distinguish "a full catalog" from "a
+one-key tweak," so there's no separate API to learn for either case.

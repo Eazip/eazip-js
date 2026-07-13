@@ -26,7 +26,7 @@ React app? Use [`@eazip/react`](https://github.com/Eazip/eazip-js/tree/main/pack
 ## Install
 
 ```sh
-npm install @eazip/core@beta
+npm install @eazip/core
 ```
 
 ## Jobs: progress, cancellation, subscriptions

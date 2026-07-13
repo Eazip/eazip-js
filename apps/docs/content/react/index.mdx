@@ -1,0 +1,54 @@
+---
+title: '@eazip/react'
+description: One hook, one component — zip downloads for React apps.
+---
+
+`@eazip/react` gives you `useEazip()` and `<EazipTray />`: a hook that starts
+zip downloads and a self-contained tray component that narrates progress,
+completion, partial results, failures, and expiry. No CSS import, no
+provider, and no configuration are required to get started.
+
+```tsx
+import { EazipTray, useEazip } from '@eazip/react';
+
+function Gallery({ selectedFiles }: { selectedFiles: File[] }) {
+  const zip = useEazip();
+  return (
+    <>
+      <button onClick={() => zip.download({ files: selectedFiles })}>
+        Download as ZIP
+      </button>
+      <EazipTray />
+    </>
+  );
+}
+```
+
+```sh
+npm install @eazip/react
+```
+
+Nothing here needs a context provider or a CSS import to work — `useEazip()`
+falls back to a shared internal store, and `<EazipTray />`'s styles are
+injected alongside it. Add `EazipProvider` later if you want shared config
+(a default `publicKey` or `strategy`) or per-test isolation; it's additive,
+never required.
+
+## In this section
+
+- [`useEazip()`](/docs/react/use-eazip) — the hook: `download()`, the current
+  `task`, and the actions around it.
+- [`<EazipTray />`](/docs/react/eazip-tray) — every prop, the three placements,
+  and how to embed it inside your own layout.
+- [Localization](/docs/react/i18n) — the built-in `en`/`ja` catalogs and
+  per-string overrides.
+- [Persistence & reload-resume](/docs/react/persistence) — how cloud exports
+  survive a page reload.
+- [Headless usage](/docs/react/headless) — build your own UI on `useEazip()`
+  without the tray.
+
+New to Eazip? [Getting started](/docs/getting-started) walks through install and
+a full `useEazip()` + `<EazipTray />` example. Not using React?
+[`@eazip/core`](/docs/core) is the framework-agnostic engine underneath — this
+package is a thin, opinionated layer on top of it, not a reimplementation.
+
