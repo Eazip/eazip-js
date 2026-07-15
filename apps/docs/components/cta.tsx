@@ -16,10 +16,17 @@ export function Cta() {
         </div>
         <div className={styles.actions}>
           <a
+            href="https://eazip.io/cloud/?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=homepage_final_cta"
+            className={styles.btnSolid}
+            data-analytics-placement="homepage_final_cta"
+          >
+            Try Eazip Cloud
+          </a>
+          <a
             href="https://github.com/Eazip/eazip-js"
             target="_blank"
             rel="noreferrer"
-            className={styles.btnSolid}
+            className={styles.btnOutline}
           >
             Star on GitHub
           </a>
