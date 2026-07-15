@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Hanken_Grotesk, IBM_Plex_Mono } from 'next/font/google';
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { ReactNode } from 'react';
+import { Analytics } from '@/components/analytics';
 import './global.css';
 
 const hankenGrotesk = Hanken_Grotesk({
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
     >
       <body>
+        <Analytics />
         <RootProvider theme={{ defaultTheme: 'dark', enableSystem: false }}>
           {children}
         </RootProvider>
