@@ -68,17 +68,34 @@ private, generate short-lived signed URLs in your backend and return those URLs
 to the browser. Do not put S3, R2, or other storage credentials in front-end
 code.
 
-When you need custom request headers, pass a `fetch` implementation. The source
-server must allow those headers in its CORS policy as well.
+When a trusted private CDN needs a custom request header, pass a `fetch`
+implementation and scope the credential to that CDN's exact origin. The source
+server must allow the header in its CORS policy as well. Never attach a bearer
+token to every URL when the URL list can contain untrusted hosts.
 
 ```ts
+const privateCdnOrigin = 'https://private-cdn.example.com';
+
 const result = await createZip({
   files: urls,
-  fetch: (input, init) =>
-    fetch(input, {
+  fetch: (input, init) => {
+    const url = new URL(
+      input instanceof Request ? input.url : input.toString(),
+      window.location.href,
+    );
+
+    if (url.origin !== privateCdnOrigin) {
+      return fetch(input, init);
+    }
+
+    const headers = new Headers(init?.headers);
+    headers.set('Authorization', `Bearer ${accessToken}`);
+
+    return fetch(input, {
       ...init,
-      headers: { Authorization: `Bearer ${accessToken}` },
-    }),
+      headers,
+    });
+  },
 });
 ```
 
