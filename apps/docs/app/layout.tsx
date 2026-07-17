@@ -20,6 +20,10 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://eazip.io'),
+  icons: {
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml', sizes: 'any' }],
+    shortcut: '/favicon.svg',
+  },
   title: {
     default: 'Eazip — turn files and URLs into one ZIP',
     template: '%s · Eazip',
