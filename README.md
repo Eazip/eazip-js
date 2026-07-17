@@ -7,6 +7,11 @@ This repository contains public, browser-facing SDK packages only. Server APIs,
 dashboard code, infrastructure, and internal Eazip services are not part of
 this repository.
 
+**Documentation:** [Getting started](https://eazip.io/docs/getting-started?utm_source=eazip_js&utm_medium=github_readme&utm_campaign=oss_acquisition&utm_content=root_getting_started) ·
+[Create a ZIP from remote URLs](https://eazip.io/docs/recipes/create-zip-from-remote-urls?utm_source=eazip_js&utm_medium=github_readme&utm_campaign=oss_acquisition&utm_content=root_remote_urls) ·
+[React](https://eazip.io/docs/react?utm_source=eazip_js&utm_medium=github_readme&utm_campaign=oss_acquisition&utm_content=root_react_docs) ·
+[Cloud strategy](https://eazip.io/docs/cloud?utm_source=eazip_js&utm_medium=github_readme&utm_campaign=cloud_activation&utm_content=root_cloud_docs)
+
 ## Packages
 
 - [`@eazip/core`](packages/core): framework-independent zip engine — one function
@@ -62,7 +67,8 @@ See [`packages/react`](packages/react/README.md) for the full API.
 ## Large downloads: the cloud strategy
 
 For thousands of files or multi-gigabyte exports, the same API switches to the
-[Eazip](https://eazip.io) cloud, which builds the zip server-side:
+[Eazip Cloud strategy](https://eazip.io/docs/cloud?utm_source=eazip_js&utm_medium=github_readme&utm_campaign=cloud_activation&utm_content=root_cloud_strategy),
+which builds the zip server-side:
 
 ```ts
 const job = startZip({ strategy: 'cloud', publicKey: 'pk_ez_...', files: urls });

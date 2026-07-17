@@ -58,6 +58,9 @@ zip.download({
 });
 ```
 
+For CORS, signed URLs, custom filenames, and partial failures, see the
+[remote URL ZIP recipe](https://eazip.io/docs/recipes/create-zip-from-remote-urls?utm_source=eazip_js&utm_medium=package_readme&utm_campaign=oss_acquisition&utm_content=react_remote_urls).
+
 Errors never reject the call — they land on `zip.task` and render as a calm, recoverable
 state in the tray.
 
@@ -104,7 +107,8 @@ import { EazipProvider } from '@eazip/react';
 
 Browser-side zipping is great for a handful of files, but it holds everything in memory
 and dies with the tab. For hundreds or thousands of files — or multi-gigabyte exports —
-switch the same API to [Eazip](https://eazip.io) Public Sessions:
+switch the same API to
+[Eazip Cloud Public Sessions](https://eazip.io/docs/cloud?utm_source=eazip_js&utm_medium=package_readme&utm_campaign=cloud_activation&utm_content=react_cloud_docs):
 
 ```tsx
 zip.download({ strategy: 'cloud', publicKey: 'pk_ez_...', files: urls });
