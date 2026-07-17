@@ -7,6 +7,11 @@ import { useEffect, useState } from 'react';
 const GA_MEASUREMENT_ID = 'G-JMZW6S8J9J';
 const CLOUD_HOST = 'eazip.io';
 const CLOUD_PATH = '/cloud';
+const NPM_HOSTS = new Set(['npmjs.com', 'www.npmjs.com']);
+const TRACKED_NPM_PACKAGES = new Map([
+  ['/package/@eazip/core', '@eazip/core'],
+  ['/package/@eazip/react', '@eazip/react'],
+]);
 
 declare global {
   interface Window {
@@ -43,11 +48,22 @@ export function Analytics() {
       if (!link) return;
 
       const destination = new URL(link.href, window.location.href);
-      if (destination.hostname !== CLOUD_HOST || !destination.pathname.startsWith(CLOUD_PATH)) return;
+      if (destination.hostname === CLOUD_HOST && destination.pathname.startsWith(CLOUD_PATH)) {
+        window.gtag?.('event', 'cloud_cta_click', {
+          link_text: link.textContent?.trim().slice(0, 100) || 'unlabeled',
+          link_url: `${destination.origin}${destination.pathname}`,
+          placement: link.dataset.analyticsPlacement || 'docs_link',
+          source_page: window.location.pathname,
+        });
+        return;
+      }
 
-      window.gtag?.('event', 'cloud_cta_click', {
-        link_text: link.textContent?.trim().slice(0, 100) || 'unlabeled',
-        link_url: `${destination.origin}${destination.pathname}`,
+      if (!NPM_HOSTS.has(destination.hostname)) return;
+      const packageName = TRACKED_NPM_PACKAGES.get(destination.pathname);
+      if (!packageName) return;
+
+      window.gtag?.('event', 'npm_package_click', {
+        package_name: packageName,
         placement: link.dataset.analyticsPlacement || 'docs_link',
         source_page: window.location.pathname,
       });
