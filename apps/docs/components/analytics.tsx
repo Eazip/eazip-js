@@ -3,15 +3,9 @@
 import Script from 'next/script';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { getOutboundAnalyticsEvent } from '@/lib/outbound-analytics';
 
 const GA_MEASUREMENT_ID = 'G-JMZW6S8J9J';
-const CLOUD_HOST = 'eazip.io';
-const CLOUD_PATH = '/cloud';
-const NPM_HOSTS = new Set(['npmjs.com', 'www.npmjs.com']);
-const TRACKED_NPM_PACKAGES = new Map([
-  ['/package/@eazip/core', '@eazip/core'],
-  ['/package/@eazip/react', '@eazip/react'],
-]);
 
 declare global {
   interface Window {
@@ -41,36 +35,25 @@ export function Analytics() {
   useEffect(() => {
     if (!enabled) return;
 
-    const trackCloudClick = (event: MouseEvent) => {
+    const trackOutboundClick = (event: MouseEvent) => {
       if (!(event.target instanceof Element)) return;
 
       const link = event.target.closest<HTMLAnchorElement>('a[href]');
       if (!link) return;
 
       const destination = new URL(link.href, window.location.href);
-      if (destination.hostname === CLOUD_HOST && destination.pathname.startsWith(CLOUD_PATH)) {
-        window.gtag?.('event', 'cloud_cta_click', {
-          link_text: link.textContent?.trim().slice(0, 100) || 'unlabeled',
-          link_url: `${destination.origin}${destination.pathname}`,
-          placement: link.dataset.analyticsPlacement || 'docs_link',
-          source_page: window.location.pathname,
-        });
-        return;
-      }
-
-      if (!NPM_HOSTS.has(destination.hostname)) return;
-      const packageName = TRACKED_NPM_PACKAGES.get(destination.pathname);
-      if (!packageName) return;
-
-      window.gtag?.('event', 'npm_package_click', {
-        package_name: packageName,
+      const analyticsEvent = getOutboundAnalyticsEvent(destination, {
+        linkText: link.textContent || undefined,
         placement: link.dataset.analyticsPlacement || 'docs_link',
-        source_page: window.location.pathname,
+        sourcePage: window.location.pathname,
       });
+      if (!analyticsEvent) return;
+
+      window.gtag?.('event', analyticsEvent.name, analyticsEvent.params);
     };
 
-    document.addEventListener('click', trackCloudClick);
-    return () => document.removeEventListener('click', trackCloudClick);
+    document.addEventListener('click', trackOutboundClick);
+    return () => document.removeEventListener('click', trackOutboundClick);
   }, [enabled]);
 
   if (!enabled) return null;
