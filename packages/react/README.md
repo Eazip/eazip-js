@@ -59,7 +59,7 @@ zip.download({
 ```
 
 For CORS, signed URLs, custom filenames, and partial failures, see the
-[remote URL ZIP recipe](https://eazip.io/docs/recipes/create-zip-from-remote-urls?utm_source=eazip_js&utm_medium=package_readme&utm_campaign=oss_acquisition&utm_content=react_remote_urls).
+[download multiple files as a ZIP recipe](https://eazip.io/docs/recipes/create-zip-from-remote-urls?utm_source=eazip_js&utm_medium=package_readme&utm_campaign=oss_acquisition&utm_content=react_remote_urls).
 
 Errors never reject the call — they land on `zip.task` and render as a calm, recoverable
 state in the tray.

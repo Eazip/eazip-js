@@ -20,7 +20,7 @@ const COLUMNS: Array<{
     heading: 'Recipes',
     links: [
       { label: 'Download selected files', href: '/docs/recipes/download-selected-files' },
-      { label: 'Create a ZIP from remote URLs', href: '/docs/recipes/create-zip-from-remote-urls' },
+      { label: 'Download remote files as a ZIP', href: '/docs/recipes/create-zip-from-remote-urls' },
       { label: 'ZIP S3 or R2 objects', href: '/docs/recipes/zip-s3-or-r2-objects' },
       { label: 'Add progress, cancel, and retry', href: '/docs/recipes/progress-cancel-retry' },
     ],
