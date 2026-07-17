@@ -87,6 +87,9 @@ const result = await job.done;    // polls with backoff; pauses in hidden tabs
 result.download();                // signed URL, valid for 24h by default
 ```
 
+[Create a Public App](https://eazip.io/cloud/?utm_source=eazip_js&utm_medium=package_readme&utm_campaign=cloud_activation&utm_content=core_public_app)
+to get the public key used by the Cloud strategy.
+
 If your backend already knows the source URLs, keep that list off the browser
 and provide a session creator instead. The SDK still owns polling, completion,
 downloads, and cancellation:

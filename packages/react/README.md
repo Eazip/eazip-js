@@ -142,9 +142,10 @@ With the cloud strategy the zip is built server-side and the tray gains superpow
 - download links stay valid for 24 hours (the tray shows a calm expiry state after)
 - huge exports split into multiple zips automatically, listed in the tray
 
-Get a public key at [eazip.io](https://eazip.io). Cloud sources must be URLs reachable
-by the Eazip API. Cloud zips default to stream mode (generated on demand at download
-time — ready sooner); pass `mode: 'stored'` to keep a built archive instead.
+[Create a Public App](https://eazip.io/cloud/?utm_source=eazip_js&utm_medium=package_readme&utm_campaign=cloud_activation&utm_content=react_public_app)
+to get a public key. Cloud sources must be URLs reachable by the Eazip API. Cloud zips
+default to stream mode (generated on demand at download time — ready sooner); pass
+`mode: 'stored'` to keep a built archive instead.
 
 ## Error handling
 

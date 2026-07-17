@@ -22,6 +22,7 @@ for (const packageSpec of packages) {
   }
   assertIncludes(readme, REMOTE_URL_RECIPE, `${manifest.name} README`);
   assertIncludes(readme, 'https://eazip.io/docs/cloud?', `${manifest.name} README Cloud docs`);
+  assertIncludes(readme, 'https://eazip.io/cloud/?', `${manifest.name} README Public App CTA`);
 }
 
 const rootReadme = readFileSync('README.md', 'utf8');
