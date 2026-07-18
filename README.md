@@ -9,6 +9,7 @@ this repository.
 
 **Documentation:** [Getting started](https://eazip.io/docs/getting-started?utm_source=eazip_js&utm_medium=github_readme&utm_campaign=oss_acquisition&utm_content=root_getting_started) ·
 [Download multiple files as a ZIP from URLs](https://eazip.io/docs/recipes/create-zip-from-remote-urls?utm_source=eazip_js&utm_medium=github_readme&utm_campaign=oss_acquisition&utm_content=root_remote_urls) ·
+[ZIP S3 or R2 objects](https://eazip.io/docs/recipes/zip-s3-or-r2-objects?utm_source=eazip_js&utm_medium=github_readme&utm_campaign=oss_acquisition&utm_content=root_s3_r2_objects) ·
 [React](https://eazip.io/docs/react?utm_source=eazip_js&utm_medium=github_readme&utm_campaign=oss_acquisition&utm_content=root_react_docs) ·
 [Cloud strategy](https://eazip.io/docs/cloud?utm_source=eazip_js&utm_medium=github_readme&utm_campaign=cloud_activation&utm_content=root_cloud_docs)
 
