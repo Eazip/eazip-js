@@ -58,8 +58,6 @@ zip.download({
 });
 ```
 
-For CORS, signed URLs, custom filenames, and partial failures, see the
-[download multiple files as a ZIP recipe](https://eazip.io/docs/recipes/create-zip-from-remote-urls?utm_source=eazip_js&utm_medium=package_readme&utm_campaign=oss_acquisition&utm_content=react_remote_urls).
 For private bucket objects, follow the
 [S3/R2 ZIP recipe](https://eazip.io/docs/recipes/zip-s3-or-r2-objects?utm_source=eazip_js&utm_medium=package_readme&utm_campaign=oss_acquisition&utm_content=react_s3_r2_objects)
 to generate short-lived GET URLs on your server before calling `zip.download()`.

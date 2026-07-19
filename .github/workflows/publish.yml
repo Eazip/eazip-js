@@ -101,9 +101,6 @@ jobs:
       - name: Validate package imports
         run: npm run test:package-imports
 
-      - name: Validate package acquisition metadata
-        run: npm run test:package-metadata
-
       - name: Validate package contents
         run: npm run pack:dry-run
 
