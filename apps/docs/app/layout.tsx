@@ -30,6 +30,16 @@ export const metadata: Metadata = {
   },
   description:
     'Eazip packages files or remote URLs into a single ZIP, right in the browser — no backend, no zip server. Reach for the cloud only when a job outgrows the tab.',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    url: '/',
+    title: 'Eazip — turn files and URLs into one ZIP',
+    description:
+      'Eazip packages files or remote URLs into a single ZIP, right in the browser — no backend, no zip server. Reach for the cloud only when a job outgrows the tab.',
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

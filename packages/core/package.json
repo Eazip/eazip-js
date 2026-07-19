@@ -1,11 +1,11 @@
 {
   "name": "@eazip/core",
-  "version": "0.2.0-beta.2",
-  "description": "Zip downloads for browser apps — local zipping engine with an optional Eazip cloud strategy",
+  "version": "0.2.0-beta.3",
+  "description": "Create ZIP downloads from files and remote URLs in browser apps, with progress, ZIP64, and optional Eazip Cloud",
   "type": "module",
   "license": "MIT",
   "author": "Eazip <oss@eazip.io>",
-  "homepage": "https://github.com/Eazip/eazip-js#readme",
+  "homepage": "https://eazip.io/docs/core",
   "repository": {
     "type": "git",
     "url": "https://github.com/Eazip/eazip-js",
@@ -18,6 +18,11 @@
     "zip",
     "download",
     "browser",
+    "javascript",
+    "typescript",
+    "client-side",
+    "remote-url",
+    "multiple-files",
     "archive",
     "eazip",
     "zip64"

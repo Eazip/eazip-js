@@ -66,7 +66,8 @@ result.zips; // export_part01.zip, export_part02.zip, ...
 
 Browser-side zipping holds everything in memory and dies with the tab. For
 thousands of files or multi-gigabyte exports, switch the same API to
-[Eazip](https://eazip.io) Public Sessions — the zip is built server-side:
+[Eazip Cloud Public Sessions](https://eazip.io/docs/cloud?utm_source=eazip_js&utm_medium=package_readme&utm_campaign=cloud_activation&utm_content=core_cloud_docs) —
+the zip is built server-side:
 
 ```ts
 const job = startZip({
@@ -80,6 +81,9 @@ job.getSnapshot().session;        // { sessionId, clientSecret, expiresAt } — 
 const result = await job.done;    // polls with backoff; pauses in hidden tabs
 result.download();                // signed URL, valid for 24h by default
 ```
+
+[Create a Public App](https://eazip.io/cloud/?utm_source=eazip_js&utm_medium=package_readme&utm_campaign=cloud_activation&utm_content=core_public_app)
+to get the public key used by the Cloud strategy.
 
 If your backend already knows the source URLs, keep that list off the browser
 and provide a session creator instead. The SDK still owns polling, completion,

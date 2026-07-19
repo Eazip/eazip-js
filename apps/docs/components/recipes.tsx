@@ -84,10 +84,10 @@ const RECIPES: Array<{ title: string; slug: string; badge: Badge; blurb: string;
     icon: 'select',
   },
   {
-    title: 'Create a ZIP from remote URLs',
+    title: 'Download multiple files as a ZIP from URLs',
     slug: 'create-zip-from-remote-urls',
     badge: 'core',
-    blurb: 'Fetch and zip files straight from their URLs.',
+    blurb: 'Fetch remote files in the browser and start one download.',
     icon: 'link',
   },
   {
