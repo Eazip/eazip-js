@@ -91,10 +91,10 @@ const RECIPES: Array<{ title: string; slug: string; badge: Badge; blurb: string;
     icon: 'link',
   },
   {
-    title: 'ZIP S3 or R2 objects',
+    title: 'Download multiple S3 or R2 objects as one ZIP',
     slug: 'zip-s3-or-r2-objects',
     badge: 'core',
-    blurb: 'Bundle objects from signed bucket URLs.',
+    blurb: 'Generate presigned GET URLs, preserve object paths, and choose browser or Cloud ZIP.',
     icon: 'bucket',
   },
   {

@@ -13,6 +13,11 @@ Files are zipped **in the browser** (ZIP64, per-file progress, no upload).
 `files` accepts `File[]`, a `FileList`, `Blob`s, URL strings, or `{ url | file, filename }`
 objects. Failed URL sources are skipped and reported instead of killing the export:
 
+Objects in Amazon S3 or Cloudflare R2? The
+[S3/R2 ZIP recipe](https://eazip.io/docs/recipes/zip-s3-or-r2-objects?utm_source=eazip_js&utm_medium=package_readme&utm_campaign=oss_acquisition&utm_content=core_s3_r2_objects)
+shows server-side presigning, bucket CORS, object-key filenames, and the Cloud
+path for large or sensitive exports.
+
 ```ts
 const result = await createZip({ files: urls });
 result.status;        // 'completed' | 'partial'

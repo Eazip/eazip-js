@@ -1,25 +1,246 @@
 ---
-title: ZIP S3 or R2 objects
-description: Bundle objects from signed bucket URLs.
+title: Download multiple S3 or R2 objects as one ZIP in JavaScript
+description: Generate presigned GET URLs on your server, preserve S3 or R2 object names, configure browser CORS, and move large private ZIP jobs to Eazip Cloud.
 ---
 
-Generate signed (or public) URLs for your bucket objects on the server, then
-hand them to Eazip like any other remote source — no bucket credentials ever
-reach the browser. Works the same way whether the objects live in S3, R2, or
-another S3-compatible store. See [`@eazip/core`](/docs/core) for the underlying
-engine.
+S3 and R2 return one object per download request. If your app needs one ZIP for
+several reports, photos, or customer assets, authorize the object list on your
+server, generate a short-lived GET URL for each object, and pass those URLs to
+`@eazip/core`.
 
-## In short
+Your S3 or R2 credentials stay on the server. The browser receives only the
+objects it was authorized to download.
+
+## Install the ZIP library
+
+```bash
+npm install @eazip/core
+```
+
+<a
+  href="https://www.npmjs.com/package/@eazip/core"
+  data-analytics-placement="s3_r2_recipe_install"
+>
+  View @eazip/core on npm
+</a>
+
+The backend example below also uses the AWS SDK v3 S3 client and presigner:
+
+```bash
+npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
+```
+
+## Generate presigned GET URLs on your server
+
+Configure one `S3Client` for either provider. Amazon S3 can use its normal AWS
+credential provider chain. For R2, set the region to `auto`, use the account's
+S3 API endpoint, and provide an R2 API token through the server environment.
+
+```ts
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
+const bucket = process.env.STORAGE_BUCKET!;
+const storage = new S3Client({
+  region: process.env.STORAGE_REGION!,
+  ...(process.env.STORAGE_ENDPOINT
+    ? { endpoint: process.env.STORAGE_ENDPOINT }
+    : {}),
+});
+
+type ObjectToZip = {
+  key: string;
+  filename: string;
+};
+
+export async function signZipSources(objects: readonly ObjectToZip[]) {
+  const expiresIn = 15 * 60;
+  const files = await Promise.all(
+    objects.map(async ({ key, filename }) => ({
+      url: await getSignedUrl(
+        storage,
+        new GetObjectCommand({ Bucket: bucket, Key: key }),
+        { expiresIn },
+      ),
+      filename,
+    })),
+  );
+
+  return {
+    files,
+    expiresAt: new Date(Date.now() + expiresIn * 1_000).toISOString(),
+  };
+}
+```
+
+Example server environments:
+
+```dotenv
+# Amazon S3: use the workload's IAM role or another AWS credential provider
+STORAGE_BUCKET=private-reports
+STORAGE_REGION=us-east-1
+
+# Cloudflare R2: additionally set the standard AWS_ACCESS_KEY_ID and
+# AWS_SECRET_ACCESS_KEY variables from a narrowly scoped R2 token
+STORAGE_BUCKET=private-reports
+STORAGE_REGION=auto
+STORAGE_ENDPOINT=https://ACCOUNT_ID.r2.cloudflarestorage.com
+```
+
+Call `signZipSources()` only after your backend has authenticated the user and
+loaded the allowed keys from a server-owned export record. Do not accept an
+arbitrary list of keys from the browser and sign it without authorization.
+Avoid logging the returned URLs: a presigned URL is a bearer token until it
+expires.
+
+Use `filename` to remove internal tenant prefixes or to choose the archive
+layout without changing the storage key:
+
+```ts
+const objects = [
+  {
+    key: 'tenant-42/reports/2026/q1.csv',
+    filename: 'reports/2026/q1.csv',
+  },
+  {
+    key: 'tenant-42/reports/2026/q2.csv',
+    filename: 'reports/2026/q2.csv',
+  },
+];
+
+const payload = await signZipSources(objects);
+
+return Response.json(payload, {
+  headers: { 'Cache-Control': 'no-store' },
+});
+```
+
+Return the payload only from an authenticated endpoint and prevent intermediary
+or browser caches from retaining the signed URLs.
+
+For R2, presigned URLs must use the `r2.cloudflarestorage.com` S3 API domain;
+Cloudflare does not support presigned URLs on R2 custom domains. For S3, a URL
+signed with temporary role credentials can expire earlier than `expiresIn`
+when the underlying role session ends.
+
+## Fetch the objects and download one ZIP
+
+Return the signed sources from your authenticated endpoint, then pass the
+response to Eazip. Query-string signatures remain untouched while `filename`
+controls each ZIP entry.
 
 ```ts
 import { createZip } from '@eazip/core';
 
-const result = await createZip({
-  files: presignedUrls.map((url) => ({ url })), // signed by your server, not the browser
-  zipName: 'bundle.zip',
+const response = await fetch('/api/exports/quarterly-reports/sources', {
+  credentials: 'include',
 });
 
-result.download();
+if (!response.ok) {
+  throw new Error('Could not prepare the export');
+}
+
+const { files } = await response.json() as {
+  files: Array<{ url: string; filename: string }>;
+  expiresAt: string;
+};
+
+const result = await createZip({
+  files,
+  zipName: 'quarterly-reports.zip',
+  concurrency: 4,
+});
+
+if (result.status === 'partial') {
+  console.warn(`${result.skippedCount} objects were skipped`, result.errors);
+}
+
+result.downloadAll();
 ```
 
-A step-by-step walkthrough is coming soon.
+Eazip keeps the input order, sanitizes archive paths, and adds a suffix when
+two objects resolve to the same filename. By default, an expired, deleted, or
+otherwise unreadable object is reported as a per-file error while the useful
+objects still produce a ZIP. Set `failOnUrlError: true` when the export is valid
+only if every object is present.
+
+## Allow browser GET requests with CORS
+
+A valid signature authorizes an object request, but it does not bypass browser
+CORS. For local ZIP jobs, configure the bucket to allow your exact application
+origin. The same shape works for S3 and R2:
+
+```json
+[
+  {
+    "AllowedOrigins": ["https://app.example.com"],
+    "AllowedMethods": ["GET", "HEAD"],
+    "AllowedHeaders": ["*"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+Keep production origins explicit instead of using `*` for private exports.
+Test with the same origin and GET method your application will use. If a URL
+works when pasted into the address bar but fails inside `fetch()`, inspect the
+response's CORS headers before changing the signature.
+
+## Choose local ZIP or Cloud ZIP
+
+Use the browser strategy when the selected objects comfortably fit in the
+visitor's memory and the page can remain open. The browser fetches every object,
+so CORS is required and the signed URL list is visible in devtools.
+
+Use Eazip Cloud when the archive is large, the job must survive a closed tab, or
+the storage bucket should not allow browser CORS. The Eazip API fetches each
+signed URL, so add the exact S3 or R2 API hostname to the Public App's allowed
+source hosts and choose an expiry long enough for queued work and retries.
+
+```ts
+import { startZip } from '@eazip/core';
+
+const job = startZip({
+  strategy: 'cloud',
+  publicKey: 'pk_ez_...',
+  files,
+  zipName: 'quarterly-reports.zip',
+  mode: 'stored',
+});
+
+const result = await job.done;
+result.downloadAll();
+```
+
+<a
+  href="https://eazip.io/cloud/?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=s3_r2_recipe_cta"
+  data-analytics-placement="s3_r2_recipe_cloud_cta"
+>
+  Create a Public App for S3 or R2 exports
+</a>
+
+When the object list itself is sensitive, do not send it or its signed URLs to
+the browser. Let your backend create the Cloud session and return only the
+session handle; see [backend-created sessions](/docs/cloud/backend-sessions).
+
+## Retry expired or changed objects safely
+
+- Generate URLs close to the time the ZIP job starts. Do not store them as
+  permanent object identifiers.
+- Re-authorize the export and generate a fresh set on retry. Never extend a URL
+  merely because the client asks.
+- Keep the signing principal read-only and scoped to the bucket or object prefix
+  the application needs.
+- Do not put AWS or R2 access keys in frontend code, client-visible environment
+  variables, analytics events, or logs.
+
+Provider references: [Amazon S3 presigned URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html),
+[Amazon S3 CORS](https://docs.aws.amazon.com/AmazonS3/latest/userguide/cors.html),
+[Cloudflare R2 presigned URLs](https://developers.cloudflare.com/r2/api/s3/presigned-urls/),
+and [Cloudflare R2 CORS](https://developers.cloudflare.com/r2/buckets/cors/).
+
+For a provider-neutral URL workflow, continue with
+[Download multiple files as a ZIP from URLs](/docs/recipes/create-zip-from-remote-urls).
+For thousands of objects or multi-gigabyte results, see
+[Zip GB-scale URL jobs](/docs/recipes/gb-scale-url-jobs).
