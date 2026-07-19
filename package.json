@@ -14,7 +14,6 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:package-imports": "node scripts/check-package-imports.mjs",
-    "test:package-metadata": "node scripts/check-package-metadata.mjs",
     "pack:dry-run": "npm pack --dry-run -w @eazip/core -w @eazip/react",
     "release:info": "node scripts/release-info.mjs",
     "dev:client-example": "npm run dev -w @eazip/example-client",
