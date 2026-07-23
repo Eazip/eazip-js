@@ -1,0 +1,22 @@
+---
+title: EazipProgress
+description: Progress reported while a local ZIP is fetching and adding files.
+---
+
+> **EazipProgress** = `object`
+
+Defined in: [packages/core/src/shared/types.ts:31](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L31)
+
+Progress reported while a local ZIP is fetching and adding files.
+
+## Properties
+
+| Property | Type | Description | Defined in |
+| ------ | ------ | ------ | ------ |
+| <a id="property-bytesprocessed"></a> `bytesProcessed?` | `number` | - | [packages/core/src/shared/types.ts:38](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L38) |
+| <a id="property-bytestotal"></a> `bytesTotal?` | `number` | Grows as sizes become known (Content-Length / blob sizes); may be incomplete. | [packages/core/src/shared/types.ts:37](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L37) |
+| <a id="property-currentfileindex"></a> `currentFileIndex?` | `number` | - | [packages/core/src/shared/types.ts:39](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L39) |
+| <a id="property-currentfilename"></a> `currentFileName?` | `string` | - | [packages/core/src/shared/types.ts:40](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L40) |
+| <a id="property-filescompleted"></a> `filesCompleted` | `number` | Processed files: added to a zip or skipped with a per-file error. | [packages/core/src/shared/types.ts:35](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L35) |
+| <a id="property-filestotal"></a> `filesTotal` | `number` | - | [packages/core/src/shared/types.ts:33](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L33) |
+| <a id="property-phase"></a> `phase` | [`EazipProgressPhase`](EazipProgressPhase) | - | [packages/core/src/shared/types.ts:32](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L32) |

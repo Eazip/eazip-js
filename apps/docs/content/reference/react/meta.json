@@ -1,0 +1,9 @@
+{
+  "title": "@eazip/react",
+  "pages": [
+    "functions",
+    "classes",
+    "type-aliases",
+    "variables"
+  ]
+}

@@ -1,0 +1,22 @@
+---
+title: ResumeZipOptions
+description: Credentials and polling controls for reconnecting to an existing Cloud session.
+---
+
+> **ResumeZipOptions** = `object`
+
+Defined in: [packages/core/src/shared/types.ts:281](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L281)
+
+Credentials and polling controls for reconnecting to an existing Cloud session.
+
+## Properties
+
+| Property | Type | Description | Defined in |
+| ------ | ------ | ------ | ------ |
+| <a id="property-apibaseurl"></a> `apiBaseUrl?` | `string` | Cloud API origin. Defaults to `DEFAULT_API_BASE_URL`. | [packages/core/src/shared/types.ts:287](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L287) |
+| <a id="property-clientsecret"></a> `clientSecret` | `string` | Bearer secret returned when the session was created. | [packages/core/src/shared/types.ts:285](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L285) |
+| <a id="property-fetch"></a> `fetch?` | [`FetchLike`](FetchLike) | Custom `fetch` implementation used for Cloud requests. | [packages/core/src/shared/types.ts:289](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L289) |
+| <a id="property-onchange"></a> `onChange?` | (`snapshot`) => `void` | Called whenever the observable job snapshot changes. | [packages/core/src/shared/types.ts:294](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L294) |
+| <a id="property-polling"></a> `polling?` | [`PollingOptions`](PollingOptions) | - | [packages/core/src/shared/types.ts:292](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L292) |
+| <a id="property-sessionid"></a> `sessionId` | `string` | Existing Cloud session identifier. | [packages/core/src/shared/types.ts:283](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L283) |
+| <a id="property-signal"></a> `signal?` | `AbortSignal` | Stops polling when aborted; it does not cancel the server-side job. | [packages/core/src/shared/types.ts:291](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L291) |

@@ -24,8 +24,10 @@ import type {
 import { normalizeApiBaseUrl } from './http.js';
 import { SessionsClient } from './sessions.js';
 
+/** Default origin used for Eazip Cloud Sessions API requests. */
 export const DEFAULT_API_BASE_URL = 'https://api.eazip.io';
 
+/** Starts an Eazip Cloud ZIP job and begins polling its session. */
 export function startCloudZip(options: CloudZipOptions): ZipJob<CloudZipResult> {
   const hasCustomCreateSession = isCloudSessionZipOptions(options);
   const files = hasCustomCreateSession ? null : toSourceFiles(options.files).map((file) => {
@@ -53,6 +55,7 @@ function isCloudSessionZipOptions(options: CloudZipOptions): options is CloudSes
   return typeof options.createSession === 'function';
 }
 
+/** Reconnects to an existing Cloud session and resumes polling it. */
 export function resumeZip(options: ResumeZipOptions): ZipJob<CloudZipResult> {
   const apiBaseUrl = normalizeApiBaseUrl(options.apiBaseUrl ?? DEFAULT_API_BASE_URL);
   const session: ZipJobSession = {

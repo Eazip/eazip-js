@@ -1,0 +1,18 @@
+{
+  "title": "Classes",
+  "pages": [
+    "SessionsClient",
+    "EazipAbortError",
+    "EazipApiError",
+    "EazipChallengeRequiredError",
+    "EazipDownloadExpiredError",
+    "EazipErrorBase",
+    "EazipJobFailedError",
+    "EazipNetworkError",
+    "EazipQuotaError",
+    "EazipRateLimitError",
+    "EazipSessionExpiredError",
+    "EazipSessionRevokedError",
+    "EazipValidationError"
+  ]
+}

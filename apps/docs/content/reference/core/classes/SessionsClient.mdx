@@ -1,0 +1,91 @@
+---
+title: SessionsClient
+description: "Low-level client for creating, reading, and polling Eazip Cloud sessions. Most applications should use `startZip({ strategy: 'cloud' })`. Use this client when you need direct control over the session lifecycle."
+---
+
+Defined in: [packages/core/src/cloud/sessions.ts:28](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/cloud/sessions.ts#L28)
+
+Low-level client for creating, reading, and polling Eazip Cloud sessions.
+
+Most applications should use `startZip({ strategy: 'cloud' })`. Use this
+client when you need direct control over the session lifecycle.
+
+## Constructors
+
+### Constructor
+
+> **new SessionsClient**(`options`): `SessionsClient`
+
+Defined in: [packages/core/src/cloud/sessions.ts:33](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/cloud/sessions.ts#L33)
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `options` | [`SessionsClientOptions`](../type-aliases/SessionsClientOptions) |
+
+#### Returns
+
+`SessionsClient`
+
+## Methods
+
+### create()
+
+> **create**(`options`): `Promise`\<[`CreatedCloudSession`](../type-aliases/CreatedCloudSession)\>
+
+Defined in: [packages/core/src/cloud/sessions.ts:40](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/cloud/sessions.ts#L40)
+
+Creates a Cloud session from URL sources.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `options` | [`CreateCloudSessionOptions`](../type-aliases/CreateCloudSessionOptions) |
+
+#### Returns
+
+`Promise`\<[`CreatedCloudSession`](../type-aliases/CreatedCloudSession)\>
+
+***
+
+### get()
+
+> **get**(`sessionId`, `options`): `Promise`\<[`EazipCloudSession`](../type-aliases/EazipCloudSession)\>
+
+Defined in: [packages/core/src/cloud/sessions.ts:59](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/cloud/sessions.ts#L59)
+
+Fetches the latest state of one authenticated Cloud session.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `sessionId` | `string` |
+| `options` | [`GetCloudSessionOptions`](../type-aliases/GetCloudSessionOptions) |
+
+#### Returns
+
+`Promise`\<[`EazipCloudSession`](../type-aliases/EazipCloudSession)\>
+
+***
+
+### poll()
+
+> **poll**(`sessionId`, `options`): `Promise`\<[`EazipCloudSession`](../type-aliases/EazipCloudSession)\>
+
+Defined in: [packages/core/src/cloud/sessions.ts:76](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/cloud/sessions.ts#L76)
+
+Polls a Cloud session until it completes, fails, expires, or is aborted.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `sessionId` | `string` |
+| `options` | [`PollCloudSessionOptions`](../type-aliases/PollCloudSessionOptions) |
+
+#### Returns
+
+`Promise`\<[`EazipCloudSession`](../type-aliases/EazipCloudSession)\>

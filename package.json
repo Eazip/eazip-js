@@ -16,11 +16,16 @@
     "test:package-imports": "node scripts/check-package-imports.mjs",
     "pack:dry-run": "npm pack --dry-run -w @eazip/core -w @eazip/react",
     "release:info": "node scripts/release-info.mjs",
+    "docs:reference": "node scripts/generate-reference.mjs",
+    "docs:reference:check": "node scripts/generate-reference.mjs --check",
     "dev:client-example": "npm run dev -w @eazip/example-client",
     "dev:react-example": "npm run dev -w @eazip/example-react",
     "dev:docs": "npm run dev -w @eazip/docs"
   },
   "devDependencies": {
+    "typedoc": "^0.28.20",
+    "typedoc-plugin-frontmatter": "^1.3.1",
+    "typedoc-plugin-markdown": "^4.12.0",
     "typescript": "^5.7.2",
     "vitest": "^4.1.9"
   }

@@ -2,6 +2,7 @@
 
 import type { EazipTrayMessages } from './index.js';
 
+/** Built-in English messages for `EazipTray`. */
 export const en: EazipTrayMessages = {
   preparingTitle: (filesTotal) =>
     filesTotal === 1 ? 'Preparing 1 file' : `Preparing ${filesTotal.toLocaleString()} files`,

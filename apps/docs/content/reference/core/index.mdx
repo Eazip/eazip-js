@@ -1,0 +1,103 @@
+---
+title: "@eazip/core"
+description: API reference for @eazip/core.
+---
+
+Generated from the public exports of `@eazip/core`. For behavior and examples, see [Core concepts](/docs/concepts).
+
+## Functions
+
+| Function | Description |
+| ------ | ------ |
+| [createLocalZip](functions/createLocalZip) | Creates a ZIP in the browser and resolves when all ZIP parts are ready. |
+| [createObjectUrl](functions/createObjectUrl) | Creates an object URL when the runtime exposes `URL.createObjectURL`. |
+| [createZip](functions/createZip) | Starts a local or Cloud ZIP job and waits for its result. |
+| [isAbortLike](functions/isAbortLike) | Returns true for SDK and platform abort errors. |
+| [isBrowser](functions/isBrowser) | Returns true when DOM download APIs are available. |
+| [isEazipError](functions/isEazipError) | Returns true when an unknown value is an SDK error with a stable `code`. |
+| [linkAbort](functions/linkAbort) | Abort `target` when `source` aborts (immediately if already aborted). |
+| [normalizeEntryName](functions/normalizeEntryName) | Sanitizes a ZIP entry path and falls back when the result would be empty. |
+| [normalizeZipFilename](functions/normalizeZipFilename) | Sanitizes a requested archive filename and ensures it ends in `.zip`. |
+| [resumeZip](functions/resumeZip) | Reconnects to an existing Cloud session and resumes polling it. |
+| [staggerDownloads](functions/staggerDownloads) | Runs `download(i)` for each index with a stagger between clicks. |
+| [startCloudZip](functions/startCloudZip) | Starts an Eazip Cloud ZIP job and begins polling its session. |
+| [startLocalZip](functions/startLocalZip) | Starts a browser-only ZIP job and returns its observable handle immediately. |
+| [startZip](functions/startZip) | Starts a local or Cloud ZIP job and returns its observable handle immediately. |
+| [throwIfAborted](functions/throwIfAborted) | Throws `EazipAbortError` when the signal has already been aborted. |
+| [toEazipError](functions/toEazipError) | Coerce an arbitrary thrown value into an EazipErrorBase for job snapshots. |
+| [toSourceFiles](functions/toSourceFiles) | Normalizes any accepted `files` input into EazipSourceFile[]. Throws `EazipValidationError` synchronously for empty or invalid input. |
+| [triggerDownload](functions/triggerDownload) | Starts a download via a temporary anchor click. Browser-only. |
+| [uniqueEntryName](functions/uniqueEntryName) | Reserves a ZIP entry path, adding a numeric suffix when it is already used. |
+
+## Classes
+
+| Class | Description |
+| ------ | ------ |
+| [EazipAbortError](classes/EazipAbortError) | The caller cancelled the operation with `AbortSignal` or `ZipJob.abort()`. |
+| [EazipApiError](classes/EazipApiError) | Error response returned by an Eazip Cloud API. |
+| [EazipChallengeRequiredError](classes/EazipChallengeRequiredError) | Cloud requires the caller to complete the attached anti-abuse challenge. |
+| [EazipDownloadExpiredError](classes/EazipDownloadExpiredError) | A generated download URL has expired or is no longer available. |
+| [EazipErrorBase](classes/EazipErrorBase) | Base class for errors surfaced by the Core and React packages. |
+| [EazipJobFailedError](classes/EazipJobFailedError) | The remote Cloud ZIP job reached a failed state. |
+| [EazipNetworkError](classes/EazipNetworkError) | Network transport failure before a usable API response was received. |
+| [EazipQuotaError](classes/EazipQuotaError) | A Cloud plan or usage quota prevented the operation. |
+| [EazipRateLimitError](classes/EazipRateLimitError) | A request was rejected by a rate limit and may include a retry delay. |
+| [EazipSessionExpiredError](classes/EazipSessionExpiredError) | The Cloud session expired before it could be used or resumed. |
+| [EazipSessionRevokedError](classes/EazipSessionRevokedError) | The Cloud session was explicitly revoked. |
+| [EazipValidationError](classes/EazipValidationError) | The SDK rejected invalid options, input, or an unavailable operation. |
+| [SessionsClient](classes/SessionsClient) | Low-level client for creating, reading, and polling Eazip Cloud sessions. |
+
+## Interfaces
+
+| Interface | Description |
+| ------ | ------ |
+| [ZipJob](interfaces/ZipJob) | Observable handle returned immediately when a ZIP job starts. |
+
+## Type Aliases
+
+| Type Alias | Description |
+| ------ | ------ |
+| [CloudCreateSessionContext](type-aliases/CloudCreateSessionContext) | Values passed to a backend-provided Cloud session factory. |
+| [CloudCreateSessionResult](type-aliases/CloudCreateSessionResult) | Session credentials returned by a backend-provided Cloud session factory. |
+| [CloudSessionZipOptions](type-aliases/CloudSessionZipOptions) | Cloud options when a trusted backend creates the session. |
+| [CloudSourceZipOptions](type-aliases/CloudSourceZipOptions) | Cloud options when the browser creates a session with a public key. |
+| [CloudZipOptions](type-aliases/CloudZipOptions) | Either browser-created or backend-created Cloud session options. |
+| [CloudZipResult](type-aliases/CloudZipResult) | Result from a completed or partially completed Cloud ZIP job. |
+| [CreateCloudSessionOptions](type-aliases/CreateCloudSessionOptions) | Request options used by `SessionsClient.create()`. |
+| [CreatedCloudSession](type-aliases/CreatedCloudSession) | Credentials and initial state returned after creating a Cloud session. |
+| [EazipChallenge](type-aliases/EazipChallenge) | Details needed to complete an anti-abuse challenge. |
+| [EazipCloudJob](type-aliases/EazipCloudJob) | Current Cloud job details attached to a session. |
+| [EazipCloudJobStatus](type-aliases/EazipCloudJobStatus) | Lifecycle state returned by the Cloud Sessions API. |
+| [EazipCloudSession](type-aliases/EazipCloudSession) | A Cloud session and its latest job state. |
+| [EazipError](type-aliases/EazipError) | A non-fatal, per-file error. The zip is still produced without this file. |
+| [EazipErrorOptions](type-aliases/EazipErrorOptions) | Optional HTTP and cause metadata attached to Eazip errors. |
+| [EazipFileInput](type-aliases/EazipFileInput) | A single file source in any accepted shape. |
+| [EazipMode](type-aliases/EazipMode) | Selects whether Cloud generates downloads on demand or stores them ahead of time. |
+| [EazipProgress](type-aliases/EazipProgress) | Progress reported while a local ZIP is fetching and adding files. |
+| [EazipProgressPhase](type-aliases/EazipProgressPhase) | The current stage of a local ZIP job. |
+| [EazipSourceFile](type-aliases/EazipSourceFile) | A remote URL or browser `File`/`Blob`, with an optional ZIP entry name. |
+| [EazipStrategy](type-aliases/EazipStrategy) | Selects whether the ZIP is created in the browser or by Eazip Cloud. |
+| [EazipZipOutput](type-aliases/EazipZipOutput) | Metadata and download location for one ZIP or split ZIP part. |
+| [EazipZipStatus](type-aliases/EazipZipStatus) | Lifecycle state for one ZIP output. |
+| [FetchLike](type-aliases/FetchLike) | A `fetch`-compatible implementation for custom runtimes, auth, or tests. |
+| [GetCloudSessionOptions](type-aliases/GetCloudSessionOptions) | Authentication and cancellation options used by `SessionsClient.get()`. |
+| [LocalZipOptions](type-aliases/LocalZipOptions) | Options for creating a ZIP entirely in the browser. |
+| [LocalZipOutput](type-aliases/LocalZipOutput) | A completed browser-generated ZIP backed by a `Blob`. |
+| [LocalZipResult](type-aliases/LocalZipResult) | Result from a browser-generated ZIP job. |
+| [PollCloudSessionOptions](type-aliases/PollCloudSessionOptions) | Options used to poll a Cloud session until it reaches a terminal state. |
+| [PollingOptions](type-aliases/PollingOptions) | Backoff controls for Cloud session polling. |
+| [ResumeZipOptions](type-aliases/ResumeZipOptions) | Credentials and polling controls for reconnecting to an existing Cloud session. |
+| [SessionsClientOptions](type-aliases/SessionsClientOptions) | Connection options for the low-level Cloud Sessions API client. |
+| [StartZipOptions](type-aliases/StartZipOptions) | Options accepted by the framework-agnostic `startZip()` and `createZip()` APIs. |
+| [ZipInput](type-aliases/ZipInput) | Anything `startZip`/`createZip` accept as the `files` option. |
+| [ZipJobSession](type-aliases/ZipJobSession) | Cloud credentials and the latest remote job state retained for resume flows. |
+| [ZipJobSnapshot](type-aliases/ZipJobSnapshot) | Immutable observable state for a running or completed ZIP job. |
+| [ZipJobStatus](type-aliases/ZipJobStatus) | Lifecycle state exposed by a `ZipJob` snapshot. |
+| [ZipResult](type-aliases/ZipResult) | Result returned by either the local or Cloud strategy. |
+
+## Variables
+
+| Variable | Description |
+| ------ | ------ |
+| [DEFAULT\_API\_BASE\_URL](variables/DEFAULT_API_BASE_URL) | Default origin used for Eazip Cloud Sessions API requests. |
+| [DOWNLOAD\_STAGGER\_MS](variables/DOWNLOAD_STAGGER_MS) | Delay between anchor clicks in downloadAll (browser popup heuristics). |

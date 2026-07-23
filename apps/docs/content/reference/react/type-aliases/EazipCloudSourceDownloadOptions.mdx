@@ -1,0 +1,124 @@
+---
+title: EazipCloudSourceDownloadOptions
+description: Cloud download options when the browser creates a session with a public key.
+---
+
+> **EazipCloudSourceDownloadOptions** = `object` & `object`
+
+Defined in: [types.ts:52](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L52)
+
+Cloud download options when the browser creates a session with a public key.
+
+## Type Declaration
+
+### autoDownload?
+
+> `optional` **autoDownload?**: `boolean`
+
+Starts downloading automatically when the result becomes ready.
+
+### failOnUrlError?
+
+> `optional` **failOnUrlError?**: `boolean`
+
+Fails the whole job instead of returning a partial ZIP when a URL fails.
+
+### fetch?
+
+> `optional` **fetch?**: `FetchLike`
+
+Custom `fetch` implementation for URL sources and Cloud requests.
+
+### maxZipSizeBytes?
+
+> `optional` **maxZipSizeBytes?**: `number`
+
+Best-effort maximum size for each split ZIP output.
+
+### onChange?
+
+> `optional` **onChange?**: (`snapshot`) => `void`
+
+Called whenever the underlying Core job snapshot changes.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `snapshot` | `ZipJobSnapshot` |
+
+#### Returns
+
+`void`
+
+### signal?
+
+> `optional` **signal?**: `AbortSignal`
+
+Cancels local work or stops Cloud polling when aborted.
+
+### zipName?
+
+> `optional` **zipName?**: `string`
+
+Requested archive filename. `.zip` is added when omitted.
+
+## Type Declaration
+
+### apiBaseUrl?
+
+> `optional` **apiBaseUrl?**: `string`
+
+Cloud API origin; falls back to provider config or the SDK default.
+
+### createSession?
+
+> `optional` **createSession?**: `never`
+
+### files
+
+> **files**: `ZipInput`
+
+URL sources to include in the Cloud ZIP.
+
+### mode?
+
+> `optional` **mode?**: `EazipMode`
+
+Cloud generation mode.
+
+### onChallenge?
+
+> `optional` **onChallenge?**: (`challenge`) => `Promise`\<`string`\>
+
+Resolves an anti-abuse challenge and returns its verification token.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `challenge` | `EazipChallenge` |
+
+#### Returns
+
+`Promise`\<`string`\>
+
+### polling?
+
+> `optional` **polling?**: `PollingOptions`
+
+### publicKey?
+
+> `optional` **publicKey?**: `string`
+
+Browser-safe Eazip Cloud public key; falls back to provider config.
+
+### strategy
+
+> **strategy**: `"cloud"`
+
+### turnstileToken?
+
+> `optional` **turnstileToken?**: `string`
+
+Pre-obtained Turnstile token sent with session creation.

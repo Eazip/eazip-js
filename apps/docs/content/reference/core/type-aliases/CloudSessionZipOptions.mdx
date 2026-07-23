@@ -1,0 +1,119 @@
+---
+title: CloudSessionZipOptions
+description: Cloud options when a trusted backend creates the session.
+---
+
+> **CloudSessionZipOptions** = `object` & `object`
+
+Defined in: [packages/core/src/shared/types.ts:255](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L255)
+
+Cloud options when a trusted backend creates the session.
+
+## Type Declaration
+
+### failOnUrlError?
+
+> `optional` **failOnUrlError?**: `boolean`
+
+false (local default): failed URL sources are skipped and reported in
+`errors`, producing a partial result. true: fail on the first URL error.
+
+### fetch?
+
+> `optional` **fetch?**: [`FetchLike`](FetchLike)
+
+Custom `fetch` implementation used for URL sources and Cloud requests.
+
+### maxZipSizeBytes?
+
+> `optional` **maxZipSizeBytes?**: `number`
+
+Best-effort size cap per zip: the output is split into multiple zips so
+that each stays under this size. A single file larger than the cap gets
+its own (over-limit) zip — same as the Eazip API default.
+
+### onChange?
+
+> `optional` **onChange?**: (`snapshot`) => `void`
+
+Convenience mirror of `job.subscribe`, called with each new snapshot.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `snapshot` | [`ZipJobSnapshot`](ZipJobSnapshot) |
+
+#### Returns
+
+`void`
+
+### signal?
+
+> `optional` **signal?**: `AbortSignal`
+
+Cancels local work or stops Cloud polling when aborted.
+
+### zipName?
+
+> `optional` **zipName?**: `string`
+
+Requested archive filename. `.zip` is added when omitted.
+
+## Type Declaration
+
+### apiBaseUrl?
+
+> `optional` **apiBaseUrl?**: `string`
+
+### createSession
+
+> **createSession**: (`context`) => `Promise`\<[`CloudCreateSessionResult`](CloudCreateSessionResult)\>
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `context` | [`CloudCreateSessionContext`](CloudCreateSessionContext) |
+
+#### Returns
+
+`Promise`\<[`CloudCreateSessionResult`](CloudCreateSessionResult)\>
+
+### files?
+
+> `optional` **files?**: `never`
+
+### filesTotal?
+
+> `optional` **filesTotal?**: `number`
+
+Optional initial count for UI before the first poll returns url_count.
+
+### mode?
+
+> `optional` **mode?**: [`EazipMode`](EazipMode)
+
+'stream' (default): the zip is generated on demand at download time —
+ready sooner, each download regenerates. 'stored': built once and kept
+in storage. The Public App's allowed modes still apply.
+
+### onChallenge?
+
+> `optional` **onChallenge?**: `never`
+
+### polling?
+
+> `optional` **polling?**: [`PollingOptions`](PollingOptions)
+
+### publicKey?
+
+> `optional` **publicKey?**: `never`
+
+### strategy
+
+> **strategy**: `"cloud"`
+
+### turnstileToken?
+
+> `optional` **turnstileToken?**: `never`

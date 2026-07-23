@@ -1,0 +1,41 @@
+{
+  "$schema": "./node_modules/typedoc-plugin-markdown/typedoc-plugin-markdown.schema.json",
+  "plugin": [
+    "typedoc-plugin-markdown",
+    "typedoc-plugin-frontmatter",
+    "./scripts/typedoc-frontmatter.mjs"
+  ],
+  "readme": "none",
+  "includeVersion": false,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "gitRevision": "main",
+  "validation": {
+    "invalidLink": true,
+    "notExported": false,
+    "notDocumented": false
+  },
+  "entryFileName": "index",
+  "fileExtension": ".mdx",
+  "router": "member",
+  "cleanOutputDir": true,
+  "hideBreadcrumbs": true,
+  "hidePageHeader": true,
+  "hidePageTitle": true,
+  "indexFormat": "table",
+  "parametersFormat": "table",
+  "interfacePropertiesFormat": "table",
+  "classPropertiesFormat": "table",
+  "typeAliasPropertiesFormat": "table",
+  "sanitizeComments": true,
+  "useFirstParagraphOfCommentAsSummary": true,
+  "groupOrder": [
+    "Functions",
+    "Classes",
+    "Interfaces",
+    "Type Aliases",
+    "Variables",
+    "*"
+  ]
+}

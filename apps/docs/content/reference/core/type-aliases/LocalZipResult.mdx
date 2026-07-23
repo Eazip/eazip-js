@@ -1,0 +1,25 @@
+---
+title: LocalZipResult
+description: Result from a browser-generated ZIP job.
+---
+
+> **LocalZipResult** = `object`
+
+Defined in: [packages/core/src/shared/types.ts:302](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L302)
+
+Result from a browser-generated ZIP job.
+
+## Properties
+
+| Property | Type | Description | Defined in |
+| ------ | ------ | ------ | ------ |
+| <a id="property-dispose"></a> `dispose` | () => `void` | Revokes the object URLs backing `zips[].downloadUrl`. | [packages/core/src/shared/types.ts:314](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L314) |
+| <a id="property-download"></a> `download` | (`zipIndex?`) => `void` | - | [packages/core/src/shared/types.ts:311](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L311) |
+| <a id="property-downloadall"></a> `downloadAll` | () => `void` | - | [packages/core/src/shared/types.ts:312](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L312) |
+| <a id="property-errors"></a> `errors` | [`EazipError`](EazipError)[] | - | [packages/core/src/shared/types.ts:309](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L309) |
+| <a id="property-skippedcount"></a> `skippedCount` | `number` | - | [packages/core/src/shared/types.ts:310](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L310) |
+| <a id="property-status"></a> `status` | `"completed"` \| `"partial"` | - | [packages/core/src/shared/types.ts:304](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L304) |
+| <a id="property-strategy"></a> `strategy` | `"local"` | - | [packages/core/src/shared/types.ts:303](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L303) |
+| <a id="property-totalsize"></a> `totalSize` | `number` | - | [packages/core/src/shared/types.ts:307](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L307) |
+| <a id="property-zipfilename"></a> `zipFilename` | `string` | Base zip filename; part files are named `<stem>_partNN.zip` when split. | [packages/core/src/shared/types.ts:306](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L306) |
+| <a id="property-zips"></a> `zips` | [`LocalZipOutput`](LocalZipOutput)[] | - | [packages/core/src/shared/types.ts:308](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L308) |

@@ -1,0 +1,7 @@
+{
+  "title": "Variables",
+  "pages": [
+    "DEFAULT_API_BASE_URL",
+    "DOWNLOAD_STAGGER_MS"
+  ]
+}

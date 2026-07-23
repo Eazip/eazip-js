@@ -12,12 +12,19 @@ import { getFetch, normalizeApiBaseUrl, readJsonResponse } from './http.js';
 import { mapCreatedSession, mapSessionDetail, toCreateSessionRequest } from './mappers.js';
 import { pollSession, retryAfterDelay } from './polling.js';
 
+/** Connection options for the low-level Cloud Sessions API client. */
 export type SessionsClientOptions = {
   publicKey: string;
   apiBaseUrl: string;
   fetch?: FetchLike;
 };
 
+/**
+ * Low-level client for creating, reading, and polling Eazip Cloud sessions.
+ *
+ * Most applications should use `startZip({ strategy: 'cloud' })`. Use this
+ * client when you need direct control over the session lifecycle.
+ */
 export class SessionsClient {
   private readonly publicKey: string;
   private readonly apiBaseUrl: string;
@@ -29,6 +36,7 @@ export class SessionsClient {
     this.fetchImpl = getFetch(options.fetch);
   }
 
+  /** Creates a Cloud session from URL sources. */
   async create(options: CreateCloudSessionOptions): Promise<CreatedCloudSession> {
     try {
       const response = await this.fetchImpl(`${this.apiBaseUrl}/v1/sessions`, {
@@ -47,6 +55,7 @@ export class SessionsClient {
     }
   }
 
+  /** Fetches the latest state of one authenticated Cloud session. */
   async get(sessionId: string, options: GetCloudSessionOptions): Promise<EazipCloudSession> {
     try {
       const response = await this.fetchImpl(`${this.apiBaseUrl}/v1/sessions/${encodeURIComponent(sessionId)}`, {
@@ -63,6 +72,7 @@ export class SessionsClient {
     }
   }
 
+  /** Polls a Cloud session until it completes, fails, expires, or is aborted. */
   async poll(sessionId: string, options: PollCloudSessionOptions): Promise<EazipCloudSession> {
     return pollSession(async (signal) => {
       while (true) {

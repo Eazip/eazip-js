@@ -1,0 +1,114 @@
+---
+title: ZipJob
+description: Observable handle returned immediately when a ZIP job starts.
+---
+
+Defined in: [packages/core/src/shared/types.ts:377](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L377)
+
+Observable handle returned immediately when a ZIP job starts.
+
+## Type Parameters
+
+| Type Parameter | Default type |
+| ------ | ------ |
+| `R` *extends* [`ZipResult`](../type-aliases/ZipResult) | [`ZipResult`](../type-aliases/ZipResult) |
+
+## Methods
+
+### abort()
+
+> **abort**(): `void`
+
+Defined in: [packages/core/src/shared/types.ts:390](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L390)
+
+Local: cancels fetching/zipping. Cloud: stops polling (the server job continues).
+
+#### Returns
+
+`void`
+
+***
+
+### dispose()
+
+> **dispose**(): `void`
+
+Defined in: [packages/core/src/shared/types.ts:395](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L395)
+
+Releases local object URLs. No-op for cloud jobs.
+
+#### Returns
+
+`void`
+
+***
+
+### download()
+
+> **download**(`zipIndex?`): `void`
+
+Defined in: [packages/core/src/shared/types.ts:392](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L392)
+
+Downloads zips[zipIndex] (default 0). Throws EazipValidationError('NOT_READY') before completion.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `zipIndex?` | `number` |
+
+#### Returns
+
+`void`
+
+***
+
+### downloadAll()
+
+> **downloadAll**(): `void`
+
+Defined in: [packages/core/src/shared/types.ts:393](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L393)
+
+#### Returns
+
+`void`
+
+***
+
+### getSnapshot()
+
+> **getSnapshot**(): [`ZipJobSnapshot`](../type-aliases/ZipJobSnapshot)
+
+Defined in: [packages/core/src/shared/types.ts:381](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L381)
+
+Returns the same reference until the next state change (useSyncExternalStore-ready).
+
+#### Returns
+
+[`ZipJobSnapshot`](../type-aliases/ZipJobSnapshot)
+
+***
+
+### subscribe()
+
+> **subscribe**(`listener`): () => `void`
+
+Defined in: [packages/core/src/shared/types.ts:382](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L382)
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `listener` | () => `void` |
+
+#### Returns
+
+() => `void`
+
+## Properties
+
+| Property | Modifier | Type | Description | Defined in |
+| ------ | ------ | ------ | ------ | ------ |
+| <a id="property-done"></a> `done` | `readonly` | `Promise`\<`R`\> | Resolves on 'completed' or 'partial'; rejects with EazipAbortError on abort and with the fatal error on 'failed'. Safe to ignore — an internal handler prevents unhandled rejection warnings. | [packages/core/src/shared/types.ts:388](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L388) |
+| <a id="property-id"></a> `id` | `readonly` | `string` | - | [packages/core/src/shared/types.ts:378](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L378) |
+| <a id="property-strategy"></a> `strategy` | `readonly` | [`EazipStrategy`](../type-aliases/EazipStrategy) | - | [packages/core/src/shared/types.ts:379](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L379) |

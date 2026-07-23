@@ -44,6 +44,7 @@ type ClosedPart = {
   fileCount: number;
 };
 
+/** Starts a browser-only ZIP job and returns its observable handle immediately. */
 export function startLocalZip(options: LocalZipOptions): ZipJob<LocalZipResult> {
   const sources = toSourceFiles(options.files);
   const level = normalizeCompressionLevel(options.compressionLevel);
@@ -59,6 +60,7 @@ export function startLocalZip(options: LocalZipOptions): ZipJob<LocalZipResult> 
   return job;
 }
 
+/** Creates a ZIP in the browser and resolves when all ZIP parts are ready. */
 export async function createLocalZip(options: LocalZipOptions): Promise<LocalZipResult> {
   return startLocalZip(options).done;
 }

@@ -1,0 +1,64 @@
+---
+title: startZip
+description: Starts a local or Cloud ZIP job and returns its observable handle immediately. Observe progress with `getSnapshot()` / `subscribe()`, or await `job.done`.
+---
+
+## Call Signature
+
+> **startZip**(`options`): [`ZipJob`](../interfaces/ZipJob)\<[`LocalZipResult`](../type-aliases/LocalZipResult)\>
+
+Defined in: [packages/core/src/index.ts:22](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/index.ts#L22)
+
+Starts a local or Cloud ZIP job and returns its observable handle immediately.
+
+Observe progress with `getSnapshot()` / `subscribe()`, or await `job.done`.
+
+### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `options` | [`LocalZipOptions`](../type-aliases/LocalZipOptions) |
+
+### Returns
+
+[`ZipJob`](../interfaces/ZipJob)\<[`LocalZipResult`](../type-aliases/LocalZipResult)\>
+
+## Call Signature
+
+> **startZip**(`options`): [`ZipJob`](../interfaces/ZipJob)\<[`CloudZipResult`](../type-aliases/CloudZipResult)\>
+
+Defined in: [packages/core/src/index.ts:23](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/index.ts#L23)
+
+Starts a local or Cloud ZIP job and returns its observable handle immediately.
+
+Observe progress with `getSnapshot()` / `subscribe()`, or await `job.done`.
+
+### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `options` | [`CloudZipOptions`](../type-aliases/CloudZipOptions) |
+
+### Returns
+
+[`ZipJob`](../interfaces/ZipJob)\<[`CloudZipResult`](../type-aliases/CloudZipResult)\>
+
+## Call Signature
+
+> **startZip**(`options`): [`ZipJob`](../interfaces/ZipJob)
+
+Defined in: [packages/core/src/index.ts:24](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/index.ts#L24)
+
+Starts a local or Cloud ZIP job and returns its observable handle immediately.
+
+Observe progress with `getSnapshot()` / `subscribe()`, or await `job.done`.
+
+### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `options` | [`StartZipOptions`](../type-aliases/StartZipOptions) |
+
+### Returns
+
+[`ZipJob`](../interfaces/ZipJob)

@@ -1,0 +1,26 @@
+---
+title: CloudZipResult
+description: Result from a completed or partially completed Cloud ZIP job.
+---
+
+> **CloudZipResult** = `object`
+
+Defined in: [packages/core/src/shared/types.ts:318](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L318)
+
+Result from a completed or partially completed Cloud ZIP job.
+
+## Properties
+
+| Property | Type | Defined in |
+| ------ | ------ | ------ |
+| <a id="property-clientsecret"></a> `clientSecret` | `string` | [packages/core/src/shared/types.ts:322](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L322) |
+| <a id="property-download"></a> `download` | (`zipIndex?`) => `void` | [packages/core/src/shared/types.ts:328](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L328) |
+| <a id="property-downloadall"></a> `downloadAll` | () => `void` | [packages/core/src/shared/types.ts:329](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L329) |
+| <a id="property-errors"></a> `errors` | [`EazipError`](EazipError)[] | [packages/core/src/shared/types.ts:326](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L326) |
+| <a id="property-expiresat"></a> `expiresAt` | `string` | [packages/core/src/shared/types.ts:323](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L323) |
+| <a id="property-session"></a> `session` | [`EazipCloudSession`](EazipCloudSession) | [packages/core/src/shared/types.ts:324](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L324) |
+| <a id="property-sessionid"></a> `sessionId` | `string` | [packages/core/src/shared/types.ts:321](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L321) |
+| <a id="property-skippedcount"></a> `skippedCount` | `number` | [packages/core/src/shared/types.ts:327](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L327) |
+| <a id="property-status"></a> `status` | `"completed"` \| `"partial"` | [packages/core/src/shared/types.ts:320](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L320) |
+| <a id="property-strategy"></a> `strategy` | `"cloud"` | [packages/core/src/shared/types.ts:319](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L319) |
+| <a id="property-zips"></a> `zips` | [`EazipZipOutput`](EazipZipOutput)[] | [packages/core/src/shared/types.ts:325](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L325) |

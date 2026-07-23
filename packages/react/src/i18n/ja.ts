@@ -2,6 +2,7 @@
 
 import type { EazipTrayMessages } from './index.js';
 
+/** Built-in Japanese messages for `EazipTray`. */
 export const ja: EazipTrayMessages = {
   preparingTitle: (filesTotal) => `${filesTotal.toLocaleString()}件のファイルを準備中`,
   downloadReadyTitle: 'ダウンロード準備完了',

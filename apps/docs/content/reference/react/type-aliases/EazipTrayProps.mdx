@@ -1,0 +1,29 @@
+---
+title: EazipTrayProps
+description: Appearance, localization, portal, and lifecycle options for `EazipTray`.
+---
+
+> **EazipTrayProps** = `object`
+
+Defined in: [tray/EazipTray.tsx:18](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L18)
+
+Appearance, localization, portal, and lifecycle options for `EazipTray`.
+
+## Properties
+
+| Property | Type | Description | Defined in |
+| ------ | ------ | ------ | ------ |
+| <a id="property-accent"></a> `accent?` | `string` | CSS color used for progress and action accents. | [tray/EazipTray.tsx:24](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L24) |
+| <a id="property-autodownload"></a> `autoDownload?` | `boolean` | Overrides the store's automatic-download behavior. | [tray/EazipTray.tsx:26](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L26) |
+| <a id="property-autohidems"></a> `autoHideMs?` | `number` | Delay before dismissing a completed auto-downloaded task. Set to 0 to disable. | [tray/EazipTray.tsx:28](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L28) |
+| <a id="property-classname"></a> `className?` | `string` | - | [tray/EazipTray.tsx:33](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L33) |
+| <a id="property-container"></a> `container?` | `HTMLElement` \| `null` | Portal target. Defaults to `document.body`. | [tray/EazipTray.tsx:38](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L38) |
+| <a id="property-locale"></a> `locale?` | [`EazipTrayLocale`](EazipTrayLocale) | Built-in message catalog to use. | [tray/EazipTray.tsx:30](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L30) |
+| <a id="property-messages"></a> `messages?` | `Partial`\<[`EazipTrayMessages`](EazipTrayMessages)\> | Per-message overrides applied after the selected locale. | [tray/EazipTray.tsx:32](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L32) |
+| <a id="property-offset"></a> `offset?` | `object` | Placement offset in CSS pixels. | [tray/EazipTray.tsx:36](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L36) |
+| `offset.x?` | `number` | - | [tray/EazipTray.tsx:36](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L36) |
+| `offset.y?` | `number` | - | [tray/EazipTray.tsx:36](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L36) |
+| <a id="property-onstatechange"></a> `onStateChange?` | (`task`) => `void` | Called when task identity or lifecycle state changes, not on every progress tick. | [tray/EazipTray.tsx:40](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L40) |
+| <a id="property-placement"></a> `placement?` | `"corner"` \| `"bar"` \| `"anchored"` | Fixed corner, full-width bar, or container-anchored layout. | [tray/EazipTray.tsx:20](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L20) |
+| <a id="property-theme"></a> `theme?` | `"light"` \| `"dark"` \| `"auto"` | Color scheme. `auto` follows the user's system preference. | [tray/EazipTray.tsx:22](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L22) |
+| <a id="property-zindex"></a> `zIndex?` | `number` | - | [tray/EazipTray.tsx:34](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/tray/EazipTray.tsx#L34) |

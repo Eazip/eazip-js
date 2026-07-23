@@ -1,0 +1,27 @@
+---
+title: EazipConfig
+description: Shared defaults for `EazipProvider`, `useEazip`, and `EazipTray`.
+---
+
+> **EazipConfig** = `object`
+
+Defined in: [types.ts:158](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L158)
+
+Shared defaults for `EazipProvider`, `useEazip`, and `EazipTray`.
+
+## Properties
+
+| Property | Type | Description | Defined in |
+| ------ | ------ | ------ | ------ |
+| <a id="property-apibaseurl"></a> `apiBaseUrl?` | `string` | Cloud API origin applied when a download does not provide one. | [types.ts:162](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L162) |
+| <a id="property-autodownload"></a> `autoDownload?` | `boolean` | Automatically start downloads when ZIP output becomes ready. | [types.ts:174](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L174) |
+| <a id="property-defaults"></a> `defaults?` | `object` | Shared download defaults; per-call options take precedence. | [types.ts:166](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L166) |
+| `defaults.compressionLevel?` | `number` | - | [types.ts:168](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L168) |
+| `defaults.failOnUrlError?` | `boolean` | - | [types.ts:170](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L170) |
+| `defaults.maxZipSizeBytes?` | `number` | - | [types.ts:171](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L171) |
+| `defaults.mode?` | `EazipMode` | - | [types.ts:169](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L169) |
+| `defaults.zipName?` | `string` | - | [types.ts:167](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L167) |
+| <a id="property-persist"></a> `persist?` | `boolean` | Persist resumable Cloud task metadata in local storage. Defaults to true. | [types.ts:176](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L176) |
+| <a id="property-publickey"></a> `publicKey?` | `string` | Browser-safe Cloud key applied when a download does not provide one. | [types.ts:160](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L160) |
+| <a id="property-storagekey"></a> `storageKey?` | `string` | Local-storage key used for persistence. | [types.ts:178](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L178) |
+| <a id="property-strategy"></a> `strategy?` | `EazipStrategy` | Default execution strategy. | [types.ts:164](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L164) |
