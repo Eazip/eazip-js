@@ -11,11 +11,5 @@ export function baseOptions(): BaseLayoutProps {
     nav: {
       title: 'Eazip',
     },
-    links: [
-      { text: 'Get started', url: '/docs' },
-      { text: 'Guides', url: '/docs/guides' },
-      { text: 'Cloud', url: '/docs/cloud' },
-      { text: 'Reference', url: '/docs/reference' },
-    ],
   };
 }
