@@ -4,6 +4,8 @@ import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/page
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { source } from '@/lib/source';
 import { getMDXComponents } from '@/components/mdx';
+import { IntegrationPicker } from '@/components/integration-picker';
+import TrayDemo from '@/components/tray-demo-loader';
 
 type PageParams = { slug?: string[] };
 
@@ -22,6 +24,8 @@ export default async function Page({ params }: { params: Promise<PageParams> }) 
         <MDX
           components={getMDXComponents({
             a: createRelativeLink(source, page),
+            IntegrationPicker,
+            TrayDemo,
           })}
         />
       </DocsBody>

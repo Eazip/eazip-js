@@ -1,0 +1,38 @@
+---
+title: Reference
+description: Public API reference for @eazip/core and @eazip/react.
+---
+
+Choose the package whose public API you need to inspect.
+
+## `@eazip/core`
+
+The framework-agnostic browser engine and the shared Local / Cloud job model.
+
+- [`createZip`, `startZip`, and `ZipJob`](/docs/concepts/zip-job)
+- [Inputs and filenames](/docs/concepts/inputs)
+- [Results and errors](/docs/concepts/partial-results)
+- [Splitting](/docs/concepts/splitting)
+- [Sessions and resume](/docs/concepts/resume)
+
+[Open the core overview →](/docs/concepts)
+
+## `@eazip/react`
+
+The React hook, provider, tray, localization, persistence, and headless APIs.
+
+- [`useEazip()`](/docs/react/use-eazip)
+- [`<EazipTray />`](/docs/react/eazip-tray)
+- [Localization](/docs/react/i18n)
+- [Persistence](/docs/react/persistence)
+- [Headless usage](/docs/react/headless)
+
+[Open the React integration overview →](/docs/react)
+
+The current pages are curated guides to the public surface. A generated,
+symbol-level reference will replace duplicated parameter lists as the
+TypeScript source is documented.
+
+Cloud HTTP endpoints are intentionally not a third package in this Reference.
+Start with [When to use Eazip Cloud](/docs/cloud); the HTTP API contract belongs
+to the separate Cloud documentation area.

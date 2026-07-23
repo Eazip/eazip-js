@@ -124,9 +124,9 @@ export function Recipes() {
   return (
     <section className={`${shared.container} ${styles.section}`}>
       <div className={styles.header}>
-        <h2 className={styles.h2}>Recipes</h2>
+        <h2 className={styles.h2}>Guides</h2>
         <span className={styles.tagline}>common jobs, mapped out</span>
-        <Link href="/docs/recipes" className={styles.browseAll}>
+        <Link href="/docs/guides" className={styles.browseAll}>
           Browse all →
         </Link>
       </div>
@@ -135,7 +135,7 @@ export function Recipes() {
         {RECIPES.map((recipe) => {
           const hue = BADGE_HUE[recipe.badge];
           return (
-            <Link key={recipe.slug} href={`/docs/recipes/${recipe.slug}`} className={styles.card}>
+            <Link key={recipe.slug} href={`/docs/guides/${recipe.slug}`} className={styles.card}>
               <div className={styles.icon}>{ICONS[recipe.icon]}</div>
               <div className={styles.body}>
                 <div className={styles.titleRow}>

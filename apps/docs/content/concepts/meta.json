@@ -1,4 +1,4 @@
 {
-  "title": "@eazip/core",
+  "title": "Core concepts",
   "pages": ["index", "zip-job", "inputs", "partial-results", "splitting", "resume"]
 }

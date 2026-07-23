@@ -13,7 +13,7 @@ enough to reattach to it after a reload.
 
 The moment a cloud task's session exists — `sessionId` + `clientSecret`,
 the same values `job.getSnapshot().session` exposes in
-[`@eazip/core`](/docs/core/resume) — the store writes a versioned envelope to
+[`@eazip/core`](/docs/concepts/resume) — the store writes a versioned envelope to
 `localStorage` under the key `eazip-tray-v1`: task state, zip metadata,
 `skippedCount`, whether a download already started, and (when the task
 came from a plain `download({ files, publicKey })` call) enough of the

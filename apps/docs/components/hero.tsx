@@ -29,7 +29,7 @@ export function Hero() {
         </p>
 
         <div className={styles.ctaRow}>
-          <Link href="/docs/getting-started" className={styles.btnPrimary}>
+          <Link href="/docs" className={styles.btnPrimary}>
             Get started
           </Link>
           <a

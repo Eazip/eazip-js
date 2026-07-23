@@ -16,21 +16,21 @@ npm install @eazip/core
 
 ## In this section
 
-- [`createZip`, `startZip` & `ZipJob`](/docs/core/zip-job) — the one-shot
+- [`createZip`, `startZip` & `ZipJob`](/docs/concepts/zip-job) — the one-shot
   promise, the subscribable job, and the object that unifies both
   strategies.
-- [Inputs & sources](/docs/core/inputs) — every shape `files` accepts, and how
+- [Inputs & sources](/docs/concepts/inputs) — every shape `files` accepts, and how
   entry names get resolved and de-duplicated.
-- [Partial results & errors](/docs/core/partial-results) — the `partial`
+- [Partial results & errors](/docs/concepts/partial-results) — the `partial`
   status, per-file errors, and the full error class taxonomy.
-- [Multi-zip splitting](/docs/core/splitting) — `maxZipSizeBytes`, part naming,
+- [Multi-zip splitting](/docs/concepts/splitting) — `maxZipSizeBytes`, part naming,
   and why ZIP64 is always on.
-- [Sessions & resume](/docs/core/resume) — picking a cloud job back up after a
+- [Sessions & resume](/docs/concepts/resume) — picking a cloud job back up after a
   reload with `resumeZip`.
 
-Prefer a walkthrough first? [Getting started](/docs/getting-started) and
-[Quickstart (vanilla)](/docs/getting-started/quickstart-vanilla) cover the same
-ground with a working example. Using React? Skip straight to
+Prefer a walkthrough first? The
+[JavaScript quickstart](/docs/getting-started/javascript) covers the same ground
+with a working example. Using React? Skip straight to
 [`@eazip/react`](/docs/react).
 
 ## Entry points
@@ -43,4 +43,3 @@ Four entry points, so a bundler only pulls in what you actually use:
 | `@eazip/core/local` | Browser zipping only — no cloud code in your bundle. |
 | `@eazip/core/cloud` | Cloud sessions only — no `@zip.js/zip.js` in your bundle. |
 | `@eazip/core/shared` | Types, errors, and the input/download utilities both engines share. |
-

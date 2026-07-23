@@ -30,7 +30,7 @@ export function Cta() {
           >
             Star on GitHub
           </a>
-          <Link href="/docs/getting-started" className={styles.btnOutline}>
+          <Link href="/docs" className={styles.btnOutline}>
             Read the docs
           </Link>
         </div>

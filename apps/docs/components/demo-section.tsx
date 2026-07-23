@@ -12,7 +12,8 @@ export function DemoSection() {
         <CodeWindow filename="Exporter.tsx" lines={EXPORTER_TSX} />
       </div>
       <p className={styles.caption}>
-        Live <code>&lt;EazipTray /&gt;</code> — click <strong>Download as ZIP</strong> to watch it work.
+        Live React demo using <code>&lt;EazipTray /&gt;</code> — the same local engine is available from{' '}
+        <code>@eazip/core</code>.
       </p>
     </section>
   );
