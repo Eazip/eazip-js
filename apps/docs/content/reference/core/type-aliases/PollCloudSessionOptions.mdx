@@ -1,0 +1,52 @@
+---
+title: PollCloudSessionOptions
+description: Options used to poll a Cloud session until it reaches a terminal state.
+---
+
+> **PollCloudSessionOptions** = [`GetCloudSessionOptions`](GetCloudSessionOptions) & `object`
+
+Defined in: [packages/core/src/shared/types.ts:145](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L145)
+
+Options used to poll a Cloud session until it reaches a terminal state.
+
+## Type Declaration
+
+### backoffMultiplier?
+
+> `optional` **backoffMultiplier?**: `number`
+
+Multiplier applied after each non-terminal response.
+
+### initialIntervalMs?
+
+> `optional` **initialIntervalMs?**: `number`
+
+Initial delay between polls.
+
+### jitter?
+
+> `optional` **jitter?**: `boolean`
+
+Adds randomized delay to avoid synchronized polling clients.
+
+### maxIntervalMs?
+
+> `optional` **maxIntervalMs?**: `number`
+
+Upper bound for the backoff delay.
+
+### onSession?
+
+> `optional` **onSession?**: (`session`) => `void`
+
+Called after each successful poll, including non-terminal states.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `session` | [`EazipCloudSession`](EazipCloudSession) |
+
+#### Returns
+
+`void`

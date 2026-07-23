@@ -1,0 +1,19 @@
+---
+title: PollingOptions
+description: Backoff controls for Cloud session polling.
+---
+
+> **PollingOptions** = `object`
+
+Defined in: [packages/core/src/shared/types.ts:163](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L163)
+
+Backoff controls for Cloud session polling.
+
+## Properties
+
+| Property | Type | Description | Defined in |
+| ------ | ------ | ------ | ------ |
+| <a id="property-backoffmultiplier"></a> `backoffMultiplier?` | `number` | Multiplier applied after each non-terminal response. | [packages/core/src/shared/types.ts:169](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L169) |
+| <a id="property-initialintervalms"></a> `initialIntervalMs?` | `number` | Initial delay between polls. | [packages/core/src/shared/types.ts:165](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L165) |
+| <a id="property-jitter"></a> `jitter?` | `boolean` | Adds randomized delay to avoid synchronized polling clients. | [packages/core/src/shared/types.ts:171](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L171) |
+| <a id="property-maxintervalms"></a> `maxIntervalMs?` | `number` | Upper bound for the backoff delay. | [packages/core/src/shared/types.ts:167](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L167) |

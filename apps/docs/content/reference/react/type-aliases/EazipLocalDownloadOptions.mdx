@@ -1,0 +1,104 @@
+---
+title: EazipLocalDownloadOptions
+description: Download options for creating a ZIP entirely in the browser.
+---
+
+> **EazipLocalDownloadOptions** = `object` & `object`
+
+Defined in: [types.ts:39](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L39)
+
+Download options for creating a ZIP entirely in the browser.
+
+## Type Declaration
+
+### autoDownload?
+
+> `optional` **autoDownload?**: `boolean`
+
+Starts downloading automatically when the result becomes ready.
+
+### failOnUrlError?
+
+> `optional` **failOnUrlError?**: `boolean`
+
+Fails the whole job instead of returning a partial ZIP when a URL fails.
+
+### fetch?
+
+> `optional` **fetch?**: `FetchLike`
+
+Custom `fetch` implementation for URL sources and Cloud requests.
+
+### maxZipSizeBytes?
+
+> `optional` **maxZipSizeBytes?**: `number`
+
+Best-effort maximum size for each split ZIP output.
+
+### onChange?
+
+> `optional` **onChange?**: (`snapshot`) => `void`
+
+Called whenever the underlying Core job snapshot changes.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `snapshot` | `ZipJobSnapshot` |
+
+#### Returns
+
+`void`
+
+### signal?
+
+> `optional` **signal?**: `AbortSignal`
+
+Cancels local work or stops Cloud polling when aborted.
+
+### zipName?
+
+> `optional` **zipName?**: `string`
+
+Requested archive filename. `.zip` is added when omitted.
+
+## Type Declaration
+
+### compressionLevel?
+
+> `optional` **compressionLevel?**: `number`
+
+Deflate level from 0 through 9. Defaults to 6.
+
+### concurrency?
+
+> `optional` **concurrency?**: `number`
+
+Maximum parallel URL fetches. Defaults to 4.
+
+### files
+
+> **files**: `ZipInput`
+
+Files, blobs, URLs, or source descriptors to include.
+
+### onProgress?
+
+> `optional` **onProgress?**: (`progress`) => `void`
+
+Called with local fetch and archive progress.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `progress` | `EazipProgress` |
+
+#### Returns
+
+`void`
+
+### strategy?
+
+> `optional` **strategy?**: `"local"`

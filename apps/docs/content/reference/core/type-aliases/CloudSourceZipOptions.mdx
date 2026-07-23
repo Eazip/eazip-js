@@ -1,0 +1,120 @@
+---
+title: CloudSourceZipOptions
+description: Cloud options when the browser creates a session with a public key.
+---
+
+> **CloudSourceZipOptions** = `object` & `object` & `object`
+
+Defined in: [packages/core/src/shared/types.ts:232](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L232)
+
+Cloud options when the browser creates a session with a public key.
+
+## Type Declaration
+
+### failOnUrlError?
+
+> `optional` **failOnUrlError?**: `boolean`
+
+false (local default): failed URL sources are skipped and reported in
+`errors`, producing a partial result. true: fail on the first URL error.
+
+### fetch?
+
+> `optional` **fetch?**: [`FetchLike`](FetchLike)
+
+Custom `fetch` implementation used for URL sources and Cloud requests.
+
+### maxZipSizeBytes?
+
+> `optional` **maxZipSizeBytes?**: `number`
+
+Best-effort size cap per zip: the output is split into multiple zips so
+that each stays under this size. A single file larger than the cap gets
+its own (over-limit) zip — same as the Eazip API default.
+
+### onChange?
+
+> `optional` **onChange?**: (`snapshot`) => `void`
+
+Convenience mirror of `job.subscribe`, called with each new snapshot.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `snapshot` | [`ZipJobSnapshot`](ZipJobSnapshot) |
+
+#### Returns
+
+`void`
+
+### signal?
+
+> `optional` **signal?**: `AbortSignal`
+
+Cancels local work or stops Cloud polling when aborted.
+
+### zipName?
+
+> `optional` **zipName?**: `string`
+
+Requested archive filename. `.zip` is added when omitted.
+
+## Type Declaration
+
+### files
+
+> **files**: [`ZipInput`](ZipInput)
+
+## Type Declaration
+
+### apiBaseUrl?
+
+> `optional` **apiBaseUrl?**: `string`
+
+### createSession?
+
+> `optional` **createSession?**: `never`
+
+### mode?
+
+> `optional` **mode?**: [`EazipMode`](EazipMode)
+
+'stream' (default): the zip is generated on demand at download time —
+ready sooner, each download regenerates. 'stored': built once and kept
+in storage. The Public App's allowed modes still apply.
+
+### onChallenge?
+
+> `optional` **onChallenge?**: (`challenge`) => `Promise`\<`string`\>
+
+Called when the API requires a Turnstile challenge. Resolve with a token
+and the SDK retries the create once; a second challenge propagates.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `challenge` | [`EazipChallenge`](EazipChallenge) |
+
+#### Returns
+
+`Promise`\<`string`\>
+
+### polling?
+
+> `optional` **polling?**: [`PollingOptions`](PollingOptions)
+
+### publicKey
+
+> **publicKey**: `string`
+
+### strategy
+
+> **strategy**: `"cloud"`
+
+### turnstileToken?
+
+> `optional` **turnstileToken?**: `string`
+
+Pre-obtained Turnstile token, sent with the first create request.

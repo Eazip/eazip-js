@@ -1,9 +1,11 @@
 import { EazipAbortError, isEazipError } from './errors.js';
 
+/** Throws `EazipAbortError` when the signal has already been aborted. */
 export function throwIfAborted(signal: AbortSignal | undefined): void {
   if (signal?.aborted) throw new EazipAbortError();
 }
 
+/** Returns true for SDK and platform abort errors. */
 export function isAbortLike(error: unknown): boolean {
   if (isEazipError(error)) return error.code === 'ABORT_ERR';
   return error instanceof Error && error.name === 'AbortError';

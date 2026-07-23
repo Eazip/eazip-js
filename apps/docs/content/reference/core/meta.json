@@ -1,0 +1,10 @@
+{
+  "title": "@eazip/core",
+  "pages": [
+    "functions",
+    "classes",
+    "interfaces",
+    "type-aliases",
+    "variables"
+  ]
+}

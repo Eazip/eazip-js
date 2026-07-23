@@ -1,0 +1,27 @@
+---
+title: ZipJobSnapshot
+description: Immutable observable state for a running or completed ZIP job.
+---
+
+> **ZipJobSnapshot** = `object`
+
+Defined in: [packages/core/src/shared/types.ts:356](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L356)
+
+Immutable observable state for a running or completed ZIP job.
+
+## Properties
+
+| Property | Type | Description | Defined in |
+| ------ | ------ | ------ | ------ |
+| <a id="property-error"></a> `error` | [`EazipErrorBase`](../classes/EazipErrorBase) \| `null` | Fatal error when status === 'failed'. | [packages/core/src/shared/types.ts:369](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L369) |
+| <a id="property-errors"></a> `errors` | [`EazipError`](EazipError)[] | Per-file skips (local). Always [] for cloud (the API reports counts only). | [packages/core/src/shared/types.ts:366](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L366) |
+| <a id="property-filestotal"></a> `filesTotal` | `number` | - | [packages/core/src/shared/types.ts:361](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L361) |
+| <a id="property-jobid"></a> `jobId` | `string` | - | [packages/core/src/shared/types.ts:357](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L357) |
+| <a id="property-progress"></a> `progress` | [`EazipProgress`](EazipProgress) \| `null` | Local only; null for cloud jobs. | [packages/core/src/shared/types.ts:363](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L363) |
+| <a id="property-result"></a> `result` | [`ZipResult`](ZipResult) \| `null` | Set when status is 'completed' or 'partial'. | [packages/core/src/shared/types.ts:373](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L373) |
+| <a id="property-session"></a> `session` | [`ZipJobSession`](ZipJobSession) \| `null` | Cloud: populated as soon as the session is created (resume: immediately). | [packages/core/src/shared/types.ts:371](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L371) |
+| <a id="property-skippedcount"></a> `skippedCount` | `number` | - | [packages/core/src/shared/types.ts:367](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L367) |
+| <a id="property-status"></a> `status` | [`ZipJobStatus`](ZipJobStatus) | - | [packages/core/src/shared/types.ts:359](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L359) |
+| <a id="property-strategy"></a> `strategy` | [`EazipStrategy`](EazipStrategy) | - | [packages/core/src/shared/types.ts:358](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L358) |
+| <a id="property-zipfilename"></a> `zipFilename` | `string` \| `null` | - | [packages/core/src/shared/types.ts:360](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L360) |
+| <a id="property-zips"></a> `zips` | [`EazipZipOutput`](EazipZipOutput)[] | - | [packages/core/src/shared/types.ts:364](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L364) |

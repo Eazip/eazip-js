@@ -1,0 +1,24 @@
+{
+  "title": "Functions",
+  "pages": [
+    "startZip",
+    "createZip",
+    "startLocalZip",
+    "createLocalZip",
+    "startCloudZip",
+    "resumeZip",
+    "createObjectUrl",
+    "isAbortLike",
+    "isBrowser",
+    "isEazipError",
+    "linkAbort",
+    "normalizeEntryName",
+    "normalizeZipFilename",
+    "staggerDownloads",
+    "throwIfAborted",
+    "toEazipError",
+    "toSourceFiles",
+    "triggerDownload",
+    "uniqueEntryName"
+  ]
+}

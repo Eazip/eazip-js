@@ -3,6 +3,7 @@ import { EazipValidationError } from './errors.js';
 /** Delay between anchor clicks in downloadAll (browser popup heuristics). */
 export const DOWNLOAD_STAGGER_MS = 300;
 
+/** Returns true when DOM download APIs are available. */
 export function isBrowser(): boolean {
   return typeof document !== 'undefined' && typeof window !== 'undefined';
 }
@@ -22,6 +23,7 @@ export function triggerDownload(url: string, filename?: string): void {
   anchor.remove();
 }
 
+/** Creates an object URL when the runtime exposes `URL.createObjectURL`. */
 export function createObjectUrl(blob: Blob): string | undefined {
   if (typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function') return undefined;
   return URL.createObjectURL(blob);

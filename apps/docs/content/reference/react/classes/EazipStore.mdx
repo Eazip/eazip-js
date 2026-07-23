@@ -1,0 +1,283 @@
+---
+title: EazipStore
+description: Framework-independent state store used by the React hook and tray. Construct a store when you need isolated state or injected dependencies, then pass it to `EazipProvider`.
+---
+
+Defined in: [store/store.ts:97](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L97)
+
+Framework-independent state store used by the React hook and tray.
+
+Construct a store when you need isolated state or injected dependencies,
+then pass it to `EazipProvider`.
+
+## Constructors
+
+### Constructor
+
+> **new EazipStore**(`deps?`, `config?`): `EazipStore`
+
+Defined in: [store/store.ts:107](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L107)
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `deps?` | `Partial`\<[`EazipStoreDeps`](../type-aliases/EazipStoreDeps)\> |
+| `config?` | [`EazipConfig`](../type-aliases/EazipConfig) |
+
+#### Returns
+
+`EazipStore`
+
+## Methods
+
+### cancel()
+
+> **cancel**(`taskId?`): `void`
+
+Defined in: [store/store.ts:160](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L160)
+
+Aborts and removes the matching active task.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `taskId?` | `string` |
+
+#### Returns
+
+`void`
+
+***
+
+### dismiss()
+
+> **dismiss**(`taskId?`): `void`
+
+Defined in: [store/store.ts:168](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L168)
+
+Removes the matching active task.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `taskId?` | `string` |
+
+#### Returns
+
+`void`
+
+***
+
+### download()
+
+> **download**(`options`): `string`
+
+Defined in: [store/store.ts:154](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L154)
+
+Starts a ZIP task and returns its React task id.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `options` | [`EazipDownloadOptions`](../type-aliases/EazipDownloadOptions) |
+
+#### Returns
+
+`string`
+
+***
+
+### downloadAll()
+
+> **downloadAll**(`taskId?`): `void`
+
+Defined in: [store/store.ts:209](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L209)
+
+Downloads every ZIP output from a completed task with staggered clicks.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `taskId?` | `string` |
+
+#### Returns
+
+`void`
+
+***
+
+### downloadZip()
+
+> **downloadZip**(`taskId`, `zipIndex`): `void`
+
+Defined in: [store/store.ts:180](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L180)
+
+Downloads one ZIP output from a completed task.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `taskId` | `string` |
+| `zipIndex` | `number` |
+
+#### Returns
+
+`void`
+
+***
+
+### getConfig()
+
+> **getConfig**(): [`EazipConfig`](../type-aliases/EazipConfig)
+
+Defined in: [store/store.ts:132](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L132)
+
+Returns the current shared configuration.
+
+#### Returns
+
+[`EazipConfig`](../type-aliases/EazipConfig)
+
+***
+
+### getServerSnapshot()
+
+> **getServerSnapshot**(): [`EazipSnapshot`](../type-aliases/EazipSnapshot)
+
+Defined in: [store/store.ts:124](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L124)
+
+Returns the empty server-render snapshot used for hydration.
+
+#### Returns
+
+[`EazipSnapshot`](../type-aliases/EazipSnapshot)
+
+***
+
+### getSnapshot()
+
+> **getSnapshot**(): [`EazipSnapshot`](../type-aliases/EazipSnapshot)
+
+Defined in: [store/store.ts:121](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L121)
+
+Returns the current client snapshot.
+
+#### Returns
+
+[`EazipSnapshot`](../type-aliases/EazipSnapshot)
+
+***
+
+### hydrate()
+
+> **hydrate**(): `void`
+
+Defined in: [store/store.ts:141](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L141)
+
+Restore a persisted cloud task from storage. Safe to call multiple times;
+only the first call after construction does work. Must be called from an
+effect (never during render or module evaluation).
+
+#### Returns
+
+`void`
+
+***
+
+### retry()
+
+> **retry**(`taskId?`): `void`
+
+Defined in: [store/store.ts:173](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L173)
+
+Starts the matching task again with its retained request options.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `taskId?` | `string` |
+
+#### Returns
+
+`void`
+
+***
+
+### setConfig()
+
+> **setConfig**(`config`): `void`
+
+Defined in: [store/store.ts:127](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L127)
+
+Merges new shared defaults into the current configuration.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `config` | [`EazipConfig`](../type-aliases/EazipConfig) |
+
+#### Returns
+
+`void`
+
+***
+
+### setExpanded()
+
+> **setExpanded**(`expanded`): `void`
+
+Defined in: [store/store.ts:238](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L238)
+
+Sets whether the tray body is expanded.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `expanded` | `boolean` |
+
+#### Returns
+
+`void`
+
+***
+
+### subscribe()
+
+> **subscribe**(`listener`): () => `void`
+
+Defined in: [store/store.ts:113](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L113)
+
+Subscribes to immutable snapshot changes.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `listener` | () => `void` |
+
+#### Returns
+
+() => `void`
+
+***
+
+### toggleExpanded()
+
+> **toggleExpanded**(): `void`
+
+Defined in: [store/store.ts:245](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/store/store.ts#L245)
+
+Toggles whether the tray body is expanded.
+
+#### Returns
+
+`void`

@@ -1,0 +1,99 @@
+---
+title: LocalZipOptions
+description: Options for creating a ZIP entirely in the browser.
+---
+
+> **LocalZipOptions** = `object` & `object` & `object`
+
+Defined in: [packages/core/src/shared/types.ts:202](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L202)
+
+Options for creating a ZIP entirely in the browser.
+
+## Type Declaration
+
+### failOnUrlError?
+
+> `optional` **failOnUrlError?**: `boolean`
+
+false (local default): failed URL sources are skipped and reported in
+`errors`, producing a partial result. true: fail on the first URL error.
+
+### fetch?
+
+> `optional` **fetch?**: [`FetchLike`](FetchLike)
+
+Custom `fetch` implementation used for URL sources and Cloud requests.
+
+### maxZipSizeBytes?
+
+> `optional` **maxZipSizeBytes?**: `number`
+
+Best-effort size cap per zip: the output is split into multiple zips so
+that each stays under this size. A single file larger than the cap gets
+its own (over-limit) zip — same as the Eazip API default.
+
+### onChange?
+
+> `optional` **onChange?**: (`snapshot`) => `void`
+
+Convenience mirror of `job.subscribe`, called with each new snapshot.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `snapshot` | [`ZipJobSnapshot`](ZipJobSnapshot) |
+
+#### Returns
+
+`void`
+
+### signal?
+
+> `optional` **signal?**: `AbortSignal`
+
+Cancels local work or stops Cloud polling when aborted.
+
+### zipName?
+
+> `optional` **zipName?**: `string`
+
+Requested archive filename. `.zip` is added when omitted.
+
+## Type Declaration
+
+### files
+
+> **files**: [`ZipInput`](ZipInput)
+
+## Type Declaration
+
+### compressionLevel?
+
+> `optional` **compressionLevel?**: `number`
+
+0-9, default 6.
+
+### concurrency?
+
+> `optional` **concurrency?**: `number`
+
+Parallel URL fetches, default 4.
+
+### onProgress?
+
+> `optional` **onProgress?**: (`progress`) => `void`
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `progress` | [`EazipProgress`](EazipProgress) |
+
+#### Returns
+
+`void`
+
+### strategy?
+
+> `optional` **strategy?**: `"local"`

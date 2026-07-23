@@ -1,0 +1,49 @@
+---
+title: "@eazip/react"
+description: API reference for @eazip/react.
+---
+
+Generated from the React-specific exports of `@eazip/react`. The package also re-exports common Core errors and job types; see the [`@eazip/core` reference](/docs/reference/core) for those symbols.
+
+## Functions
+
+| Function | Description |
+| ------ | ------ |
+| [EazipProvider](functions/EazipProvider) | Optional provider. `useEazip()` and `<EazipTray />` work without it via a shared default store; wrap your app in `EazipProvider` to set shared config (publicKey, strategy, defaults) or to isolate state (tests, multiple roots). |
+| [EazipTray](functions/EazipTray) | Renders the current Eazip task as an accessible, portal-based download tray. |
+| [useEazip](functions/useEazip) | Returns ZIP commands and the latest task state from the nearest Eazip store. |
+
+## Classes
+
+| Class | Description |
+| ------ | ------ |
+| [EazipStore](classes/EazipStore) | Framework-independent state store used by the React hook and tray. |
+
+## Type Aliases
+
+| Type Alias | Description |
+| ------ | ------ |
+| [EazipCloudSessionDownloadOptions](type-aliases/EazipCloudSessionDownloadOptions) | Cloud download options when a trusted backend creates the session. |
+| [EazipCloudSourceDownloadOptions](type-aliases/EazipCloudSourceDownloadOptions) | Cloud download options when the browser creates a session with a public key. |
+| [EazipConfig](type-aliases/EazipConfig) | Shared defaults for `EazipProvider`, `useEazip`, and `EazipTray`. |
+| [EazipDownloadOptions](type-aliases/EazipDownloadOptions) | Options accepted by `useEazip().download()`. |
+| [EazipLocalDownloadOptions](type-aliases/EazipLocalDownloadOptions) | Download options for creating a ZIP entirely in the browser. |
+| [EazipProviderProps](type-aliases/EazipProviderProps) | Props for the optional `EazipProvider`. |
+| [EazipSnapshot](type-aliases/EazipSnapshot) | Immutable state exposed by `EazipStore`. |
+| [EazipStoreDeps](type-aliases/EazipStoreDeps) | Injectable runtime dependencies for advanced usage and deterministic tests. |
+| [EazipTask](type-aliases/EazipTask) | UI-facing representation of a Core ZIP job. |
+| [EazipTaskError](type-aliases/EazipTaskError) | Serializable fatal error shown by the React integration. |
+| [EazipTaskSkippedFile](type-aliases/EazipTaskSkippedFile) | A source omitted from a partial local ZIP result. |
+| [EazipTaskState](type-aliases/EazipTaskState) | UI lifecycle state for the active tray task. |
+| [EazipTaskZip](type-aliases/EazipTaskZip) | One downloadable ZIP shown in a React task. |
+| [EazipTrayLocale](type-aliases/EazipTrayLocale) | Built-in locale identifiers. |
+| [EazipTrayMessages](type-aliases/EazipTrayMessages) | Complete message catalog rendered by `EazipTray`. |
+| [EazipTrayProps](type-aliases/EazipTrayProps) | Appearance, localization, portal, and lifecycle options for `EazipTray`. |
+| [UseEazipResult](type-aliases/UseEazipResult) | Commands and observable task state returned by `useEazip()`. |
+
+## Variables
+
+| Variable | Description |
+| ------ | ------ |
+| [en](variables/en) | Built-in English messages for `EazipTray`. |
+| [ja](variables/ja) | Built-in Japanese messages for `EazipTray`. |

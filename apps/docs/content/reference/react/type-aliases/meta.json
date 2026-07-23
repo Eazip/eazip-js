@@ -1,0 +1,22 @@
+{
+  "title": "Type aliases",
+  "pages": [
+    "EazipConfig",
+    "EazipDownloadOptions",
+    "EazipLocalDownloadOptions",
+    "EazipCloudSourceDownloadOptions",
+    "EazipCloudSessionDownloadOptions",
+    "UseEazipResult",
+    "EazipProviderProps",
+    "EazipTrayProps",
+    "EazipSnapshot",
+    "EazipStoreDeps",
+    "EazipTask",
+    "EazipTaskError",
+    "EazipTaskSkippedFile",
+    "EazipTaskState",
+    "EazipTaskZip",
+    "EazipTrayLocale",
+    "EazipTrayMessages"
+  ]
+}

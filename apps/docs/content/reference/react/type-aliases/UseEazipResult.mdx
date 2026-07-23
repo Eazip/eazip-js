@@ -1,0 +1,24 @@
+---
+title: UseEazipResult
+description: Commands and observable task state returned by `useEazip()`.
+---
+
+> **UseEazipResult** = `object`
+
+Defined in: [types.ts:136](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L136)
+
+Commands and observable task state returned by `useEazip()`.
+
+## Properties
+
+| Property | Type | Description | Defined in |
+| ------ | ------ | ------ | ------ |
+| <a id="property-cancel"></a> `cancel` | (`taskId?`) => `void` | Cancels and removes the matching task, or the latest task when omitted. | [types.ts:146](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L146) |
+| <a id="property-dismiss"></a> `dismiss` | (`taskId?`) => `void` | Removes the matching task from the UI. | [types.ts:150](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L150) |
+| <a id="property-download"></a> `download` | (`options`) => `string` | Start a zip download. Fire & forget: returns the task id; errors surface on the task. | [types.ts:138](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L138) |
+| <a id="property-downloadall"></a> `downloadAll` | (`taskId?`) => `void` | Downloads every ZIP part from a completed task. | [types.ts:154](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L154) |
+| <a id="property-downloadzip"></a> `downloadZip` | (`taskId`, `zipIndex`) => `void` | Downloads one ZIP part from a completed task. | [types.ts:152](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L152) |
+| <a id="property-isbusy"></a> `isBusy` | `boolean` | True while the latest task is processing. | [types.ts:144](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L144) |
+| <a id="property-retry"></a> `retry` | (`taskId?`) => `void` | Restarts a retained failed or expired request. | [types.ts:148](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L148) |
+| <a id="property-task"></a> `task` | [`EazipTask`](EazipTask) \| `null` | Most recently active task, or null when the tray is idle. | [types.ts:140](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L140) |
+| <a id="property-tasks"></a> `tasks` | [`EazipTask`](EazipTask)[] | All observable tasks. Currently contains at most the active task. | [types.ts:142](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L142) |

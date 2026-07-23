@@ -1,0 +1,22 @@
+---
+title: ZipJobSession
+description: Cloud credentials and the latest remote job state retained for resume flows.
+---
+
+> **ZipJobSession** = `object`
+
+Defined in: [packages/core/src/shared/types.ts:343](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L343)
+
+Cloud credentials and the latest remote job state retained for resume flows.
+
+## Properties
+
+| Property | Type | Description | Defined in |
+| ------ | ------ | ------ | ------ |
+| <a id="property-apibaseurl"></a> `apiBaseUrl` | `string` | - | [packages/core/src/shared/types.ts:346](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L346) |
+| <a id="property-clientsecret"></a> `clientSecret` | `string` | - | [packages/core/src/shared/types.ts:345](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L345) |
+| <a id="property-createdat"></a> `createdAt` | `string` | - | [packages/core/src/shared/types.ts:347](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L347) |
+| <a id="property-expiresat"></a> `expiresAt` | `string` | - | [packages/core/src/shared/types.ts:348](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L348) |
+| <a id="property-job"></a> `job` | [`EazipCloudJob`](EazipCloudJob) \| `null` | Latest full job detail; null before the first poll. | [packages/core/src/shared/types.ts:352](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L352) |
+| <a id="property-jobstatus"></a> `jobStatus` | [`EazipCloudJobStatus`](EazipCloudJobStatus) \| `null` | Latest polled cloud job status; null before the first poll. | [packages/core/src/shared/types.ts:350](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L350) |
+| <a id="property-sessionid"></a> `sessionId` | `string` | - | [packages/core/src/shared/types.ts:344](https://github.com/Eazip/eazip-js/blob/main/packages/core/src/shared/types.ts#L344) |

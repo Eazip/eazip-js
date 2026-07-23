@@ -14,21 +14,33 @@ import { ReadyBody } from './ReadyBody.js';
 import { trayCss } from './styles.js';
 import { buildCssVars, THEMES, useResolvedTheme } from './theme.js';
 
+/** Appearance, localization, portal, and lifecycle options for `EazipTray`. */
 export type EazipTrayProps = {
+  /** Fixed corner, full-width bar, or container-anchored layout. */
   placement?: 'corner' | 'bar' | 'anchored';
+  /** Color scheme. `auto` follows the user's system preference. */
   theme?: 'light' | 'dark' | 'auto';
+  /** CSS color used for progress and action accents. */
   accent?: string;
+  /** Overrides the store's automatic-download behavior. */
   autoDownload?: boolean;
+  /** Delay before dismissing a completed auto-downloaded task. Set to 0 to disable. */
   autoHideMs?: number;
+  /** Built-in message catalog to use. */
   locale?: EazipTrayLocale;
+  /** Per-message overrides applied after the selected locale. */
   messages?: Partial<EazipTrayMessages>;
   className?: string;
   zIndex?: number;
+  /** Placement offset in CSS pixels. */
   offset?: { x?: number; y?: number };
+  /** Portal target. Defaults to `document.body`. */
   container?: HTMLElement | null;
+  /** Called when task identity or lifecycle state changes, not on every progress tick. */
   onStateChange?: (task: EazipTask | null) => void;
 };
 
+/** Renders the current Eazip task as an accessible, portal-based download tray. */
 export function EazipTray({
   placement = 'corner',
   theme = 'auto',

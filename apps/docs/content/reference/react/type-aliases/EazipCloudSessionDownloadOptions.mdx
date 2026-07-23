@@ -1,0 +1,124 @@
+---
+title: EazipCloudSessionDownloadOptions
+description: Cloud download options when a trusted backend creates the session.
+---
+
+> **EazipCloudSessionDownloadOptions** = `object` & `object`
+
+Defined in: [types.ts:71](https://github.com/Eazip/eazip-js/blob/main/packages/react/src/types.ts#L71)
+
+Cloud download options when a trusted backend creates the session.
+
+## Type Declaration
+
+### autoDownload?
+
+> `optional` **autoDownload?**: `boolean`
+
+Starts downloading automatically when the result becomes ready.
+
+### failOnUrlError?
+
+> `optional` **failOnUrlError?**: `boolean`
+
+Fails the whole job instead of returning a partial ZIP when a URL fails.
+
+### fetch?
+
+> `optional` **fetch?**: `FetchLike`
+
+Custom `fetch` implementation for URL sources and Cloud requests.
+
+### maxZipSizeBytes?
+
+> `optional` **maxZipSizeBytes?**: `number`
+
+Best-effort maximum size for each split ZIP output.
+
+### onChange?
+
+> `optional` **onChange?**: (`snapshot`) => `void`
+
+Called whenever the underlying Core job snapshot changes.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `snapshot` | `ZipJobSnapshot` |
+
+#### Returns
+
+`void`
+
+### signal?
+
+> `optional` **signal?**: `AbortSignal`
+
+Cancels local work or stops Cloud polling when aborted.
+
+### zipName?
+
+> `optional` **zipName?**: `string`
+
+Requested archive filename. `.zip` is added when omitted.
+
+## Type Declaration
+
+### apiBaseUrl?
+
+> `optional` **apiBaseUrl?**: `string`
+
+Cloud API origin; falls back to provider config or the SDK default.
+
+### createSession
+
+> **createSession**: (`context`) => `Promise`\<`CloudCreateSessionResult`\>
+
+Trusted callback that creates a Cloud session without exposing credentials.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `context` | `CloudCreateSessionContext` |
+
+#### Returns
+
+`Promise`\<`CloudCreateSessionResult`\>
+
+### files?
+
+> `optional` **files?**: `never`
+
+### filesTotal?
+
+> `optional` **filesTotal?**: `number`
+
+Initial UI count before the first session poll returns.
+
+### mode?
+
+> `optional` **mode?**: `EazipMode`
+
+Cloud generation mode passed to the session callback.
+
+### onChallenge?
+
+> `optional` **onChallenge?**: `never`
+
+### polling?
+
+> `optional` **polling?**: `PollingOptions`
+
+### publicKey?
+
+> `optional` **publicKey?**: `never`
+
+### strategy
+
+> **strategy**: `"cloud"`
+
+### turnstileToken?
+
+> `optional` **turnstileToken?**: `never`

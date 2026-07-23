@@ -1,14 +1,17 @@
 const WINDOWS_DRIVE_PREFIX = /^[a-zA-Z]:/;
 
+/** Sanitizes a requested archive filename and ensures it ends in `.zip`. */
 export function normalizeZipFilename(filename: string | undefined): string {
   const normalized = sanitizePath(filename || 'download.zip', 'download.zip');
   return normalized.toLowerCase().endsWith('.zip') ? normalized : `${normalized}.zip`;
 }
 
+/** Sanitizes a ZIP entry path and falls back when the result would be empty. */
 export function normalizeEntryName(filename: string | undefined, fallback: string): string {
   return sanitizePath(filename || fallback, fallback);
 }
 
+/** Reserves a ZIP entry path, adding a numeric suffix when it is already used. */
 export function uniqueEntryName(filename: string, used: Set<string>): string {
   if (!used.has(filename)) {
     used.add(filename);
