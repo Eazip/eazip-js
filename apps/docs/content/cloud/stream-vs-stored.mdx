@@ -34,20 +34,20 @@ limited time (24 hours by default). The expiry lives on the job, not just
 the session: `result.expiresAt` reflects it, and `@eazip/react`'s tray
 watches it and switches to a calm `'expired'` state once it passes rather
 than leaving a dead link behind. Re-run the export for fresh links; see
-[Sessions & resume](/docs/core/resume) for resuming a still-in-progress job
+[Sessions & resume](/docs/concepts/resume) for resuming a still-in-progress job
 instead.
 
 ## Zero egress either way
 
 Downloads through Eazip Cloud carry no egress fees regardless of `mode` —
 you pay for the zip job, not for bandwidth out. See
-[Zero-egress exports](/docs/recipes/zero-egress-exports) and
+[Zero-egress exports](/docs/guides/zero-egress-exports) and
 [pricing](https://eazip.io/cloud/?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=stream_vs_stored_pricing#pricing).
 
 ## Using `SessionsClient` directly
 
 The engine's `mode: 'stream'` default is an SDK-level choice, not a server
-one — call [`SessionsClient`](/docs/core/resume) directly and omit `mode`
+one — call [`SessionsClient`](/docs/concepts/resume) directly and omit `mode`
 entirely, and the API's own default applies instead:
 
 ```ts

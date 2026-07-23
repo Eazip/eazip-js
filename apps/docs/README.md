@@ -9,7 +9,7 @@ there is no Next `basePath`).
 
 ```sh
 npm run dev:docs           # from the repo root (or: npm run dev -w @eazip/docs)
-# open http://localhost:3000   (content pages at /docs/..., e.g. /docs/getting-started)
+# open http://localhost:3000   (content pages start at /docs)
 ```
 
 The dev server resolves `@eazip/core` / `@eazip/react` through the workspace

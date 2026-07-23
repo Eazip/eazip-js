@@ -9,7 +9,7 @@ describe('getOutboundAnalyticsEvent', () => {
         {
           linkText: '  Try Eazip Cloud  ',
           placement: 'remote_urls_recipe_cloud_cta',
-          sourcePage: '/docs/recipes/create-zip-from-remote-urls',
+          sourcePage: '/docs/guides/create-zip-from-remote-urls',
         },
       ),
     ).toEqual({
@@ -18,7 +18,7 @@ describe('getOutboundAnalyticsEvent', () => {
         link_text: 'Try Eazip Cloud',
         link_url: 'https://eazip.io/cloud/',
         placement: 'remote_urls_recipe_cloud_cta',
-        source_page: '/docs/recipes/create-zip-from-remote-urls',
+        source_page: '/docs/guides/create-zip-from-remote-urls',
       },
     });
   });
@@ -34,14 +34,14 @@ describe('getOutboundAnalyticsEvent', () => {
     expect(
       getOutboundAnalyticsEvent(new URL('https://www.npmjs.com/package/@eazip/core'), {
         placement: 'remote_urls_recipe_install',
-        sourcePage: '/docs/recipes/create-zip-from-remote-urls',
+        sourcePage: '/docs/guides/create-zip-from-remote-urls',
       }),
     ).toEqual({
       name: 'npm_package_click',
       params: {
         package_name: '@eazip/core',
         placement: 'remote_urls_recipe_install',
-        source_page: '/docs/recipes/create-zip-from-remote-urls',
+        source_page: '/docs/guides/create-zip-from-remote-urls',
       },
     });
   });

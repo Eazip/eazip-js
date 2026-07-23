@@ -1,0 +1,48 @@
+---
+title: Overview
+description: Add ZIP downloads to a browser app with React or framework-agnostic JavaScript, then scale with Eazip Cloud when the browser is no longer enough.
+---
+
+Eazip is an open-source toolkit for adding **Download all as ZIP** to a web
+application. Local jobs run entirely in the browser: no account, API key, or
+file upload is required.
+
+Choose the integration that matches your application. Both use the same job
+model, input rules, error behavior, and optional Cloud strategy.
+
+<IntegrationPicker placement="docs_overview" />
+
+## Try a local ZIP
+
+Select a few sample files and download them as a ZIP. The files are generated
+in this page and processed in your browser; their names and contents are not
+sent to Eazip.
+
+<TrayDemo />
+
+The demo UI uses the React integration. The JavaScript quickstart produces the
+same local ZIP with `createZip()` from `@eazip/core`.
+
+## One toolkit, two decisions
+
+Integration and execution strategy are separate choices:
+
+| Your app | Local — start here | Cloud — when the browser is not enough |
+| --- | --- | --- |
+| React | `@eazip/react` | `@eazip/react` with `strategy: 'cloud'` |
+| Any browser app | `@eazip/core` | `@eazip/core` with `strategy: 'cloud'` |
+
+Local is the default. Consider [Eazip Cloud](/docs/cloud) for thousands of
+URLs, multi-gigabyte exports, cross-origin sources you do not control, or jobs
+that must survive a reload.
+
+## Where to go next
+
+- [React quickstart](/docs/getting-started/react) — add `useEazip()` and the
+  drop-in `<EazipTray />`.
+- [Vanilla JavaScript quickstart](/docs/getting-started/javascript) — call the
+  framework-agnostic browser engine directly.
+- [How Eazip works](/docs/getting-started/how-it-works) — understand the
+  shared Local / Cloud job model.
+- [Guides](/docs/guides) — solve a specific ZIP workflow.
+- [Reference](/docs/reference) — look up the public APIs for both packages.

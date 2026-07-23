@@ -59,13 +59,12 @@ adapter layer, and any other framework can do the same.
 | --- | --- |
 | `status` | `'starting'` → `'processing'` → `'completed'` \| `'partial'` \| `'failed'` \| `'aborted'`. Terminal states are set exactly once. |
 | `progress` | Local only — phase, files/bytes completed vs. total. `null` for cloud jobs. |
-| `zips` | The zip(s) produced so far — see [Multi-zip splitting](/docs/core/splitting). |
-| `errors` / `skippedCount` | Per-file skips — see [Partial results & errors](/docs/core/partial-results). |
+| `zips` | The zip(s) produced so far — see [Multi-zip splitting](/docs/concepts/splitting). |
+| `errors` / `skippedCount` | Per-file skips — see [Partial results & errors](/docs/concepts/partial-results). |
 | `error` | The fatal error, set only when `status === 'failed'`. |
-| `session` | Cloud only — `{ sessionId, clientSecret, ... }`, populated as soon as the session exists. See [Sessions & resume](/docs/core/resume). |
+| `session` | Cloud only — `{ sessionId, clientSecret, ... }`, populated as soon as the session exists. See [Sessions & resume](/docs/concepts/resume). |
 | `result` | The full `ZipResult`, set once `status` is `'completed'` or `'partial'`. |
 
 `job.download()`/`job.downloadAll()` are shortcuts for
 `snapshot.result.download()` — nothing you couldn't call yourself once
 `result` is populated.
-

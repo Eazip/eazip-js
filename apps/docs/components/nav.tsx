@@ -2,28 +2,23 @@ import Link from 'next/link';
 import { LargeSearchToggle, SearchToggle } from 'fumadocs-ui/components/layout/search-toggle';
 import { LogoMark } from './logo-mark';
 import { ThemeToggle } from './theme-toggle';
-import { getEazipReactVersion } from '@/lib/version';
 import styles from './nav.module.css';
 
 const NAV_LINKS = [
-  { label: 'Get started', href: '/docs/getting-started' },
-  { label: 'React', href: '/docs/react' },
-  { label: 'Core', href: '/docs/core' },
+  { label: 'Get started', href: '/docs' },
+  { label: 'Guides', href: '/docs/guides' },
   { label: 'Cloud', href: '/docs/cloud' },
-  { label: 'Recipes', href: '/docs/recipes' },
-  { label: 'API Reference', href: '/docs/api' },
+  { label: 'Reference', href: '/docs/reference' },
 ];
 
 export function Nav() {
-  const version = getEazipReactVersion();
-
   return (
     <div className={styles.bar}>
       <div className={styles.inner}>
         <Link href="/" className={styles.brand}>
           <LogoMark size={27} />
           <span className={styles.wordmark}>Eazip</span>
-          <span className={styles.versionBadge}>v{version}</span>
+          <span className={styles.versionBadge}>Beta</span>
         </Link>
 
         <nav className={styles.links}>

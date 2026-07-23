@@ -1,0 +1,70 @@
+---
+title: Vanilla JavaScript quickstart
+description: Zip files in any browser application with the framework-agnostic @eazip/core package.
+---
+
+`@eazip/core` is the framework-agnostic engine behind Eazip. It works in any
+browser application with `fetch` and `Blob`, including applications that do
+not use a UI framework.
+
+## Install
+
+```sh
+npm install @eazip/core
+```
+
+## Zip and download
+
+`createZip` is the one-function path: pass it files, await the result, and
+download it.
+
+```ts
+import { createZip } from '@eazip/core';
+
+const result = await createZip({
+  files: fileInput.files ?? [],
+  zipName: 'export.zip',
+});
+
+result.download();
+```
+
+`files` accepts a `FileList`, `File` and `Blob` objects, URL strings, or
+`{ url | file, filename }` source objects. See
+[Inputs and filenames](/docs/concepts/inputs) for the complete resolution rules.
+
+## Observe progress or cancel
+
+Use `startZip` when you need the job before it completes:
+
+```ts
+import { startZip } from '@eazip/core';
+
+const job = startZip({
+  files: fileInput.files ?? [],
+  zipName: 'export.zip',
+});
+
+const unsubscribe = job.subscribe(() => {
+  const { status, progress } = job.getSnapshot();
+  console.log(status, progress?.filesCompleted, '/', progress?.filesTotal);
+});
+
+const result = await job.done;
+result.download();
+unsubscribe();
+```
+
+Call `job.abort()` to cancel. See
+[`createZip`, `startZip`, and `ZipJob`](/docs/concepts/zip-job) for the complete
+lifecycle.
+
+## Handle partial results
+
+By default, one failed source does not discard the rest of the archive. The
+result has a `partial` status and records per-file failures in `result.errors`.
+See [Partial results and errors](/docs/concepts/partial-results) for fail-fast and
+recovery options.
+
+Building with React? The [React quickstart](/docs/getting-started/react) adds a
+hook and ready-made progress UI around the same engine.

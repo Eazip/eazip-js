@@ -1,4 +1,4 @@
 {
-  "title": "@eazip/react",
+  "title": "React integration",
   "pages": ["index", "use-eazip", "eazip-tray", "i18n", "persistence", "headless"]
 }

@@ -1,5 +1,4 @@
 {
   "title": "Getting started",
-  "pages": ["index", "quickstart-vanilla", "how-it-works"]
+  "pages": ["react", "javascript", "how-it-works"]
 }
-

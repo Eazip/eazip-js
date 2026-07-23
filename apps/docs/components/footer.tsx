@@ -10,19 +10,20 @@ const COLUMNS: Array<{
   {
     heading: 'Docs',
     links: [
-      { label: 'Get started', href: '/docs/getting-started' },
-      { label: 'React SDK', href: '/docs/react' },
-      { label: 'Core API', href: '/docs/core' },
-      { label: 'Eazip Cloud', href: '/docs/cloud' },
+      { label: 'Overview', href: '/docs' },
+      { label: 'React quickstart', href: '/docs/getting-started/react' },
+      { label: 'Vanilla JavaScript', href: '/docs/getting-started/javascript' },
+      { label: 'Scale with Cloud', href: '/docs/cloud' },
+      { label: 'Reference', href: '/docs/reference' },
     ],
   },
   {
-    heading: 'Recipes',
+    heading: 'Guides',
     links: [
-      { label: 'Download selected files', href: '/docs/recipes/download-selected-files' },
-      { label: 'Download remote files as a ZIP', href: '/docs/recipes/create-zip-from-remote-urls' },
-      { label: 'ZIP S3 or R2 objects', href: '/docs/recipes/zip-s3-or-r2-objects' },
-      { label: 'Add progress, cancel, and retry', href: '/docs/recipes/progress-cancel-retry' },
+      { label: 'Download selected files', href: '/docs/guides/download-selected-files' },
+      { label: 'Download remote files as a ZIP', href: '/docs/guides/create-zip-from-remote-urls' },
+      { label: 'ZIP S3 or R2 objects', href: '/docs/guides/zip-s3-or-r2-objects' },
+      { label: 'Add progress, cancel, and retry', href: '/docs/guides/progress-cancel-retry' },
     ],
   },
   {

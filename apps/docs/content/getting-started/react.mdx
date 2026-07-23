@@ -1,0 +1,75 @@
+---
+title: React quickstart
+description: Install @eazip/react and ship your first ZIP download with a hook and drop-in tray.
+---
+
+`@eazip/react` adds a hook and progress UI on top of the shared browser engine.
+It is the shortest path when your application already uses React.
+
+## Install
+
+Eazip is in public beta — APIs may still shift before 1.0:
+
+```sh
+npm install @eazip/react
+```
+
+Requires React 18+. ZIPs are created in the browser by default, so nothing is
+uploaded.
+
+## Add an exporter
+
+`zip.download(...)` starts the export and returns immediately.
+`<EazipTray />` renders progress, cancellation, partial results, failures, and
+the completed download. No CSS import or provider is required.
+
+```tsx title="Exporter.tsx"
+import { EazipTray, useEazip } from '@eazip/react';
+
+function Exporter({ files }) {
+  const zip = useEazip();
+
+  return (
+    <>
+      <button onClick={() => zip.download({ files })}>
+        Download as ZIP
+      </button>
+      <EazipTray />
+    </>
+  );
+}
+```
+
+`files` accepts `File[]`, a `FileList`, URL strings, or `@eazip/core` source
+objects:
+
+```ts
+zip.download({
+  files: [
+    { file: blob, filename: 'notes.txt' },
+    { url: 'https://assets.example.com/hero.png' },
+  ],
+  zipName: 'assets.zip',
+});
+```
+
+See the [`useEazip()` guide](/docs/react/use-eazip) and
+[`<EazipTray />` guide](/docs/react/eazip-tray) for lifecycle and configuration
+details.
+
+## Scale when the browser is not enough
+
+For thousands of URLs, multi-gigabyte exports, or reload-resumable jobs, use
+the same call with the Cloud strategy:
+
+```tsx
+zip.download({
+  strategy: 'cloud',
+  publicKey: 'pk_ez_...',
+  files: urls,
+});
+```
+
+Start with [When to use Cloud](/docs/cloud) before adding a public key. Cloud
+product and HTTP API documentation live in the separate Cloud documentation
+area.
