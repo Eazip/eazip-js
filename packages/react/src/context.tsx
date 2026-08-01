@@ -6,10 +6,13 @@ import type { EazipConfig } from './types.js';
 
 const EazipContext = createContext<EazipStore | null>(null);
 
+/** Props for the optional `EazipProvider`. */
 export type EazipProviderProps = {
+  /** Shared defaults applied to downloads started by descendants. */
   config?: EazipConfig;
   /** Advanced: supply a preconfigured store (e.g. with injected deps in tests). */
   store?: EazipStore;
+  /** React subtree that should use this provider's store. */
   children: ReactNode;
 };
 

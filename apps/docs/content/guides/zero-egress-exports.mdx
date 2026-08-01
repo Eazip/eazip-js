@@ -1,23 +1,106 @@
 ---
 title: Zero-egress exports
-description: Eazip Cloud ships downloads with zero egress fees — stream or store, pay only for what you use.
+description: What a cloud export actually costs — no bandwidth-out fees, and how stream vs stored changes the bill.
 ---
 
-Eazip Cloud zips default to stream mode — generated on demand at download
-time, so exports are ready sooner and nothing sits around racking up storage
-costs. Pass `mode: 'stored'` when you'd rather keep a built archive around
-for repeat downloads. Either way, egress (bandwidth-out fees) is free: you
-pay only for what you use. Learn more at [eazip.io](https://eazip.io/cloud/?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=zero_egress_recipe).
+The usual reason a "Download all" feature is expensive isn't the zipping — it's
+the bandwidth. Build the archive on your own infrastructure and every download
+leaves through a metered egress pipe, so a popular export costs more the more
+people use it.
 
-## In short
+Eazip Cloud downloads carry **no egress fees**. You're billed for building and
+(optionally) keeping the archive, not for the bytes your users pull down. The
+practical consequence: the second, tenth, and hundredth download of the same
+export cost the same as the first — nothing.
+
+## What you're actually billed for
+
+Two meters, and which one you land on is `mode`:
+
+| Mode | What happens | What it meters |
+| --- | --- | --- |
+| `'stream'` (SDK default) | The zip is generated on demand at download time; nothing is kept | **Stream delivery**, by GB delivered |
+| `'stored'` | The zip is built once and kept until it expires | **Stored archives**, by GB-day |
+
+A GB-day is size × time: a 2 GB archive kept for 3 days is 6 GB-days. Storage
+is billed for how long the archive exists, so retention is a cost dial —
+shortening it on your Public App directly shortens the bill.
+
+Neither meter counts bandwidth out. See
+[pricing](https://eazip.io/cloud/?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=zero_egress_recipe#pricing)
+for the included quota per plan and the per-unit overage rates.
+
+## Picking the cheaper mode for your case
 
 ```ts
+// One-shot export: a user clicks "Download all" once and leaves.
+zip.download({ strategy: 'cloud', publicKey, files: urls });
+// mode defaults to 'stream' — nothing to store, so nothing accrues
+```
+
+```ts
+// Shared artifact: a link you hand to a client who downloads it repeatedly.
 zip.download({
   strategy: 'cloud',
   publicKey,
   files: urls,
-  mode: 'stored', // keep a built archive around for repeat downloads
+  mode: 'stored',
 });
+// built once; repeat downloads serve the same bytes without rebuilding
 ```
 
-A step-by-step walkthrough is coming soon.
+The rule of thumb:
+
+- **Downloaded once, promptly** → `'stream'`. You pay for one delivery and
+  store nothing.
+- **Downloaded several times, or over days** → `'stored'`. You pay to keep it,
+  but you're not rebuilding — and rebuilding means re-fetching every source,
+  which is slower and depends on those sources still being reachable.
+- **Sources are short-lived** (signed URLs that expire, files your users can
+  delete) → `'stored'`, so the archive stops depending on them the moment it's
+  built.
+
+Your Public App's allowed modes still apply — a `mode` your dashboard policy
+doesn't permit is rejected like an invalid origin. See
+[Stream vs stored](/docs/cloud/stream-vs-stored) for the full behavioral
+difference, including expiry.
+
+## Keeping stored costs down
+
+Retention is the lever, and it lives on the Public App rather than in SDK
+options — so it's a decision you make once per frontend, not per export:
+
+- Set **Max retention** to the shortest window your users actually need. An
+  export people download the same afternoon doesn't need 7 days.
+- Split huge exports with `maxZipSizeBytes`. Parts that expire on the same
+  schedule cost the same in total, but users can fetch just the part they need
+  instead of re-downloading 40 GB — see
+  [Multi-zip splitting](/docs/concepts/splitting).
+- Don't retry a whole export to recover a few files. `failOnUrlError: false`
+  keeps the good files and reports the rest, which is cheaper than rebuilding.
+
+## Local is still free
+
+Nothing about this replaces the local strategy. A handful of files that fit in
+tab memory costs nothing at all, because no server is involved:
+
+```ts
+zip.download({ files }); // no strategy, no key, no bill
+```
+
+Cloud earns its cost when the browser can't do the job — thousands of URLs,
+multi-gigabyte totals, exports that must survive a reload. See
+[When to use Eazip Cloud](/docs/cloud) for where that line sits, and
+[Zip GB-scale, 1,000+ URL jobs](/docs/guides/gb-scale-url-jobs) for the
+large-export walkthrough.
+
+## What "zero egress" does not cover
+
+- **Your own sources.** Eazip fetches your URLs from its servers, so the
+  bandwidth *out of your bucket or CDN into Eazip* is still billed by whoever
+  serves it. `'stored'` pays that once per export; `'stream'` pays it again on
+  every download.
+- **Included quota.** Zero egress means no bandwidth line item, not unmetered
+  use — stream delivery and stored archives each have a monthly included
+  amount, and paid plans can continue past it with usage-based overage if you
+  turn it on.

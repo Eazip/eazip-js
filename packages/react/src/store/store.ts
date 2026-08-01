@@ -39,6 +39,7 @@ import {
 
 const MAX_TIMEOUT_MS = 2_147_483_647;
 
+/** Injectable runtime dependencies for advanced usage and deterministic tests. */
 export type EazipStoreDeps = {
   startZip: typeof startZip;
   resumeZip: typeof resumeZip;
@@ -87,6 +88,12 @@ function defaultDeps(): EazipStoreDeps {
   };
 }
 
+/**
+ * Framework-independent state store used by the React hook and tray.
+ *
+ * Construct a store when you need isolated state or injected dependencies,
+ * then pass it to `EazipProvider`.
+ */
 export class EazipStore {
   private readonly deps: EazipStoreDeps;
   private config: EazipConfig;
@@ -102,6 +109,7 @@ export class EazipStore {
     this.config = config ?? {};
   }
 
+  /** Subscribes to immutable snapshot changes. */
   subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener);
     return () => {
@@ -109,14 +117,18 @@ export class EazipStore {
     };
   };
 
+  /** Returns the current client snapshot. */
   getSnapshot = (): EazipSnapshot => this.snapshot;
 
+  /** Returns the empty server-render snapshot used for hydration. */
   getServerSnapshot = (): EazipSnapshot => EMPTY_SNAPSHOT;
 
+  /** Merges new shared defaults into the current configuration. */
   setConfig(config: EazipConfig): void {
     this.config = { ...this.config, ...config };
   }
 
+  /** Returns the current shared configuration. */
   getConfig(): EazipConfig {
     return this.config;
   }
@@ -138,11 +150,13 @@ export class EazipStore {
     this.restoreFromEnvelope(envelope);
   };
 
+  /** Starts a ZIP task and returns its React task id. */
   download = (options: EazipDownloadOptions): string => {
     const resolved = this.resolveDownloadOptions(options);
     return this.startTask(resolved);
   };
 
+  /** Aborts and removes the matching active task. */
   cancel = (taskId?: string): void => {
     const internal = this.currentMatching(taskId);
     if (!internal) return;
@@ -150,16 +164,19 @@ export class EazipStore {
     this.clearCurrent();
   };
 
+  /** Removes the matching active task. */
   dismiss = (taskId?: string): void => {
     this.cancel(taskId);
   };
 
+  /** Starts the matching task again with its retained request options. */
   retry = (taskId?: string): void => {
     const internal = this.currentMatching(taskId);
     if (!internal?.request) return;
     this.download(internal.request.options);
   };
 
+  /** Downloads one ZIP output from a completed task. */
   downloadZip = (taskId: string, zipIndex: number): void => {
     const internal = this.currentMatching(taskId);
     if (!internal) return;
@@ -188,6 +205,7 @@ export class EazipStore {
     this.commit();
   };
 
+  /** Downloads every ZIP output from a completed task with staggered clicks. */
   downloadAll = (taskId?: string): void => {
     const internal = this.currentMatching(taskId);
     if (!internal) return;
@@ -216,12 +234,14 @@ export class EazipStore {
     this.commit();
   };
 
+  /** Sets whether the tray body is expanded. */
   setExpanded = (expanded: boolean): void => {
     if (this.expanded === expanded) return;
     this.expanded = expanded;
     this.commit();
   };
 
+  /** Toggles whether the tray body is expanded. */
   toggleExpanded = (): void => {
     this.setExpanded(!this.expanded);
   };

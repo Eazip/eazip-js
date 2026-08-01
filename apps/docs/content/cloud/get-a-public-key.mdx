@@ -1,0 +1,149 @@
+---
+title: "Get a public key"
+description: "Create a Public App on the dashboard and get the pk_ez_ key the SDK needs."
+---
+
+`strategy: 'cloud'` needs a `publicKey`. This page is the five minutes between
+"I want to try Cloud" and a key in your `.env`.
+
+You need an Eazip account —
+[sign up free](https://app.eazip.io/sign-up?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=get_a_public_key_signup)
+(no card). The free tier is enough to run the export in this page end to end.
+
+## 1. Create a Public App
+
+A **Public App** is the policy your key carries: which sites may use it, which
+hosts it may fetch files from, and the per-session ceilings. Every publishable
+key issued for the app inherits that policy.
+
+In the dashboard, open
+[**Public Apps**](https://app.eazip.io/public-apps?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=get_a_public_key_apps)
+→ **Create app**, and give it a name your team will recognize
+(`Acme Photos`).
+
+## 2. Add the websites that can use the key
+
+Under **Websites that can use this key**, add the exact browser addresses where
+*your app* runs. The API compares each session-create request against the
+`Origin` header the browser sends.
+
+Add every origin you'll develop and ship from, including local dev:
+
+```text
+http://localhost:3000
+https://staging.acme.example
+https://app.acme.example
+```
+
+Use scheme + host + optional port. Do not add a path or query —
+`https://app.acme.example/exports` is not an origin. A trailing slash is
+normalized for you. A request from anywhere else is rejected, which is what
+makes the key safe to ship.
+
+## 3. Add where the files come from
+
+Under **Where the files come from**, add the hosts the API is allowed to fetch
+from. This is usually a different list from the websites above: your frontend
+address belongs in the first list, while your CDN, bucket, or asset host belongs
+here.
+
+```text
+cdn.acme.example
+acme-exports.s3.amazonaws.com
+```
+
+Enter bare hostnames — no scheme, port, or wildcard. **Only this path** is
+optional; use it when Eazip should fetch from one folder such as `/exports`
+rather than the whole host.
+
+Both lists work the same way: edit each row directly, use **Add another…** to
+add an environment or file host, then save everything once at the bottom.
+
+<Callout type="warn" title="Some hosts refuse server-side fetches">
+  Local jobs fetch from the user's browser; `cloud` fetches from Eazip's
+  servers, and a few hosts allow the first and reject the second.
+  `raw.githubusercontent.com` is the one you're most likely to try first — it
+  answers a browser fine but returns **403** to our fetchers, so a job built
+  from GitHub raw URLs fails. Use a CDN in front of the content
+  (`cdn.jsdelivr.net` works for npm and GitHub content), your own asset
+  domain, or signed bucket URLs.
+</Callout>
+
+## 4. Keep the recommended defaults
+
+**Advanced settings** starts collapsed because most apps do not need to change
+it. The defaults enable both delivery modes, allow 100 files per export, retain
+stored ZIPs for one day, and use your plan's size limit.
+
+Open it only when you need a stricter delivery mode, file count, retention, or
+total-size ceiling. You can change these settings later; edits apply to new
+exports.
+
+## 5. Create the app and copy the key
+
+Click **Create app & get key**. The key looks like `pk_ez_…` and stays readable
+on the dashboard, so you don't have to store it anywhere secret:
+
+```tsx title="Exporter.tsx"
+'use client';
+
+import { EazipTray, useEazip } from '@eazip/react';
+
+function Exporter({ urls }) {
+  const zip = useEazip();
+
+  return (
+    <>
+      <button
+        onClick={() =>
+          zip.download({
+            strategy: 'cloud',
+            publicKey: process.env.NEXT_PUBLIC_EAZIP_KEY,
+            files: urls,
+          })
+        }
+      >
+        Download as ZIP
+      </button>
+      <EazipTray />
+    </>
+  );
+}
+```
+
+It ships in your JS bundle by design — see
+[Public keys & origins](/docs/cloud/keys-and-origins) for why that's safe and
+what the policy behind it enforces.
+
+<Callout type="info" title="Public key, not API key">
+  The `zk_…` keys under **API Keys** are secret and belong on a server. They
+  are for calling the Cloud HTTP API directly, not for the browser SDK. If you
+  create a session from your own backend instead, see
+  [Backend-created sessions](/docs/cloud/backend-sessions).
+</Callout>
+
+## 6. Run one export
+
+Point a session at two files on an allowed source host and press the button.
+`<EazipTray />` narrates the same five states as a local job, so a working
+cloud export looks like a working local one.
+
+If it doesn't work, the fix is almost always on the dashboard rather than in
+SDK options:
+
+| What you see | What to change |
+| --- | --- |
+| Session never starts, origin error | Add the exact browser address (including port) under **Websites that can use this key** |
+| Session starts, job fails | Check **Where the files come from**, and confirm the host serves server-side fetches |
+| Rejected before the job runs | Session is over the app's **Max files** or size ceiling |
+
+For the failure taxonomy and how errors surface in the tray, see
+[Partial results & errors](/docs/concepts/partial-results).
+
+## Next
+
+- [Stream vs stored](/docs/cloud/stream-vs-stored) — delivery modes and expiry
+- [Zip GB-scale, 1,000+ URL jobs](/docs/guides/gb-scale-url-jobs) — a full
+  worked example
+- Plan limits and pricing live in the
+  [Eazip Cloud product area](https://eazip.io/cloud/?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=get_a_public_key_pricing#pricing)

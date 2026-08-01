@@ -1,0 +1,153 @@
+---
+title: "@eazip/react"
+description: The recommended React hook, provider, and tray APIs.
+---
+
+`@eazip/react` adds React state and a ready-made progress UI on top of
+`@eazip/core`.
+
+```sh
+npm install @eazip/react
+```
+
+Most applications use two exports:
+
+```tsx
+import { EazipTray, useEazip } from '@eazip/react';
+```
+
+## `useEazip()`
+
+Returns the command used to start a ZIP and the current task state.
+
+```tsx
+function ExportButton({ files }) {
+  const zip = useEazip();
+
+  return (
+    <button
+      disabled={zip.isBusy}
+      onClick={() => zip.download({ files, zipName: 'export.zip' })}
+    >
+      Download as ZIP
+    </button>
+  );
+}
+```
+
+### Returned members
+
+| Member | Description |
+| --- | --- |
+| `download(options)` | Starts a ZIP task and returns its id immediately. |
+| `task` | The current task, or `null`. |
+| `isBusy` | `true` while the current task is processing. |
+| `cancel(taskId?)` | Cancels and clears a task. |
+| `retry(taskId?)` | Repeats a retained failed or expired task. |
+| `dismiss(taskId?)` | Removes the task from the UI. |
+| `downloadZip(taskId, index)` | Downloads one completed ZIP part. |
+| `downloadAll(taskId?)` | Downloads every completed ZIP part. |
+
+`download()` creates the ZIP locally by default:
+
+```ts
+zip.download({
+  files,
+  zipName: 'export.zip',
+  autoDownload: true,
+});
+```
+
+The commonly used options are:
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `files` | required | Files, blobs, URLs, or source objects. |
+| `zipName` | `download.zip` | Output ZIP name. |
+| `strategy` | `'local'` | Use `'cloud'` for Eazip Cloud. |
+| `autoDownload` | provider setting or `true` | Start the browser download when ready. |
+| `failOnUrlError` | `false` locally | Fail instead of returning a partial ZIP. |
+| `maxZipSizeBytes` | — | Split output into multiple ZIPs near this size. |
+| `signal` | — | External cancellation signal. |
+
+Cloud uses the same command:
+
+```ts
+zip.download({
+  strategy: 'cloud',
+  publicKey: 'pk_ez_...',
+  files: urls,
+});
+```
+
+For task fields, error behavior, and backend-created sessions, see the
+[`useEazip()` guide](/docs/react/use-eazip).
+
+## `<EazipTray />`
+
+Renders progress, cancellation, partial results, retry actions, and completed
+downloads. Place it once in the application; no stylesheet import is required.
+
+```tsx
+function App() {
+  return (
+    <>
+      <Exporter />
+      <EazipTray />
+    </>
+  );
+}
+```
+
+### Common props
+
+| Prop | Default | Description |
+| --- | --- | --- |
+| `placement` | `'corner'` | `'corner'`, `'bar'`, or `'anchored'`. |
+| `theme` | `'auto'` | `'light'`, `'dark'`, or the system preference. |
+| `accent` | `'#3056d3'` | Accent color for progress and actions. |
+| `autoDownload` | store setting | Overrides automatic download behavior. |
+| `autoHideMs` | `20000` | Delay before hiding a completed tray; `0` disables it. |
+| `locale` | `'en'` | Built-in `'en'` or `'ja'` messages. |
+| `messages` | — | Overrides selected tray messages. |
+| `onStateChange` | — | Runs when task identity or lifecycle state changes. |
+
+For portal placement, embedding, accessibility, and every visual option, see
+the [`<EazipTray />` guide](/docs/react/eazip-tray).
+
+## `<EazipProvider />`
+
+The provider is optional. Add it when several components need shared defaults,
+or when a test or application root needs isolated Eazip state.
+
+```tsx
+import { EazipProvider } from '@eazip/react';
+
+<EazipProvider
+  config={{
+    strategy: 'cloud',
+    publicKey: 'pk_ez_...',
+    defaults: { zipName: 'export.zip' },
+  }}
+>
+  <App />
+</EazipProvider>
+```
+
+| Config | Description |
+| --- | --- |
+| `strategy` | Default local or Cloud strategy. |
+| `publicKey` / `apiBaseUrl` | Shared Cloud connection defaults. |
+| `defaults` | Shared ZIP name, compression, mode, failure, and splitting defaults. |
+| `autoDownload` | Default automatic-download behavior. |
+| `persist` / `storageKey` | Persistence settings for resumable Cloud tasks. |
+
+Values passed directly to `download()` take precedence over provider defaults.
+
+## Related
+
+- [React quickstart](/docs/getting-started/react)
+- [React integration](/docs/react)
+- [Build a headless UI](/docs/react/headless)
+- [Localization](/docs/react/i18n)
+- [Persistence](/docs/react/persistence)

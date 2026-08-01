@@ -1,0 +1,151 @@
+---
+title: "@eazip/core"
+description: The recommended framework-agnostic APIs for creating and controlling ZIP jobs.
+---
+
+`@eazip/core` is the browser engine used by every Eazip integration. Most
+applications only need `createZip()` or `startZip()`.
+
+```sh
+npm install @eazip/core
+```
+
+| API | Choose it when |
+| --- | --- |
+| `createZip(options)` | You only need the finished ZIP. |
+| `startZip(options)` | You need progress, cancellation, or job state. |
+
+Both APIs create ZIPs locally by default. Set `strategy: 'cloud'` when the job
+is too large or must survive a page reload.
+
+## `createZip(options)`
+
+Creates a ZIP and resolves when its output is ready.
+
+```ts
+import { createZip } from '@eazip/core';
+
+const result = await createZip({
+  files,
+  zipName: 'export.zip',
+});
+
+result.download();
+```
+
+The promise resolves for both complete and partial results. It rejects when
+the whole job fails or is cancelled.
+
+### Common options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `files` | `FileList`, `File`, `Blob`, URL, source object, or an array | required | Sources to include in the ZIP. |
+| `zipName` | `string` | `download.zip` | Output name. `.zip` is added when omitted. |
+| `strategy` | `'local' \| 'cloud'` | `'local'` | Where the ZIP is created. |
+| `failOnUrlError` | `boolean` | `false` locally | Fail the whole job instead of returning a partial ZIP. |
+| `maxZipSizeBytes` | `number` | — | Split output into multiple ZIPs near this size. |
+| `signal` | `AbortSignal` | — | Cancel local work or stop Cloud polling. |
+
+For accepted source shapes and filename rules, see
+[Inputs and filenames](/docs/concepts/inputs).
+
+### Local-only options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `compressionLevel` | `0`–`9` | `6` | Deflate compression level. |
+| `concurrency` | `number` | `4` | Maximum parallel URL fetches. |
+| `onProgress` | `(progress) => void` | — | Receives local fetch and archive progress. |
+
+### Cloud
+
+The shortest Cloud call adds a public key:
+
+```ts
+const result = await createZip({
+  strategy: 'cloud',
+  publicKey: 'pk_ez_...',
+  files: urls,
+  zipName: 'export.zip',
+});
+```
+
+Use a backend-created session when URLs or credentials must not reach the
+browser. See [Backend-created sessions](/docs/cloud/backend-sessions).
+
+### Result
+
+| Member | Description |
+| --- | --- |
+| `status` | `'completed'` or `'partial'`. |
+| `strategy` | `'local'` or `'cloud'`. |
+| `zips` | Output ZIP metadata, including filenames and download URLs. |
+| `errors` / `skippedCount` | Sources omitted from a partial result. |
+| `download(index?)` | Downloads one ZIP, defaulting to the first. |
+| `downloadAll()` | Downloads every ZIP part. |
+| `dispose()` | Local results only: releases their browser object URLs. |
+
+Call `dispose()` only after users no longer need to download the local result.
+
+## `startZip(options)`
+
+Starts the same operation but returns a job immediately.
+
+```ts
+import { startZip } from '@eazip/core';
+
+const job = startZip({ files, zipName: 'export.zip' });
+
+const unsubscribe = job.subscribe(() => {
+  const snapshot = job.getSnapshot();
+  console.log(snapshot.status, snapshot.progress);
+});
+
+const result = await job.done;
+result.download();
+unsubscribe();
+```
+
+`startZip()` accepts the same options as `createZip()`.
+
+### Job members
+
+| Member | Description |
+| --- | --- |
+| `getSnapshot()` | Returns the current immutable job state. |
+| `subscribe(listener)` | Runs the listener after state changes and returns an unsubscribe function. |
+| `done` | Resolves with the result or rejects on cancellation or fatal failure. |
+| `abort()` | Cancels local work. For Cloud, it stops polling but not the server job. |
+| `download(index?)` | Downloads a ready ZIP. |
+| `downloadAll()` | Downloads all ready ZIP parts. |
+| `dispose()` | Releases local object URLs. |
+
+For snapshot fields and lifecycle details, see
+[`ZipJob` lifecycle](/docs/concepts/zip-job).
+
+## Handle errors
+
+Use `isEazipError()` when you need the stable SDK error code:
+
+```ts
+import { createZip, isEazipError } from '@eazip/core';
+
+try {
+  await createZip({ files });
+} catch (error) {
+  if (isEazipError(error)) {
+    console.error(error.code, error.status, error.retryAfterMs);
+  }
+}
+```
+
+Per-file failures usually produce a partial result instead of rejecting. See
+[Partial results and errors](/docs/concepts/partial-results).
+
+## Related
+
+- [Vanilla JavaScript quickstart](/docs/getting-started/javascript)
+- [Progress, cancel, and retry](/docs/guides/progress-cancel-retry)
+- [Multi-ZIP splitting](/docs/concepts/splitting)
+- [When to use Cloud](/docs/cloud)

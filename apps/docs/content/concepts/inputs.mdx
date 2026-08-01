@@ -66,3 +66,11 @@ them, not the browser — so a `File`/`Blob` source throws
 `EazipValidationError('CLOUD_URL_SOURCES_ONLY')`. See
 [Why Eazip Cloud](/docs/cloud) for what "fetched by the API" implies for CORS
 and allowed hosts.
+
+Fetching server-side also means CORS stops mattering and reachability starts:
+a host can serve a browser and still refuse Eazip's servers.
+`raw.githubusercontent.com` is the common example — it returns `403` to the
+API, so put a CDN (`cdn.jsdelivr.net` works for npm and GitHub content), your
+own asset domain, or signed bucket URLs in front of the content. See
+[Get a public key](/docs/cloud/get-a-public-key) for the allowed-source-hosts
+setup.

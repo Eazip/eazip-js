@@ -3,6 +3,7 @@
 import { en } from './en.js';
 import { ja } from './ja.js';
 
+/** Complete message catalog rendered by `EazipTray`. */
 export type EazipTrayMessages = {
   preparingTitle: (filesTotal: number) => string;
   downloadReadyTitle: string;
@@ -39,6 +40,7 @@ export type EazipTrayMessages = {
   progressLabel: string;
 };
 
+/** Built-in locale identifiers. */
 export type EazipTrayLocale = 'en' | 'ja';
 
 const CATALOGS: Record<EazipTrayLocale, EazipTrayMessages> = { en, ja };

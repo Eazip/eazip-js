@@ -3,7 +3,7 @@ import type { EazipSourceFile, ZipInput } from './types.js';
 
 /**
  * Normalizes any accepted `files` input into EazipSourceFile[].
- * Throws EazipValidationError('EMPTY_INPUT' | 'INVALID_INPUT') synchronously.
+ * Throws `EazipValidationError` synchronously for empty or invalid input.
  */
 export function toSourceFiles(input: ZipInput): EazipSourceFile[] {
   if (typeof Blob !== 'undefined' && input instanceof Blob) {

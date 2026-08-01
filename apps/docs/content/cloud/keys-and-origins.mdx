@@ -5,12 +5,14 @@ description: "Creating a public key and allowing your origins and source hosts."
 
 Every direct `cloud` call — one where the SDK creates the session itself,
 rather than a [backend-created session](/docs/cloud/backend-sessions) — needs a
-`publicKey`, created from your Eazip dashboard at
-[eazip.io](https://eazip.io/cloud/?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=keys_and_origins):
+`publicKey`:
 
 ```ts
 zip.download({ strategy: 'cloud', publicKey: 'pk_ez_...', files: urls });
 ```
+
+This page explains what the key is and what constrains it. For the click-by-click
+steps to create one, see [Get a public key](/docs/cloud/get-a-public-key).
 
 ## It's meant to be public
 
@@ -26,14 +28,12 @@ What keeps a public key from being usable by anyone who copies it is the
 Public App policy behind it, configured on the dashboard rather than in the
 SDK:
 
-- **Allowed origins.** The API validates the request's origin against an
-  allowlist you configure per Public App, so your key only creates sessions
-  from the site(s) you've named — copying it into an unrelated app's
-  frontend doesn't work.
-- **Allowed source hosts.** Because `cloud` sources are URLs the *API*
-  fetches (see [Why Eazip Cloud](/docs/cloud)), the Public App also scopes which
-  hosts it's willing to fetch from — add your CDN, bucket, or asset domain
-  there before pointing a session at it.
+- **Websites that can use this key** (allowed origins). The API validates the
+  request's exact browser origin, so copying the key into an unrelated
+  frontend does not work.
+- **Where the files come from** (allowed source hosts). Because `cloud`
+  sources are URLs the *API* fetches (see [Why Eazip Cloud](/docs/cloud)), add
+  your CDN, bucket, or asset host before pointing a session at it.
 
 A request from an origin or a source host outside those allowlists is
 rejected with an API error, caught the same way as any other: an
