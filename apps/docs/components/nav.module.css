@@ -37,17 +37,6 @@
   color: var(--ez-fg);
 }
 
-.versionBadge {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 11px;
-  color: var(--ez-fg3);
-  border: 1px solid var(--ez-border);
-  border-radius: 5px;
-  padding: 1px 6px;
-  margin-left: 2px;
-  white-space: nowrap;
-}
-
 .links {
   display: flex;
   gap: 20px;

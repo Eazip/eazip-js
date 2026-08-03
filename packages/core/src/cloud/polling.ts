@@ -1,5 +1,6 @@
 import { EazipAbortError, EazipApiError, EazipJobFailedError } from '../shared/errors.js';
 import type { EazipCloudSession, PollCloudSessionOptions } from '../shared/types.js';
+import { cloudJobFailureMessage } from './failures.js';
 
 export type PollFetchSession = (signal?: AbortSignal) => Promise<EazipCloudSession>;
 
@@ -21,7 +22,10 @@ export async function pollSession(fetchSession: PollFetchSession, options: PollC
     options.onSession?.(session);
     if (session.job.status === 'completed') return session;
     if (session.job.status === 'failed') {
-      throw new EazipJobFailedError();
+      throw new EazipJobFailedError(cloudJobFailureMessage(session.job), {
+        failedCount: session.job.failedCount,
+        failures: session.job.failures,
+      });
     }
 
     const delayMs = withJitter(intervalMs, jitter);

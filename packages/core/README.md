@@ -126,7 +126,13 @@ await job.done;
 ## Error handling
 
 ```ts
-import { createZip, isEazipError, EazipSessionExpiredError, EazipRateLimitError } from '@eazip/core';
+import {
+  createZip,
+  isEazipError,
+  EazipJobFailedError,
+  EazipRateLimitError,
+  EazipSessionExpiredError,
+} from '@eazip/core';
 
 try {
   const result = await createZip({ strategy: 'cloud', publicKey, files });
@@ -135,6 +141,8 @@ try {
     // links aged out — re-run the export
   } else if (error instanceof EazipRateLimitError) {
     console.log('retry after', error.retryAfterMs);
+  } else if (error instanceof EazipJobFailedError) {
+    console.table(error.failures); // safe codes, input indexes, and HTTP statuses
   } else if (isEazipError(error)) {
     console.log(error.code, error.message);
   }
@@ -165,7 +173,8 @@ const session = await client.poll(created.id, { clientSecret: created.clientSecr
 
 ## Entry points
 
-- `@eazip/core` — everything
+- `@eazip/core` — `createZip`/`startZip`/`resumeZip`, strategy-specific job
+  starters, public types, and error classes
 - `@eazip/core/local` — browser zipping only (no cloud code)
 - `@eazip/core/cloud` — cloud sessions only (no zip.js)
 - `@eazip/core/shared` — types, errors, input/download utilities
@@ -175,7 +184,8 @@ const session = await client.poll(created.id, { clientSecret: created.clientSecr
 - Browser-first ESM. Local URL sources are fetched by the browser and must be
   CORS-accessible; cloud URL sources are fetched by the Eazip API.
 - `@eazip/core` supersedes the earlier `@eazip/client` beta.
-- Use the beta channel while in preview: APIs may change before `1.0.0`.
+- Stable releases remain pre-`1.0.0`; see the repository changelog for any
+  breaking `0.x` changes.
 
 ## License
 

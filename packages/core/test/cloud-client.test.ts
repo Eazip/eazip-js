@@ -55,6 +55,8 @@ function sessionBody(jobOverrides: Record<string, unknown> = {}) {
         max_zip_size_bytes: null,
         zip_count: 1,
         total_size: 123,
+        failed_count: 0,
+        failures: [],
         zips: [{
           id: 'zip_1',
           sequence: 1,
@@ -135,6 +137,8 @@ describe('SessionsClient', () => {
       zipFilename: 'docs.zip',
       zipCount: 1,
       totalSize: 123,
+      failedCount: 0,
+      failures: [],
     });
     expect(session.job.zips[0]).toEqual({
       id: 'zip_1',
@@ -275,10 +279,18 @@ describe('startCloudZip', () => {
     expect(storedRequest['mode']).toBe('stored');
   });
 
-  it('computes partial results from url_count vs file_count', async () => {
+  it('computes partial results and maps privacy-safe failure details', async () => {
     const fetch = fetchQueue([
       () => jsonResponse(createdBody()),
-      () => jsonResponse(sessionBody({ url_count: 5, file_count: 3 })),
+      () => jsonResponse(sessionBody({
+        url_count: 5,
+        file_count: 3,
+        failed_count: 2,
+        failures: [
+          { code: 'SOURCE_HTTP_ERROR', file_index: 3, status: 404 },
+          { code: 'SOURCE_TIMEOUT', file_index: 4 },
+        ],
+      })),
     ]);
     const job = startCloudZip({
       strategy: 'cloud',
@@ -291,6 +303,10 @@ describe('startCloudZip', () => {
     const result = await job.done;
     expect(result.status).toBe('partial');
     expect(result.skippedCount).toBe(2);
+    expect(result.errors).toEqual([
+      { code: 'SOURCE_HTTP_ERROR', message: 'Source file 4 returned HTTP 404', fileIndex: 3 },
+      { code: 'SOURCE_TIMEOUT', message: 'Source file 5 timed out', fileIndex: 4 },
+    ]);
   });
 
   it('can use an app-provided createSession callback instead of sending URLs from the browser', async () => {
@@ -401,7 +417,15 @@ describe('startCloudZip', () => {
   it('fails with EazipJobFailedError when the job fails server-side', async () => {
     const fetch = fetchQueue([
       () => jsonResponse(createdBody()),
-      () => jsonResponse(sessionBody({ status: 'failed', zips: [] })),
+      () => jsonResponse(sessionBody({
+        status: 'failed',
+        zips: [],
+        failed_count: 2,
+        failures: [
+          { code: 'SOURCE_HTTP_ERROR', file_index: 0, status: 403 },
+          { code: 'LIMIT_EXCEEDED' },
+        ],
+      })),
     ]);
     const job = startCloudZip({
       strategy: 'cloud',
@@ -411,7 +435,16 @@ describe('startCloudZip', () => {
       polling: FAST_POLLING,
       fetch,
     });
-    await expect(job.done).rejects.toBeInstanceOf(EazipJobFailedError);
+    await expect(job.done).rejects.toMatchObject({
+      code: 'JOB_FAILED',
+      message: 'The zip job failed: Source file 1 returned HTTP 403 (+1 more)',
+      failedCount: 2,
+      failures: [
+        { code: 'SOURCE_HTTP_ERROR', fileIndex: 0, status: 403 },
+        { code: 'LIMIT_EXCEEDED' },
+      ],
+    });
+    expect(job.getSnapshot().error).toBeInstanceOf(EazipJobFailedError);
   });
 
   it('rejects non-URL sources and missing public keys synchronously', () => {

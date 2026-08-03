@@ -1,4 +1,9 @@
-import type { EazipCloudJobStatus, EazipMode, EazipZipStatus } from '../shared/types.js';
+import type {
+  EazipCloudFailureCode,
+  EazipCloudJobStatus,
+  EazipMode,
+  EazipZipStatus,
+} from '../shared/types.js';
 
 export type ApiErrorResponse = {
   success: false;
@@ -44,6 +49,13 @@ export type ApiSessionDetailResponse = {
       max_zip_size_bytes: number | null;
       zip_count: number;
       total_size: number | null;
+      /** Optional while older API deployments are still in service. */
+      failed_count?: number;
+      failures?: Array<{
+        code: EazipCloudFailureCode;
+        file_index?: number;
+        status?: number;
+      }>;
       zips: Array<{
         id: string;
         sequence: number;

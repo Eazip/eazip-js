@@ -1,6 +1,22 @@
-export * from './shared/index.js';
-export { startLocalZip, createLocalZip, normalizeEntryName, normalizeZipFilename, uniqueEntryName } from './local/index.js';
-export { startCloudZip, resumeZip, DEFAULT_API_BASE_URL, SessionsClient, type SessionsClientOptions } from './cloud/index.js';
+export type * from './shared/types.js';
+export type { EazipErrorOptions } from './shared/errors.js';
+export {
+  EazipAbortError,
+  EazipApiError,
+  EazipChallengeRequiredError,
+  EazipDownloadExpiredError,
+  EazipErrorBase,
+  EazipJobFailedError,
+  EazipNetworkError,
+  EazipQuotaError,
+  EazipRateLimitError,
+  EazipSessionExpiredError,
+  EazipSessionRevokedError,
+  EazipValidationError,
+  isEazipError,
+} from './shared/errors.js';
+export { startLocalZip, createLocalZip } from './local/index.js';
+export { startCloudZip, resumeZip } from './cloud/index.js';
 
 import { startCloudZip } from './cloud/index.js';
 import { startLocalZip } from './local/index.js';

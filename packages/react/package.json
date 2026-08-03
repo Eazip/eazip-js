@@ -1,11 +1,11 @@
 {
   "name": "@eazip/react",
-  "version": "0.1.0-beta.3",
+  "version": "0.1.0",
   "description": "React hooks and a download tray for ZIP files and remote URLs in browser apps, with optional Eazip Cloud",
   "type": "module",
   "license": "MIT",
   "author": "Eazip <oss@eazip.io>",
-  "homepage": "https://eazip.io/docs/react",
+  "homepage": "https://eazip.io/docs/reference/react",
   "repository": {
     "type": "git",
     "url": "https://github.com/Eazip/eazip-js",
@@ -50,7 +50,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@eazip/core": "^0.2.0-beta.3"
+    "@eazip/core": "^0.2.0"
   },
   "peerDependencies": {
     "react": ">=18",

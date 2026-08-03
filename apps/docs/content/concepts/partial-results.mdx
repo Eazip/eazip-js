@@ -27,11 +27,12 @@ would just be noise — so the job fails outright instead, with
 `EazipValidationError('ALL_SOURCES_FAILED')` (the skipped-file list is
 attached as `cause`).
 
-This per-file detail is a **local-strategy** feature. Cloud results also
-expose `errors` and `skippedCount` on `ZipResult`, but the Public Sessions
-API only reports a skipped *count*, not per-file detail — so for cloud jobs
-`errors` is always `[]`, and `skippedCount` is derived from
-`urlCount - fileCount`.
+Cloud results expose the same `errors` and `skippedCount` shape without
+revealing source URLs or free-form server messages. A Cloud error contains a
+stable code, the zero-based input `fileIndex` when available, and a safe
+message. HTTP failures also retain the upstream status in
+`result.session.job.failures`. `skippedCount` is still derived from
+`urlCount - fileCount` once the completed job reports both counts.
 
 ## Error taxonomy
 
@@ -51,7 +52,7 @@ every other wire code stays a generic `EazipApiError` with `code` preserved:
 | `EazipDownloadExpiredError` | `DOWNLOAD_URL_EXPIRED` | Cloud only — a signed download link was used after it expired. |
 | `EazipRateLimitError` | e.g. `PUBLIC_APP_RATE_LIMITED` | Cloud only — too many requests; carries `retryAfterMs`. |
 | `EazipQuotaError` | e.g. `QUOTA_EXCEEDED` | Cloud only — a plan or quota limit was hit. |
-| `EazipJobFailedError` | `JOB_FAILED` | Cloud only — the server-side job itself failed. |
+| `EazipJobFailedError` | `JOB_FAILED` | Cloud only — the server-side job itself failed; carries privacy-safe `.failures` and `.failedCount`. |
 | `EazipApiError` | any other wire code | Fallback for any API error without a dedicated subclass. |
 
 ```ts

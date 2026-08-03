@@ -1,4 +1,4 @@
-import type { EazipChallenge } from './types.js';
+import type { EazipChallenge, EazipCloudFailure } from './types.js';
 
 /** Optional HTTP and cause metadata attached to Eazip errors. */
 export type EazipErrorOptions = {
@@ -81,8 +81,19 @@ export class EazipQuotaError extends EazipApiError {
 
 /** The remote Cloud ZIP job reached a failed state. */
 export class EazipJobFailedError extends EazipApiError {
-  constructor(message = 'The zip job failed', options: EazipErrorOptions = {}) {
+  readonly failedCount: number;
+  readonly failures: readonly EazipCloudFailure[];
+
+  constructor(
+    message = 'The zip job failed',
+    options: EazipErrorOptions & {
+      failedCount?: number;
+      failures?: readonly EazipCloudFailure[];
+    } = {},
+  ) {
     super('JOB_FAILED', message, options);
+    this.failures = Object.freeze([...(options.failures ?? [])]);
+    this.failedCount = options.failedCount ?? this.failures.length;
   }
 }
 

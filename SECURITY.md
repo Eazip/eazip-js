@@ -2,8 +2,9 @@
 
 ## Supported Versions
 
-`@eazip/core` is currently in beta. Security fixes are shipped on the latest
-published beta and, after a stable release exists, on the latest stable line.
+Security fixes are shipped on the latest stable `@eazip/core` and
+`@eazip/react` versions. Prerelease versions are supported on a best-effort
+basis until their corresponding stable version is published.
 
 ## Reporting a Vulnerability
 

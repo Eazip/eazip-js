@@ -23,6 +23,7 @@ import type {
 } from '../shared/types.js';
 import { normalizeApiBaseUrl } from './http.js';
 import { SessionsClient } from './sessions.js';
+import { cloudFailuresToErrors, cloudSkippedCount } from './failures.js';
 
 /** Default origin used for Eazip Cloud Sessions API requests. */
 export const DEFAULT_API_BASE_URL = 'https://api.eazip.io';
@@ -221,6 +222,8 @@ async function pollToCompletion(
         filesTotal: session.job.urlCount,
         zipFilename: session.job.zipFilename,
         zips: session.job.zips,
+        errors: cloudFailuresToErrors(session.job.failures),
+        skippedCount: cloudSkippedCount(session.job),
         session: {
           sessionId: session.id,
           clientSecret,
@@ -241,9 +244,9 @@ function finishCloud(
   clientSecret: string,
   apiBaseUrl: string,
 ): void {
-  const includedCount = session.job.fileCount ?? session.job.urlCount;
-  const skippedCount = Math.max(0, session.job.urlCount - includedCount);
+  const skippedCount = cloudSkippedCount(session.job);
   const zips: EazipZipOutput[] = session.job.zips;
+  const errors = cloudFailuresToErrors(session.job.failures);
 
   const download = (zipIndex = 0): void => {
     const zip = zips[zipIndex];
@@ -264,7 +267,7 @@ function finishCloud(
     expiresAt: session.job.expiresAt ?? session.expiresAt,
     session,
     zips,
-    errors: [],
+    errors,
     skippedCount,
     download,
     downloadAll: () => staggerDownloads(zips.length, download),
