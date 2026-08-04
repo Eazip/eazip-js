@@ -126,8 +126,10 @@ keep. `npm install && npm run build && npm run test` runs everything.
 
 ## Status
 
-Use the beta channel while the SDK is in preview. APIs may change before `1.0.0`.
-`@eazip/core` supersedes the earlier `@eazip/client` beta.
+The SDK is available on npm's stable channel. Versions remain pre-`1.0.0`, so
+breaking changes will be called out in the changelog and released with an
+appropriate `0.x` version bump. `@eazip/core` supersedes the earlier
+`@eazip/client` beta.
 
 ## License
 

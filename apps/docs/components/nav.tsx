@@ -18,7 +18,6 @@ export function Nav() {
         <Link href="/" className={styles.brand}>
           <LogoMark size={27} />
           <span className={styles.wordmark}>Eazip</span>
-          <span className={styles.versionBadge}>Beta</span>
         </Link>
 
         <nav className={styles.links}>

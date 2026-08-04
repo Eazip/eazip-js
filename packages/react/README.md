@@ -158,7 +158,8 @@ import { isEazipError, EazipChallengeRequiredError } from '@eazip/react';
 - ESM only, React 18+, works in Next.js App Router out of the box (`'use client'` is baked in).
 - State is kept in a tiny external store; cloud exports persist to `localStorage`
   (`persist: false` opts out).
-- Use the beta channel while in preview: APIs may change before `1.0.0`.
+- Stable releases remain pre-`1.0.0`; see the repository changelog for any
+  breaking `0.x` changes.
 
 ## License
 

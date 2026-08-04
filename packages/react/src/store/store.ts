@@ -7,11 +7,9 @@ import {
   EazipValidationError,
   isEazipError,
   resumeZip,
-  staggerDownloads,
   startZip,
-  toSourceFiles,
-  triggerDownload,
 } from '@eazip/core';
+import { staggerDownloads, toSourceFiles, triggerDownload } from '@eazip/core/shared';
 import type {
   CloudSessionZipOptions,
   CloudZipOptions,
