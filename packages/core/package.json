@@ -66,6 +66,6 @@
     "vitest": "^4.1.9"
   },
   "dependencies": {
-    "@zip.js/zip.js": "^2.8.26"
+    "@zip.js/zip.js": "^2.8.34"
   }
 }
