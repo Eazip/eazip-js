@@ -82,23 +82,6 @@ export type LocalZipOutput = EazipZipOutput & {
 /** Lifecycle state returned by the Cloud Sessions API. */
 export type EazipCloudJobStatus = 'pending' | 'preparing' | 'processing' | 'completed' | 'failed';
 
-/** Privacy-safe reason returned for a failed or skipped Cloud source. */
-export type EazipCloudFailureCode =
-  | 'SOURCE_HTTP_ERROR'
-  | 'SOURCE_TIMEOUT'
-  | 'SOURCE_FETCH_FAILED'
-  | 'LIMIT_EXCEEDED'
-  | 'PROCESSING_FAILED';
-
-/** A Cloud failure without source URLs or free-form server details. */
-export type EazipCloudFailure = {
-  code: EazipCloudFailureCode;
-  /** Zero-based index into the submitted files when the server can identify it. */
-  fileIndex?: number;
-  /** Upstream HTTP status for SOURCE_HTTP_ERROR. */
-  status?: number;
-};
-
 /** Details needed to complete an anti-abuse challenge. */
 export type EazipChallenge = {
   provider: 'turnstile';
@@ -121,8 +104,6 @@ export type EazipCloudJob = {
   maxZipSizeBytes: number | null;
   zipCount: number;
   totalSize: number | null;
-  failedCount: number;
-  failures: EazipCloudFailure[];
   zips: EazipZipOutput[];
 };
 
@@ -381,7 +362,7 @@ export type ZipJobSnapshot = {
   /** Local only; null for cloud jobs. */
   progress: EazipProgress | null;
   zips: EazipZipOutput[];
-  /** Per-file skips. Cloud entries contain privacy-safe codes and input indexes. */
+  /** Per-file skips (local). Always [] for cloud (the API reports counts only). */
   errors: EazipError[];
   skippedCount: number;
   /** Fatal error when status === 'failed'. */

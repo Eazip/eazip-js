@@ -129,7 +129,6 @@ await job.done;
 import {
   createZip,
   isEazipError,
-  EazipJobFailedError,
   EazipRateLimitError,
   EazipSessionExpiredError,
 } from '@eazip/core';
@@ -141,8 +140,6 @@ try {
     // links aged out — re-run the export
   } else if (error instanceof EazipRateLimitError) {
     console.log('retry after', error.retryAfterMs);
-  } else if (error instanceof EazipJobFailedError) {
-    console.table(error.failures); // safe codes, input indexes, and HTTP statuses
   } else if (isEazipError(error)) {
     console.log(error.code, error.message);
   }

@@ -40,8 +40,6 @@ export {
 } from '@eazip/core';
 
 export type {
-  EazipCloudFailure,
-  EazipCloudFailureCode,
   EazipError,
   EazipMode,
   EazipProgress,

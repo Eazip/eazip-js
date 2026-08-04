@@ -36,11 +36,6 @@ export function mapCreatedSession(response: ApiCreateSessionResponse): CreatedCl
 
 export function mapSessionDetail(response: ApiSessionDetailResponse): EazipCloudSession {
   const job = response.session.job;
-  const failures = (job.failures ?? []).map((failure) => ({
-    code: failure.code,
-    ...(failure.file_index != null ? { fileIndex: failure.file_index } : {}),
-    ...(failure.status != null ? { status: failure.status } : {}),
-  }));
   return {
     id: response.session.id,
     createdAt: response.session.created_at,
@@ -59,8 +54,6 @@ export function mapSessionDetail(response: ApiSessionDetailResponse): EazipCloud
       maxZipSizeBytes: job.max_zip_size_bytes,
       zipCount: job.zip_count,
       totalSize: job.total_size,
-      failedCount: job.failed_count ?? failures.length,
-      failures,
       zips: job.zips.map((zip) => ({
         id: zip.id,
         sequence: zip.sequence,

@@ -129,14 +129,12 @@ For snapshot fields and lifecycle details, see
 Use `isEazipError()` when you need the stable SDK error code:
 
 ```ts
-import { createZip, EazipJobFailedError, isEazipError } from '@eazip/core';
+import { createZip, isEazipError } from '@eazip/core';
 
 try {
   await createZip({ files });
 } catch (error) {
-  if (error instanceof EazipJobFailedError) {
-    console.error(error.failedCount, error.failures);
-  } else if (isEazipError(error)) {
+  if (isEazipError(error)) {
     console.error(error.code, error.status, error.retryAfterMs);
   }
 }

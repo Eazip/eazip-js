@@ -4,13 +4,6 @@
 
 First stable pre-1.0 releases.
 
-### Added
-
-- Privacy-safe Cloud failure details on partial results and
-  `EazipJobFailedError.failures`, including input indexes and upstream HTTP
-  statuses when available.
-- `EazipJobFailedError.failedCount` for concise failure summaries.
-
 ### Changed from the beta channel
 
 - `@eazip/core` now keeps its top-level runtime API focused on ZIP job
