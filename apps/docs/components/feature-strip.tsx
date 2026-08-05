@@ -3,24 +3,19 @@ import shared from './shared.module.css';
 
 const FEATURES = [
   {
-    title: 'Files or URLs',
+    title: 'No backend to build',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path
-          d="M6 3h7l5 5v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinejoin="round"
-        />
-        <path d="M9 13l2.5 2.5L15 11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+        <path d="M14 3v5h5" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
       </svg>
     ),
     body: (
-      <>Zip local blobs and remote URLs into one archive — mix and match freely.</>
+      <>Create ZIP downloads in the browser without running ZIP workers, temporary storage, or download servers.</>
     ),
   },
   {
-    title: 'Runs in the browser',
+    title: 'Production-ready download UX',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.8" />
@@ -29,10 +24,10 @@ const FEATURES = [
         <circle cx="8.2" cy="6.2" r="0.6" fill="currentColor" />
       </svg>
     ),
-    body: <>Packaged entirely client-side. No backend, no zip server to run.</>,
+    body: <>Use the React tray for progress, cancel, retry, completion, and multiple ZIP downloads.</>,
   },
   {
-    title: 'Cloud when you scale',
+    title: 'Scale without a rewrite',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path
@@ -45,7 +40,7 @@ const FEATURES = [
     ),
     body: (
       <>
-        Thousands of files or many GB? Switch <code>strategy: &apos;cloud&apos;</code>.
+        Keep the same API and UI when moving large, long-running, or resumable jobs to Eazip Cloud.
       </>
     ),
   },

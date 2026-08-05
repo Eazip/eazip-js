@@ -24,17 +24,19 @@ const INTEGRATIONS: Record<
     label: 'React',
     packageName: '@eazip/react',
     install: 'npm install @eazip/react',
-    filename: 'Exporter.tsx',
-    code: `import { EazipTray, useEazip } from '@eazip/react';
+    filename: 'App.tsx',
+    code: `import { useEazip, EazipTray } from '@eazip/react';
+import { MyFileList } from './MyFileList';
 
-function Exporter({ files }) {
+export default function App() {
   const zip = useEazip();
 
   return (
     <>
-      <button onClick={() => zip.download({ files })}>
-        Download as ZIP
-      </button>
+      <MyFileList
+        onDownload={(files) => zip.download({ files })}
+      />
+
       <EazipTray />
     </>
   );

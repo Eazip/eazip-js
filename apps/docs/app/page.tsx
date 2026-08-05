@@ -7,17 +7,22 @@ import { Quickstart } from '@/components/quickstart';
 import { Recipes } from '@/components/recipes';
 import { Cta } from '@/components/cta';
 import { Footer } from '@/components/footer';
+import { CloudIntro } from '@/components/cloud-intro';
+import { IntegrationPreferenceProvider } from '@/components/integration-preference';
 
 export default function HomePage() {
   return (
     <>
       <Nav />
       <main>
-        <Hero />
-        <DemoSection />
-        <FeatureStrip />
-        <TwoPackages />
-        <Quickstart />
+        <IntegrationPreferenceProvider>
+          <Hero />
+          <DemoSection />
+          <FeatureStrip />
+          <TwoPackages />
+          <Quickstart />
+        </IntegrationPreferenceProvider>
+        <CloudIntro />
         <Recipes />
         <Cta />
       </main>

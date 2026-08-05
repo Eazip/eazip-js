@@ -15,23 +15,27 @@ npm install @eazip/react
 Requires React 18+. ZIPs are created in the browser by default, so nothing is
 uploaded.
 
-## Add an exporter
+## Add it to your app
 
 `zip.download(...)` starts the export and returns immediately.
 `<EazipTray />` renders progress, cancellation, partial results, failures, and
-the completed download. No CSS import or provider is required.
+the completed download. `MyFileList` represents your own picker or file list;
+pass its selected files to `zip.download(...)`. No CSS import or provider is
+required.
 
-```tsx title="Exporter.tsx"
-import { EazipTray, useEazip } from '@eazip/react';
+```tsx title="App.tsx"
+import { useEazip, EazipTray } from '@eazip/react';
+import { MyFileList } from './MyFileList';
 
-function Exporter({ files }) {
+export default function App() {
   const zip = useEazip();
 
   return (
     <>
-      <button onClick={() => zip.download({ files })}>
-        Download as ZIP
-      </button>
+      <MyFileList
+        onDownload={(files) => zip.download({ files })}
+      />
+
       <EazipTray />
     </>
   );

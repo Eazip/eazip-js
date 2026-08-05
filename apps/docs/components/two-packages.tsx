@@ -10,33 +10,11 @@ export function TwoPackages() {
   return (
     <section className={`${shared.container} ${styles.section}`}>
       <div className={styles.header}>
-        <div className={styles.label}>Two packages · one mental model</div>
-        <h2 className={styles.h2}>A few lines of core, or one component</h2>
+        <div className={styles.label}>Two integrations · one ZIP engine</div>
+        <h2 className={styles.h2}>Choose the integration that fits your app</h2>
       </div>
 
       <div className={styles.row}>
-        <div className={styles.text}>
-          <span
-            className={styles.badge}
-            style={{ color: CORE_HUE, background: `color-mix(in srgb, ${CORE_HUE} 15%, transparent)` }}
-          >
-            @eazip/core
-          </span>
-          <h3 className={styles.h3}>The framework-agnostic engine</h3>
-          <p className={styles.body}>
-            Feed it files, blobs, or remote URLs; get back a ZIP the browser downloads. ESM-only,
-            tree-shakeable, zero config.
-          </p>
-        </div>
-        <div className={styles.code}>
-          <CodeWindow filename="export.ts" lines={EXPORT_TS} />
-        </div>
-      </div>
-
-      <div className={`${styles.row} ${styles.rowReversed}`}>
-        <div className={styles.code}>
-          <CodeWindow filename="App.tsx" lines={APP_TSX} />
-        </div>
         <div className={styles.text}>
           <span
             className={styles.badge}
@@ -44,12 +22,34 @@ export function TwoPackages() {
           >
             @eazip/react
           </span>
-          <h3 className={styles.h3}>Or a single component</h3>
+          <h3 className={styles.h3}>For React apps</h3>
           <p className={styles.body}>
             {
-              'A useEazip() hook plus a self-contained <EazipTray/> that narrates progress, retries and the download. Flip one option to cloud when you outgrow the browser.'
+              'Use the useEazip() hook and drop-in <EazipTray /> for progress, cancel, retry, and completed downloads.'
             }
           </p>
+        </div>
+        <div className={styles.code}>
+          <CodeWindow filename="App.tsx" lines={APP_TSX} />
+        </div>
+      </div>
+
+      <div className={`${styles.row} ${styles.rowReversed}`}>
+        <div className={styles.text}>
+          <span
+            className={styles.badge}
+            style={{ color: CORE_HUE, background: `color-mix(in srgb, ${CORE_HUE} 15%, transparent)` }}
+          >
+            @eazip/core
+          </span>
+          <h3 className={styles.h3}>For any JavaScript app</h3>
+          <p className={styles.body}>
+            Feed it local blobs and remote URLs, then download the resulting ZIP. Framework-agnostic,
+            ESM-only, and zero config.
+          </p>
+        </div>
+        <div className={styles.code}>
+          <CodeWindow filename="export.ts" lines={EXPORT_TS} />
         </div>
       </div>
     </section>

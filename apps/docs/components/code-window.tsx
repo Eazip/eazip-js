@@ -1,11 +1,19 @@
-import { Fragment } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import styles from './code-window.module.css';
 
 export type TokenClass = 'kw' | 'str' | 'cmt' | 'fn' | 'pl';
 export type CodeToken = readonly [text: string, cls?: TokenClass];
 export type CodeLine = readonly CodeToken[];
 
-export function CodeWindow({ filename, lines }: { filename: string; lines: readonly CodeLine[] }) {
+export function CodeWindow({
+  filename,
+  lines,
+  titlebar,
+}: {
+  filename?: string;
+  lines: readonly CodeLine[];
+  titlebar?: ReactNode;
+}) {
   return (
     <div className={styles.window}>
       <div className={styles.titlebar}>
@@ -14,7 +22,7 @@ export function CodeWindow({ filename, lines }: { filename: string; lines: reado
           <span className={styles.dot} />
           <span className={styles.dot} />
         </span>
-        <span className={styles.filename}>{filename}</span>
+        {titlebar ?? <span className={styles.filename}>{filename}</span>}
       </div>
       <pre className={styles.body}>
         <code>

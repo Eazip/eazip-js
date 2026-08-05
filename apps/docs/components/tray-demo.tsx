@@ -23,10 +23,6 @@ export default function TrayDemo() {
     });
   };
 
-  const toggleAll = () => {
-    setSelected((previous) => (previous.size === files.length ? new Set() : new Set(files.map((f) => f.id))));
-  };
-
   const selectedFiles = files.filter((f) => selected.has(f.id));
 
   const handleDownload = () => {
@@ -46,56 +42,14 @@ export default function TrayDemo() {
           <span className={styles.dot} />
           <span className={styles.dot} />
         </span>
-        <span className={styles.appName}>Assets</span>
         <div className={styles.spacer} />
-        <button type="button" className={styles.selectAll} onClick={toggleAll}>
-          {selected.size === files.length ? 'Clear' : 'Select all'}
-        </button>
+        <span className={styles.packageLabel}>@eazip/react</span>
       </div>
 
-      <div className={styles.grid}>
-        {files.map((file) => {
-          const isSelected = selected.has(file.id);
-          return (
-            <button
-              key={file.id}
-              type="button"
-              className={styles.tile}
-              data-selected={isSelected}
-              onClick={() => toggle(file.id)}
-              aria-pressed={isSelected}
-            >
-              <span className={styles.check} aria-hidden="true">
-                {isSelected ? (
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M5 12l4 4L19 7"
-                      stroke="#fff"
-                      strokeWidth="3.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                ) : null}
-              </span>
-              <span
-                className={styles.thumb}
-                style={{
-                  background: `linear-gradient(150deg, hsl(${file.hue}, 45%, 40%), hsl(${file.hue}, 55%, 24%))`,
-                }}
-              >
-                <span className={styles.extBadge}>{file.ext}</span>
-              </span>
-              <span className={styles.fileName}>{file.name}</span>
-              <span className={styles.fileSize}>{formatFileSize(file.blob.size)}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className={styles.footer}>
+      <div className={styles.listHeader}>
+        <span className={styles.filesLabel}>Files</span>
         <span className={styles.selectedCount}>
-          {selectedFiles.length} of {files.length} selected
+          {selectedFiles.length > 0 ? `${selectedFiles.length} of ${files.length} selected` : 'No files selected'}
         </span>
         <button
           type="button"
@@ -114,6 +68,39 @@ export default function TrayDemo() {
           </svg>
           Download as ZIP
         </button>
+      </div>
+
+      <div className={styles.list}>
+        {files.map((file) => {
+          const isSelected = selected.has(file.id);
+          return (
+            <button
+              key={file.id}
+              type="button"
+              className={styles.row}
+              data-selected={isSelected}
+              onClick={() => toggle(file.id)}
+              aria-pressed={isSelected}
+            >
+              <span className={styles.check} aria-hidden="true">
+                {isSelected ? (
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M5 12l4 4L19 7"
+                      stroke="#fff"
+                      strokeWidth="3.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                ) : null}
+              </span>
+              <span className={styles.extBadge}>{file.ext}</span>
+              <span className={styles.fileName}>{file.name}</span>
+              <span className={styles.fileSize}>{formatFileSize(file.blob.size)}</span>
+            </button>
+          );
+        })}
       </div>
 
       <EazipTray accent={ACCENT} container={panelEl} />

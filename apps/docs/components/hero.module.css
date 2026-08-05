@@ -82,8 +82,8 @@
 }
 
 .title {
-  font-size: 58px;
-  line-height: 1.04;
+  font-size: 54px;
+  line-height: 1.06;
   font-weight: 800;
   letter-spacing: -0.038em;
   color: var(--ez-fg);
@@ -93,7 +93,7 @@
 
 @media (max-width: 700px) {
   .title {
-    font-size: 38px;
+    font-size: 34px;
   }
 }
 
@@ -118,7 +118,7 @@
   font-size: 18px;
   line-height: 1.6;
   color: var(--ez-fg2);
-  max-width: 520px;
+  max-width: 600px;
   margin: 22px auto 0;
   text-wrap: pretty;
 }
@@ -151,28 +151,15 @@
   text-decoration: none;
 }
 
-.btnOutline {
-  border: 1px solid var(--ez-border);
-  background: var(--ez-surface);
-  color: var(--ez-fg);
-  border-radius: 10px;
-  padding: 0 20px;
-  height: 46px;
-  font-size: 14.5px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  text-decoration: none;
-}
-
 .npmChip {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   background: var(--ez-code-bg);
   border: 1px solid var(--ez-code-border);
   border-radius: 10px;
-  padding: 0 10px 0 14px;
+  max-width: 100%;
+  padding: 0 8px 0 14px;
   height: 46px;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 13px;
@@ -181,6 +168,41 @@
 
 .npmPrompt {
   color: #6b7480;
+}
+
+.npmPrefix {
+  white-space: nowrap;
+}
+
+.npmSegments {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 7px;
+  background: #191b1f;
+}
+
+.npmSegment {
+  appearance: none;
+  border: 0;
+  border-radius: 6px;
+  padding: 4px 8px;
+  background: transparent;
+  color: #6b7480;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.npmSegment[data-active='true'] {
+  background: color-mix(in srgb, var(--ez-accent) 26%, transparent);
+  color: #eef1f6;
+}
+
+.npmSegment:focus-visible {
+  outline: 2px solid var(--ez-accent);
+  outline-offset: 1px;
 }
 
 .copyButton {

@@ -14,32 +14,25 @@ export function Hero() {
         </div>
 
         <h1 className={styles.title}>
-          Turn files and URLs
-          <br />
-          into one{' '}
+          Add{' '}
           <span className={styles.accent}>
-            ZIP.
+            “Download as ZIP”
             <span className={styles.accentBar} aria-hidden="true" />
           </span>
+          <br />
+          to any web app.
         </h1>
 
         <p className={styles.sub}>
-          Eazip packages files or remote URLs into a single ZIP, <strong>right in the browser</strong> — no
-          backend, no zip server. Reach for the cloud only when a job outgrows the tab.
+          Create ZIPs from files or remote URLs, <strong>right in the browser</strong> — without any backend
+          code. Eazip handles multi-GB archives and thousands of URLs too — just switch to Eazip Cloud for
+          larger jobs.
         </p>
 
         <div className={styles.ctaRow}>
           <Link href="/docs" className={styles.btnPrimary}>
             Get started
           </Link>
-          <a
-            href="https://github.com/Eazip/eazip-js"
-            target="_blank"
-            rel="noreferrer"
-            className={styles.btnOutline}
-          >
-            GitHub
-          </a>
           <CopyNpmChip />
         </div>
       </div>

@@ -1,16 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import { useIntegrationPreference } from './integration-preference';
 import styles from './hero.module.css';
-
-const INSTALL_COMMAND = 'npm i @eazip/react';
 
 export function CopyNpmChip() {
   const [copied, setCopied] = useState(false);
+  const { integration, setIntegration } = useIntegrationPreference();
+  const installCommand = `npm i @eazip/${integration}`;
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(INSTALL_COMMAND);
+      await navigator.clipboard.writeText(installCommand);
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch {
@@ -22,7 +23,24 @@ export function CopyNpmChip() {
   return (
     <div className={styles.npmChip}>
       <span className={styles.npmPrompt}>$</span>
-      <span>{INSTALL_COMMAND}</span>
+      <span className={styles.npmPrefix}>npm i @eazip/</span>
+      <span className={styles.npmSegments} aria-label="Choose a package">
+        {(['react', 'core'] as const).map((packageName) => (
+          <button
+            key={packageName}
+            type="button"
+            className={styles.npmSegment}
+            data-active={integration === packageName}
+            aria-pressed={integration === packageName}
+            onClick={() => {
+              setIntegration(packageName);
+              setCopied(false);
+            }}
+          >
+            {packageName}
+          </button>
+        ))}
+      </span>
       <button
         type="button"
         className={styles.copyButton}

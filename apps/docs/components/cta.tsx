@@ -10,18 +10,18 @@ export function Cta() {
         <div className={styles.text}>
           <h2 className={styles.h2}>Ship your first ZIP today.</h2>
           <p className={styles.body}>
-            Free and MIT-licensed. When a job outgrows the browser, Eazip Cloud is one option away — same
-            API, same tray, same UX.
+            Free and MIT-licensed. Follow the three-step quickstart and add a polished ZIP download in
+            minutes.
           </p>
         </div>
         <div className={styles.actions}>
-          <a
-            href="https://eazip.io/cloud/?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=homepage_final_cta"
+          <Link
+            href="#quickstart"
             className={styles.btnSolid}
             data-analytics-placement="homepage_final_cta"
           >
-            Try Eazip Cloud
-          </a>
+            View quickstart
+          </Link>
           <a
             href="https://github.com/Eazip/eazip-js"
             target="_blank"
