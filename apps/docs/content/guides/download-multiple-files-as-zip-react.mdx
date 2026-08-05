@@ -1,0 +1,75 @@
+---
+title: Download Multiple Files as a ZIP in React
+description: Add a multiple-file picker and ZIP download to React with useEazip and EazipTray, including progress, cancel, and retry states.
+---
+
+This guide lets a user choose several browser files and download them as one ZIP
+from a React application.
+
+## Before you start
+
+```sh
+npm install @eazip/react
+```
+
+## Build the React component
+
+```tsx title="FileZipDownload.tsx"
+'use client';
+
+import { useState } from 'react';
+import { useEazip, EazipTray } from '@eazip/react';
+
+export function FileZipDownload() {
+  const [files, setFiles] = useState<File[]>([]);
+  const zip = useEazip();
+
+  return (
+    <section>
+      <label>
+        Files to download
+        <input
+          type="file"
+          multiple
+          onChange={(event) =>
+            setFiles(Array.from(event.currentTarget.files ?? []))
+          }
+        />
+      </label>
+
+      <button
+        type="button"
+        disabled={files.length === 0 || zip.isBusy}
+        onClick={() =>
+          zip.download({
+            files,
+            zipName: 'selected-files.zip',
+          })
+        }
+      >
+        Download {files.length || ''} files as ZIP
+      </button>
+
+      <EazipTray />
+    </section>
+  );
+}
+```
+
+The component keeps the selected `File` objects in React state. `zip.download()`
+starts the browser job, while `<EazipTray />` renders progress, cancellation,
+retry, partial-result, and download states.
+
+## Fit it into an existing application
+
+- Keep one `<EazipTray />` near the application root when several components
+  start downloads.
+- Pass `{ file, filename }` objects when you need folders or renamed entries.
+- Use the headless hook state only when ZIP status must fit an existing panel or
+  toolbar.
+
+The files never need to leave the browser for this Local workflow. Remote URLs
+must be browser-readable through CORS; large remote jobs can switch to Cloud.
+
+Next, learn how to [download selected application files](/docs/guides/download-selected-files)
+or [show custom progress and retry controls](/docs/guides/progress-cancel-retry).

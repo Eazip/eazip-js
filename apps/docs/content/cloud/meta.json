@@ -1,4 +1,11 @@
 {
-  "title": "Scale with Cloud",
-  "pages": ["index", "get-a-public-key", "keys-and-origins", "stream-vs-stored", "backend-sessions"]
+  "title": "Eazip Cloud",
+  "pages": [
+    "index",
+    "get-a-public-key",
+    "keys-and-origins",
+    "stream-vs-stored",
+    "backend-sessions",
+    "zero-egress-exports"
+  ]
 }

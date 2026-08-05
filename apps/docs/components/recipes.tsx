@@ -77,46 +77,46 @@ const ICONS: Record<string, ReactNode> = {
 
 const RECIPES: Array<{ title: string; slug: string; badge: Badge; blurb: string; icon: keyof typeof ICONS }> = [
   {
-    title: 'Download selected files',
-    slug: 'download-selected-files',
-    badge: 'react',
-    blurb: 'Turn a gallery or asset picker into a single ZIP.',
+    title: 'Create a ZIP file in the browser with JavaScript',
+    slug: 'create-zip-file-browser-javascript',
+    badge: 'core',
+    blurb: 'Package selected browser files without backend ZIP code.',
     icon: 'select',
   },
   {
-    title: 'Download multiple files as a ZIP from URLs',
+    title: 'Download multiple files as a ZIP in React',
+    slug: 'download-multiple-files-as-zip-react',
+    badge: 'react',
+    blurb: 'Add a multiple-file picker, ZIP action, and tray.',
+    icon: 'select',
+  },
+  {
+    title: 'Create a ZIP from remote URLs',
     slug: 'create-zip-from-remote-urls',
     badge: 'core',
     blurb: 'Fetch remote files in the browser and start one download.',
     icon: 'link',
   },
   {
-    title: 'ZIP S3 or R2 objects',
+    title: 'Download S3 or R2 objects as a ZIP',
     slug: 'zip-s3-or-r2-objects',
     badge: 'core',
     blurb: 'Bundle objects from signed bucket URLs.',
     icon: 'bucket',
   },
   {
-    title: 'Add progress, cancel, and retry',
-    slug: 'progress-cancel-retry',
-    badge: 'react',
-    blurb: 'Let the tray narrate every state for you.',
-    icon: 'retry',
-  },
-  {
-    title: 'Zip GB-scale, 1,000+ URL jobs',
+    title: 'Create multi-GB ZIP archives with JavaScript',
     slug: 'gb-scale-url-jobs',
     badge: 'cloud',
-    blurb: 'Offload huge, many-file archives to the cloud strategy.',
+    blurb: 'Offload large archives and split output into practical parts.',
     icon: 'scale',
   },
   {
-    title: 'Zero-egress exports',
-    slug: 'zero-egress-exports',
+    title: 'Zip thousands of URLs with JavaScript',
+    slug: 'zip-thousands-urls-javascript',
     badge: 'cloud',
-    blurb: 'Eazip Cloud ships downloads with zero egress fees — stream or store, pay only for what you use.',
-    icon: 'noFee',
+    blurb: 'Run high-count URL jobs with partial and resumable state.',
+    icon: 'retry',
   },
 ];
 
@@ -135,7 +135,12 @@ export function Recipes() {
         {RECIPES.map((recipe) => {
           const hue = BADGE_HUE[recipe.badge];
           return (
-            <Link key={recipe.slug} href={`/docs/guides/${recipe.slug}`} className={styles.card}>
+            <Link
+              key={recipe.slug}
+              href={`/docs/guides/${recipe.slug}`}
+              className={styles.card}
+              data-analytics-placement="homepage_guides"
+            >
               <div className={styles.icon}>{ICONS[recipe.icon]}</div>
               <div className={styles.body}>
                 <div className={styles.titleRow}>

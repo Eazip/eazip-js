@@ -1,23 +1,33 @@
 ---
 title: Reference
-description: The recommended APIs for creating ZIPs with Eazip Core and React.
+description: Look up the public Core and React APIs, options, task fields, results, errors, and component props.
 ---
 
-Reference is intentionally focused on the APIs most applications should use.
-Additional exported types and lower-level helpers remain available through
-TypeScript autocomplete, but are not listed here as equal entry points.
+Reference describes exact contracts. Use Getting Started for a guided path and
+Guides for complete workflows.
 
-| Package | Use it when | Start with |
-| --- | --- | --- |
-| `@eazip/core` | You use Vanilla JavaScript or want direct control over a ZIP job. | [`createZip()` and `startZip()`](/docs/reference/core) |
-| `@eazip/react` | You want a React hook and ready-made progress UI. | [`useEazip()` and `<EazipTray />`](/docs/reference/react) |
+<Cards>
+  <Card
+    title="@eazip/core"
+    description="Functions, job members, options, results, errors, and package entry points."
+    href="/docs/reference/core"
+  />
+  <Card
+    title="@eazip/react"
+    description="Hook actions, task fields, tray props, provider config, and localization exports."
+    href="/docs/reference/react"
+  />
+</Cards>
 
-## Looking for examples?
+## Choose the package
 
-Reference pages are for looking up an API while you build. For a guided path,
-start with the [Vanilla JavaScript quickstart](/docs/getting-started/javascript)
-or [React quickstart](/docs/getting-started/react).
+| Use | Package |
+| --- | --- |
+| Framework-agnostic JavaScript or custom job control | `@eazip/core` |
+| React state and a ready-made download interface | `@eazip/react` |
 
-Cloud HTTP endpoints are not part of this SDK Reference. Start with
-[When to use Eazip Cloud](/docs/cloud); its HTTP contract belongs to the
-separate Cloud documentation area.
+The React package builds on Core and re-exports its public error classes and
+shared ZIP types.
+
+Cloud HTTP endpoints are outside this SDK Reference. Start with
+[When to use Eazip Cloud](/docs/cloud) for the SDK boundary.

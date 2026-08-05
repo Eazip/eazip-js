@@ -1,26 +1,22 @@
 ---
 title: "@eazip/core"
-description: The recommended framework-agnostic APIs for creating and controlling ZIP jobs.
+description: Reference for Core functions, ZIP options, jobs, results, errors, and package entry points.
 ---
-
-`@eazip/core` is the browser engine used by every Eazip integration. Most
-applications only need `createZip()` or `startZip()`.
 
 ```sh
 npm install @eazip/core
 ```
 
-| API | Choose it when |
-| --- | --- |
-| `createZip(options)` | You only need the finished ZIP. |
-| `startZip(options)` | You need progress, cancellation, or job state. |
+## Primary functions
 
-Both APIs create ZIPs locally by default. Set `strategy: 'cloud'` when the job
-is too large or must survive a page reload.
+| Function | Returns | Use it when |
+| --- | --- | --- |
+| `createZip(options)` | `Promise<ZipResult>` | You only need the finished output. |
+| `startZip(options)` | `ZipJob` | You need progress, cancellation, or observable state. |
+
+Both use Local execution unless `strategy: 'cloud'` is present.
 
 ## `createZip(options)`
-
-Creates a ZIP and resolves when its output is ready.
 
 ```ts
 import { createZip } from '@eazip/core';
@@ -33,119 +29,158 @@ const result = await createZip({
 result.download();
 ```
 
-The promise resolves for both complete and partial results. It rejects when
-the whole job fails or is cancelled.
+The promise resolves for `completed` and `partial` output. It rejects for
+validation, cancellation, and fatal failures.
 
-### Common options
-
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `files` | `FileList`, `File`, `Blob`, URL, source object, or an array | required | Sources to include in the ZIP. |
-| `zipName` | `string` | `download.zip` | Output name. `.zip` is added when omitted. |
-| `strategy` | `'local' \| 'cloud'` | `'local'` | Where the ZIP is created. |
-| `failOnUrlError` | `boolean` | `false` locally | Fail the whole job instead of returning a partial ZIP. |
-| `maxZipSizeBytes` | `number` | — | Split output into multiple ZIPs near this size. |
-| `signal` | `AbortSignal` | — | Cancel local work or stop Cloud polling. |
-
-For accepted source shapes and filename rules, see
-[Inputs and filenames](/docs/concepts/inputs).
-
-### Local-only options
+### Shared options
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `compressionLevel` | `0`–`9` | `6` | Deflate compression level. |
+| `files` | `ZipInput` | required for source-created jobs | Files, blobs, URLs, or source objects. |
+| `zipName` | `string` | `'download.zip'` | Output name; `.zip` is added when omitted. |
+| `strategy` | `'local' \| 'cloud'` | `'local'` | Execution location. |
+| `failOnUrlError` | `boolean` | `false` | Fail instead of keeping usable output. |
+| `maxZipSizeBytes` | `number` | — | Best-effort output part size. |
+| `signal` | `AbortSignal` | — | Cancels Local work or stops Cloud polling. |
+| `fetch` | `FetchLike` | global `fetch` | Custom source and Cloud requests. |
+| `onChange` | `(snapshot) => void` | — | Called after job snapshot changes. |
+
+### Local options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `compressionLevel` | integer `0`–`9` | `6` | Deflate compression level. |
 | `concurrency` | `number` | `4` | Maximum parallel URL fetches. |
-| `onProgress` | `(progress) => void` | — | Receives local fetch and archive progress. |
+| `onProgress` | `(progress) => void` | — | Local file and byte progress. |
 
-### Cloud
+### Frontend-created Cloud options
 
-The shortest Cloud call adds a public key:
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `strategy` | `'cloud'` | required | Selects Cloud execution. |
+| `publicKey` | `string` | required | Browser-safe `pk_ez_...` key. |
+| `files` | `ZipInput` | required | URL sources; File and Blob values fail validation. |
+| `apiBaseUrl` | `string` | SDK Cloud endpoint | Overrides the Cloud API origin. |
+| `mode` | `'stream' \| 'stored'` | `'stream'` | Cloud delivery mode. |
+| `turnstileToken` | `string` | — | Pre-obtained challenge token. |
+| `onChallenge` | `(challenge) => Promise<string>` | — | Resolves a requested challenge once. |
+| `polling` | `PollingOptions` | SDK defaults | Overrides Cloud polling behavior. |
 
-```ts
-const result = await createZip({
-  strategy: 'cloud',
-  publicKey: 'pk_ez_...',
-  files: urls,
-  zipName: 'export.zip',
-});
-```
+For backend-created Cloud jobs, pass `createSession(context)` instead of
+`files` and `publicKey`. `filesTotal` can provide an initial UI count.
 
-Use a backend-created session when URLs or credentials must not reach the
-browser. See [Backend-created sessions](/docs/cloud/backend-sessions).
+## Results
 
-### Result
+Both strategies expose:
 
 | Member | Description |
 | --- | --- |
-| `status` | `'completed'` or `'partial'`. |
 | `strategy` | `'local'` or `'cloud'`. |
-| `zips` | Output ZIP metadata, including filenames and download URLs. |
-| `errors` / `skippedCount` | Sources omitted from a partial result. |
-| `download(index?)` | Downloads one ZIP, defaulting to the first. |
-| `downloadAll()` | Downloads every ZIP part. |
-| `dispose()` | Local results only: releases their browser object URLs. |
+| `status` | `'completed'` or `'partial'`. |
+| `zips` | One entry per output ZIP. |
+| `errors` | Per-file Local errors; currently empty for Cloud output. |
+| `skippedCount` | Number of omitted sources. |
+| `download(index?)` | Downloads one ZIP, defaulting to index `0`. |
+| `downloadAll()` | Downloads every output ZIP. |
 
-Call `dispose()` only after users no longer need to download the local result.
+Local results also expose `totalSize` and `dispose()`. Cloud results expose
+`sessionId`, `clientSecret`, `expiresAt`, and `session`.
 
 ## `startZip(options)`
-
-Starts the same operation but returns a job immediately.
 
 ```ts
 import { startZip } from '@eazip/core';
 
-const job = startZip({ files, zipName: 'export.zip' });
-
+const job = startZip({ files });
 const unsubscribe = job.subscribe(() => {
-  const snapshot = job.getSnapshot();
-  console.log(snapshot.status, snapshot.progress);
+  console.log(job.getSnapshot().status);
 });
 
-const result = await job.done;
-result.download();
-unsubscribe();
+try {
+  const result = await job.done;
+  result.download();
+} finally {
+  unsubscribe();
+}
 ```
 
-`startZip()` accepts the same options as `createZip()`.
+`startZip()` accepts the same option shapes as `createZip()`.
 
 ### Job members
 
 | Member | Description |
 | --- | --- |
-| `getSnapshot()` | Returns the current immutable job state. |
-| `subscribe(listener)` | Runs the listener after state changes and returns an unsubscribe function. |
-| `done` | Resolves with the result or rejects on cancellation or fatal failure. |
-| `abort()` | Cancels local work. For Cloud, it stops polling but not the server job. |
-| `download(index?)` | Downloads a ready ZIP. |
-| `downloadAll()` | Downloads all ready ZIP parts. |
-| `dispose()` | Releases local object URLs. |
+| `id` | Stable job identifier. |
+| `strategy` | Fixed Local or Cloud strategy. |
+| `getSnapshot()` | Returns the current immutable snapshot. |
+| `subscribe(listener)` | Subscribes to changes and returns an unsubscribe function. |
+| `done` | Resolves with usable output or rejects with the terminal error. |
+| `abort()` | Stops Local work or Cloud polling. |
+| `download(index?)` | Downloads one ready output. |
+| `downloadAll()` | Downloads every ready output. |
+| `dispose()` | Releases Local object URLs; a no-op for Cloud. |
 
-For snapshot fields and lifecycle details, see
-[`ZipJob` lifecycle](/docs/concepts/zip-job).
+### Snapshot fields
 
-## Handle errors
+| Field | Description |
+| --- | --- |
+| `jobId` / `strategy` | Job identity and execution strategy. |
+| `status` | `starting`, `processing`, `completed`, `partial`, `failed`, or `aborted`. |
+| `progress` | Local progress; `null` for Cloud. |
+| `zips` | Output available so far. |
+| `errors` / `skippedCount` | Omitted source information. |
+| `error` | Fatal error for a failed job. |
+| `session` | Cloud session credentials and latest server job. |
+| `result` | Final result after completion or partial completion. |
 
-Use `isEazipError()` when you need the stable SDK error code:
+## Resume Cloud jobs
 
 ```ts
-import { createZip, isEazipError } from '@eazip/core';
+import { resumeZip } from '@eazip/core';
 
-try {
-  await createZip({ files });
-} catch (error) {
-  if (isEazipError(error)) {
-    console.error(error.code, error.status, error.retryAfterMs);
-  }
-}
+const job = resumeZip({
+  sessionId,
+  clientSecret,
+  apiBaseUrl,
+});
 ```
 
-Per-file failures usually produce a partial result instead of rejecting. See
-[Partial results and errors](/docs/concepts/partial-results).
+`resumeZip()` returns a `ZipJob`. It reconnects to an existing session and does
+not create a new job.
+
+## Errors
+
+All SDK errors extend `EazipErrorBase`. Use `isEazipError()` to narrow an
+unknown value and read its stable `code`.
+
+| Class | Typical condition |
+| --- | --- |
+| `EazipValidationError` | Invalid input, missing key, or API misuse. |
+| `EazipAbortError` | The job or supplied signal was aborted. |
+| `EazipNetworkError` | A browser or Cloud request could not be made. |
+| `EazipApiError` | Cloud API error without a more specific subclass. |
+| `EazipChallengeRequiredError` | Cloud requires an anti-abuse challenge. |
+| `EazipRateLimitError` | Cloud rate limit; may include `retryAfterMs`. |
+| `EazipQuotaError` | Cloud plan or quota limit. |
+| `EazipJobFailedError` | The server-side ZIP job failed. |
+| `EazipSessionExpiredError` / `EazipSessionRevokedError` | Session credentials are no longer usable. |
+| `EazipDownloadExpiredError` | A Cloud output link is no longer usable. |
+
+## Package entry points
+
+| Import | Notable exports |
+| --- | --- |
+| `@eazip/core` | Recommended functions, shared types, and errors. |
+| `@eazip/core/local` | `createLocalZip`, `startLocalZip`, and filename utilities. |
+| `@eazip/core/cloud` | `startCloudZip`, `resumeZip`, `SessionsClient`, and `DEFAULT_API_BASE_URL`. |
+| `@eazip/core/shared` | Shared types, errors, input normalization, download, and abort helpers. |
+
+Use specialized entry points only when bundle boundaries or lower-level Cloud
+session access require them.
 
 ## Related
 
-- [Vanilla JavaScript quickstart](/docs/getting-started/javascript)
-- [Progress, cancel, and retry](/docs/guides/progress-cancel-retry)
-- [Multi-ZIP splitting](/docs/concepts/splitting)
-- [When to use Cloud](/docs/cloud)
+- [JavaScript basics](/docs/getting-started/javascript)
+- [ZIP jobs](/docs/concepts/zip-job)
+- [Inputs and sources](/docs/concepts/inputs)
+- [Partial results and errors](/docs/concepts/partial-results)

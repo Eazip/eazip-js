@@ -1,128 +1,123 @@
 ---
 title: "@eazip/react"
-description: The recommended React hook, provider, and tray APIs.
+description: Reference for the React hook, task state, tray props, provider config, localization, and re-exported Core types.
 ---
-
-`@eazip/react` adds React state and a ready-made progress UI on top of
-`@eazip/core`.
 
 ```sh
 npm install @eazip/react
 ```
 
-Most applications use two exports:
-
-```tsx
-import { EazipTray, useEazip } from '@eazip/react';
-```
+Requires React and React DOM 18 or later.
 
 ## `useEazip()`
 
-Returns the command used to start a ZIP and the current task state.
-
 ```tsx
-function ExportButton({ files }) {
-  const zip = useEazip();
+import { useEazip } from '@eazip/react';
 
-  return (
-    <button
-      disabled={zip.isBusy}
-      onClick={() => zip.download({ files, zipName: 'export.zip' })}
-    >
-      Download as ZIP
-    </button>
-  );
-}
+const zip = useEazip();
 ```
 
 ### Returned members
 
 | Member | Description |
 | --- | --- |
-| `download(options)` | Starts a ZIP task and returns its id immediately. |
-| `task` | The current task, or `null`. |
+| `download(options)` | Starts a task and returns its ID immediately. |
+| `task` | Current task or `null`. |
+| `tasks` | Current task as an array; currently contains at most one item. |
 | `isBusy` | `true` while the current task is processing. |
-| `cancel(taskId?)` | Cancels and clears a task. |
-| `retry(taskId?)` | Repeats a retained failed or expired task. |
-| `dismiss(taskId?)` | Removes the task from the UI. |
-| `downloadZip(taskId, index)` | Downloads one completed ZIP part. |
+| `cancel(taskId?)` | Aborts and removes the matching or current task. |
+| `retry(taskId?)` | Restarts a retained request. |
+| `dismiss(taskId?)` | Removes the matching or current task. |
+| `downloadZip(taskId, zipIndex)` | Downloads one completed ZIP part. |
 | `downloadAll(taskId?)` | Downloads every completed ZIP part. |
 
-`download()` creates the ZIP locally by default:
-
-```ts
-zip.download({
-  files,
-  zipName: 'export.zip',
-  autoDownload: true,
-});
-```
-
-The commonly used options are:
+### Local download options
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `files` | required | Files, blobs, URLs, or source objects. |
-| `zipName` | `download.zip` | Output ZIP name. |
-| `strategy` | `'local'` | Use `'cloud'` for Eazip Cloud. |
-| `autoDownload` | provider setting or `true` | Start the browser download when ready. |
-| `failOnUrlError` | `false` locally | Fail instead of returning a partial ZIP. |
-| `maxZipSizeBytes` | — | Split output into multiple ZIPs near this size. |
-| `signal` | — | External cancellation signal. |
+| `files` | required | `ZipInput` files, blobs, URLs, or source objects. |
+| `strategy` | `'local'` | Local execution. |
+| `zipName` | `'download.zip'` | Output filename. |
+| `compressionLevel` | `6` | Deflate level from `0` through `9`. |
+| `concurrency` | `4` | Parallel Local URL fetches. |
+| `onProgress` | — | Receives Local progress. |
 
-Cloud uses the same command:
+### Shared download options
 
-```ts
-zip.download({
-  strategy: 'cloud',
-  publicKey: 'pk_ez_...',
-  files: urls,
-});
-```
+| Option | Default | Description |
+| --- | --- | --- |
+| `failOnUrlError` | `false` | Fail instead of returning partial output. |
+| `maxZipSizeBytes` | — | Best-effort output part size. |
+| `signal` | — | External abort signal. |
+| `fetch` | global `fetch` | Custom source or Cloud requests. |
+| `onChange` | — | Receives underlying Core snapshots. |
+| `autoDownload` | provider value or `true` | Downloads the first output automatically. |
 
-For task fields, error behavior, and backend-created sessions, see the
-[`useEazip()` guide](/docs/react/use-eazip).
+### Cloud download options
+
+Frontend-created sessions add:
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `strategy` | required `'cloud'` | Cloud execution. |
+| `publicKey` | provider value or required | Browser-safe public key. |
+| `files` | required | Remote URL sources. |
+| `apiBaseUrl` | provider or SDK default | Cloud API origin. |
+| `mode` | `'stream'` | `stream` or `stored`. |
+| `turnstileToken` / `onChallenge` | — | Anti-abuse challenge handling. |
+| `polling` | SDK defaults | Cloud polling controls. |
+
+Backend-created sessions use `createSession(context)` and optional `filesTotal`
+instead of `files`, `publicKey`, and challenge options.
+
+## `EazipTask`
+
+| Field | Description |
+| --- | --- |
+| `id` | Task identifier. |
+| `state` | `processing`, `completed`, `partial`, `failed`, or `expired`. |
+| `strategy` | Local or Cloud. |
+| `zipName` | Requested or resolved archive name. |
+| `filesTotal` | Known input count. |
+| `progress` | Local progress or `null`. |
+| `zips` | Output ZIP metadata and download state. |
+| `skippedCount` / `skipped` | Omitted source count and Local details. |
+| `error` | Serializable fatal error. |
+| `downloadStarted` | Whether an automatic or manual output download started. |
+| `createdAt` / `expiresAt` | Client creation time and optional Cloud expiry. |
+| `canRetry` | Whether the original request can be replayed. |
 
 ## `<EazipTray />`
 
-Renders progress, cancellation, partial results, retry actions, and completed
-downloads. Place it once in the application; no stylesheet import is required.
-
 ```tsx
-function App() {
-  return (
-    <>
-      <Exporter />
-      <EazipTray />
-    </>
-  );
-}
+import { EazipTray } from '@eazip/react';
+
+<EazipTray />
 ```
 
-### Common props
+### Props
 
 | Prop | Default | Description |
 | --- | --- | --- |
-| `placement` | `'corner'` | `'corner'`, `'bar'`, or `'anchored'`. |
-| `theme` | `'auto'` | `'light'`, `'dark'`, or the system preference. |
-| `accent` | `'#3056d3'` | Accent color for progress and actions. |
-| `autoDownload` | store setting | Overrides automatic download behavior. |
-| `autoHideMs` | `20000` | Delay before hiding a completed tray; `0` disables it. |
-| `locale` | `'en'` | Built-in `'en'` or `'ja'` messages. |
-| `messages` | — | Overrides selected tray messages. |
-| `onStateChange` | — | Runs when task identity or lifecycle state changes. |
-
-For portal placement, embedding, accessibility, and every visual option, see
-the [`<EazipTray />` guide](/docs/react/eazip-tray).
+| `placement` | `'corner'` | `corner`, `bar`, or `anchored`. |
+| `theme` | `'auto'` | `light`, `dark`, or system preference. |
+| `accent` | `'#3056d3'` | CSS accent color. |
+| `autoDownload` | store value | Overrides automatic-download behavior. |
+| `autoHideMs` | `20000` | Completed auto-downloaded task delay; `0` disables. |
+| `locale` | `'en'` | Built-in `en` or `ja` catalog. |
+| `messages` | — | Partial message overrides. |
+| `className` | — | Class on the tray root. |
+| `zIndex` | `9999` | Tray stacking order. |
+| `offset` | — | `{ x?, y? }` CSS-pixel placement offset. |
+| `container` | `document.body` | Portal target. |
+| `onStateChange` | — | Called on task identity or lifecycle-state changes. |
 
 ## `<EazipProvider />`
 
-The provider is optional. Add it when several components need shared defaults,
-or when a test or application root needs isolated Eazip state.
+The provider is optional. Its `config` supplies shared fallbacks and isolated
+store state.
 
 ```tsx
-import { EazipProvider } from '@eazip/react';
-
 <EazipProvider
   config={{
     strategy: 'cloud',
@@ -136,18 +131,24 @@ import { EazipProvider } from '@eazip/react';
 
 | Config | Description |
 | --- | --- |
-| `strategy` | Default local or Cloud strategy. |
+| `strategy` | Default Local or Cloud strategy. |
 | `publicKey` / `apiBaseUrl` | Shared Cloud connection defaults. |
-| `defaults` | Shared ZIP name, compression, mode, failure, and splitting defaults. |
-| `autoDownload` | Default automatic-download behavior. |
-| `persist` / `storageKey` | Persistence settings for resumable Cloud tasks. |
+| `defaults` | ZIP name, compression, mode, failure, and splitting defaults. |
+| `autoDownload` | Shared automatic-download default. |
+| `persist` | Enables resumable Cloud task persistence; defaults to `true`. |
+| `storageKey` | Overrides the persistence key. |
 
-Values passed directly to `download()` take precedence over provider defaults.
+Options passed directly to `download()` take precedence.
+
+## Localization and re-exports
+
+The package exports `en`, `ja`, `EazipTrayLocale`, and `EazipTrayMessages` for
+tray localization. It also re-exports Core error classes and shared types used
+by the React API, including `ZipInput`, `ZipJob`, and progress and output types.
 
 ## Related
 
-- [React quickstart](/docs/getting-started/react)
-- [React integration](/docs/react)
+- [React basics](/docs/getting-started/react)
+- [React patterns](/docs/react)
 - [Build a headless UI](/docs/react/headless)
-- [Localization](/docs/react/i18n)
-- [Persistence](/docs/react/persistence)
+- [Persist Cloud tasks](/docs/react/persistence)

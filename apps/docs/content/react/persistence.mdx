@@ -1,50 +1,55 @@
 ---
-title: "Persistence & reload-resume"
-description: "How cloud exports survive a page reload."
+title: "Persist Cloud tasks"
+description: "Understand how React reconnects to Cloud jobs after reload and when restored tasks can retry."
 ---
 
-A `local` export lives entirely in tab memory — there's nothing to save, so
-reloading mid-export simply loses it (see
-[How Eazip works](/docs/getting-started/how-it-works)). A `cloud` export is
-different: the job runs on the server, so `@eazip/react` persists just
-enough to reattach to it after a reload.
+React persists resumable Cloud tasks by default. Local tasks remain in browser
+memory and disappear when the tab reloads.
 
-## What gets saved
+## What is persisted?
 
-The moment a cloud task's session exists — `sessionId` + `clientSecret`,
-the same values `job.getSnapshot().session` exposes in
-[`@eazip/core`](/docs/concepts/resume) — the store writes a versioned envelope to
-`localStorage` under the key `eazip-tray-v1`: task state, zip metadata,
-`skippedCount`, whether a download already started, and (when the task
-came from a plain `download({ files, publicKey })` call) enough of the
-original request to support `retry()`. Sessions started via a
-`createSession` callback persist the same way, minus the retryable request
-— see [Backend-created sessions](/docs/cloud/backend-sessions).
+Once a Cloud session exists, the React store retains:
 
-Nothing is written for `local` tasks: their result is a set of in-memory
-`Blob`s, which can't be serialized into `localStorage` — persisting a
-`local` task's metadata without the actual zip bytes would just be a
-misleading ghost entry, so the store skips it entirely.
+- the session ID and client secret;
+- task state and output metadata;
+- expiry and skipped count; and
+- a replayable URL request when one can be serialized safely.
 
-## Hydration
+Browser `File` and `Blob` data is never written to storage.
 
-On mount, `useEazip()`/`<EazipTray />` read the envelope back and restore
-the task — from an effect only, never during render, so server-rendered
-and client-rendered output always match on first paint. If the saved task
-was still `'processing'`, hydration calls `resumeZip()` immediately and
-polling picks up where it left off; if it had already finished, the saved
-zip metadata (including any `downloadUrl`) is shown as-is. A task whose
-`expiresAt` has already passed by the time you reload comes back as
-`'expired'` instead.
+<Callout type="warn" title="The client secret is a session credential">
+  Persistence uses browser storage so the app can resume. Protect the origin
+  from script injection and do not copy stored session data into logs,
+  analytics, or URLs.
+</Callout>
 
-## Opting out
+## What happens after a reload?
+
+- A processing Cloud task reconnects with `resumeZip()` and continues polling.
+- A completed task restores its download metadata while the output is valid.
+- Expired output restores as `expired` rather than showing a broken link.
+- A Local task does not restore.
+
+## When is retry unavailable?
+
+Plain URL requests can be retained and replayed. A `createSession` callback
+cannot be serialized, so a restored backend-created task can resume an existing
+session but cannot recreate a failed one. Start a fresh `download()` call in
+that case.
+
+## Configure persistence
 
 ```tsx
-<EazipProvider config={{ persist: false }}>
+<EazipProvider
+  config={{
+    persist: false,
+  }}
+>
   <App />
 </EazipProvider>
 ```
 
-`persist: false` (via `EazipProvider`'s `config`) disables reads and writes
-entirely. `storageKey` overrides the default `'eazip-tray-v1'` key — set it
-per app if multiple Eazip-powered apps might share an origin.
+Set `persist: false` to disable reads and writes. Use a custom `storageKey` when
+multiple Eazip-powered roots share one origin.
+
+For manual Core persistence, see [Sessions and resume](/docs/concepts/resume).

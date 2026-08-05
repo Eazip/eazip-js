@@ -1,26 +1,20 @@
 ---
-title: "Localization"
-description: "Built-in en/ja catalogs and per-string overrides."
+title: Localization
+description: Use the built-in English or Japanese tray messages, or override the copy your product needs.
 ---
 
-`<EazipTray />` ships two full message catalogs, `en` (default) and `ja` —
-covering every state the tray can be in, from the initial "preparing N
-files" title through partial-result banners and expiry copy:
+The tray includes complete English and Japanese message catalogs.
 
 ```tsx
 <EazipTray locale="ja" />
 ```
 
-Every string the tray renders — titles, subtitles, button labels, the
-processing description, error copy — comes from the active catalog. There
-are no hardcoded strings in the tray components, so `locale` recolors the
-entire UI in one prop, including plural-aware phrasing (`1 file` vs.
-`12 files`) and locale-formatted numbers.
+The active locale controls titles, status text, actions, plural forms, and
+number formatting across every tray state.
 
-## Overriding individual strings
+## Override selected messages
 
-Pass `messages` to override any subset of the catalog — unlisted keys keep
-their default (`en` or `ja`) value:
+Pass only the strings your product needs to change:
 
 ```tsx
 <EazipTray
@@ -28,34 +22,35 @@ their default (`en` or `ja`) value:
   messages={{
     download: 'Save ZIP',
     downloadReadyTitle: 'Your export is ready',
-    processingDescription: (filesTotal) => `Packing ${filesTotal} files…`,
+    processingDescription: (filesTotal) =>
+      `Packing ${filesTotal} files…`,
   }}
 />
 ```
 
-`messages` is typed as `Partial<EazipTrayMessages>`, exported from
-`@eazip/react` — your editor autocompletes every available key, and
-function-valued strings (like `processingDescription` above, or
-`readySubtitle(zipCount, totalSize)`) keep their real parameter types, so a
-mismatched override is a type error, not a silent no-op.
+Unspecified messages continue to use the selected built-in locale. Function
+messages retain typed parameters for counts and formatted values.
 
-## Building your own catalog
+## Start a new catalog
 
-`EazipTrayMessages`, and the `en`/`ja` catalogs themselves, are exported
-from `@eazip/react` — spread one as a starting point for a third locale, or
-borrow its copy when building your own UI [headless](/docs/react/headless):
+Use an existing exported catalog as the fallback, then override the messages
+you have translated:
 
 ```ts
-import { en, type EazipTrayMessages } from '@eazip/react';
+import {
+  en,
+  type EazipTrayMessages,
+} from '@eazip/react';
 
 const fr: EazipTrayMessages = {
   ...en,
   download: 'Télécharger',
   downloadReadyTitle: 'Téléchargement prêt',
-  // ...override every other key, or ship the rest of `en` as a fallback
 };
 ```
 
-Pass `fr` as `messages` on `<EazipTray />` the same way as any partial
-override — the component doesn't distinguish "a full catalog" from "a
-one-key tweak," so there's no separate API to learn for either case.
+Pass the resulting object through the `messages` prop. For a headless UI, reuse
+the same catalog types or supply messages through your own localization system.
+
+See the [React Reference](/docs/reference/react) for the locale and message prop
+types.

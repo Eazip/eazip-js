@@ -1,53 +1,46 @@
 ---
-title: '@eazip/react'
-description: One hook, one component — zip downloads for React apps.
+title: React patterns
+description: Choose the right React pattern for task state, the download tray, localization, and Cloud persistence.
 ---
 
-`@eazip/react` gives you `useEazip()` and `<EazipTray />`: a hook that starts
-zip downloads and a self-contained tray component that narrates progress,
-completion, partial results, failures, and expiry. No CSS import, no
-provider, and no configuration are required to get started.
+Start with [React in Getting Started](/docs/getting-started/react). The pages in
+this section explain the choices you make after the first ZIP works.
 
-```tsx
-import { EazipTray, useEazip } from '@eazip/react';
+## Choose what to customize
 
-function Gallery({ selectedFiles }: { selectedFiles: File[] }) {
-  const zip = useEazip();
-  return (
-    <>
-      <button onClick={() => zip.download({ files: selectedFiles })}>
-        Download as ZIP
-      </button>
-      <EazipTray />
-    </>
-  );
-}
-```
+<Cards>
+  <Card
+    title="Control tasks with useEazip"
+    description="Start downloads, read task state, and share defaults."
+    href="/docs/react/use-eazip"
+  />
+  <Card
+    title="Present the Eazip tray"
+    description="Choose placement, theme, embedding, and auto-hide behavior."
+    href="/docs/react/eazip-tray"
+  />
+  <Card
+    title="Build a headless UI"
+    description="Render Eazip task state inside your own design system."
+    href="/docs/react/headless"
+  />
+  <Card
+    title="Localize the tray"
+    description="Use English or Japanese, or override individual messages."
+    href="/docs/react/i18n"
+  />
+  <Card
+    title="Persist Cloud tasks"
+    description="Understand reload-resume and when retry remains available."
+    href="/docs/react/persistence"
+  />
+</Cards>
 
-```sh
-npm install @eazip/react
-```
+## Understand the package boundary
 
-Nothing here needs a context provider or a CSS import to work — `useEazip()`
-falls back to a shared internal store, and `<EazipTray />`'s styles are
-injected alongside it. Add `EazipProvider` later if you want shared config
-(a default `publicKey` or `strategy`) or per-test isolation; it's additive,
-never required.
+`@eazip/react` adds a React store and UI around `@eazip/core`. Input rules,
+Local and Cloud strategies, splitting, partial results, and error classes come
+from Core rather than a separate React implementation.
 
-## In this section
-
-- [`useEazip()`](/docs/react/use-eazip) — the hook: `download()`, the current
-  `task`, and the actions around it.
-- [`<EazipTray />`](/docs/react/eazip-tray) — every prop, the three placements,
-  and how to embed it inside your own layout.
-- [Localization](/docs/react/i18n) — the built-in `en`/`ja` catalogs and
-  per-string overrides.
-- [Persistence & reload-resume](/docs/react/persistence) — how cloud exports
-  survive a page reload.
-- [Headless usage](/docs/react/headless) — build your own UI on `useEazip()`
-  without the tray.
-
-New to Eazip? The [React quickstart](/docs/getting-started/react) walks through
-install and a full `useEazip()` + `<EazipTray />` example. Not using React?
-[`@eazip/core`](/docs/concepts) is the framework-agnostic engine underneath — this
-package is a thin, opinionated layer on top of it, not a reimplementation.
+Use the [React Reference](/docs/reference/react) when you need exact hook
+members, component props, or provider config.

@@ -1,55 +1,55 @@
 ---
 title: "How Eazip works"
-description: "The mental model: local and cloud strategies, and the ZipJob that unifies them."
+description: "Understand the two integration packages, Local and Cloud execution, and the job model they share."
 ---
 
-Eazip ships two ways to turn a list of files into a ZIP, behind one API.
+Eazip separates **how your application integrates** from **where the ZIP job
+runs**. Choose each independently.
 
-## Two strategies
+## Choose an integration
 
-**`local`** (the default) fetches and zips everything inside the browser
-tab, using `@zip.js/zip.js` — no server, no upload, nothing to configure.
-It's bounded by what the tab can hold in memory, and the export stops if
-the tab closes or reloads mid-run.
+| Your application | Package | Basic interface |
+| --- | --- | --- |
+| React | `@eazip/react` | `useEazip()` and `<EazipTray />` |
+| Any browser application | `@eazip/core` | `createZip()` and `startZip()` |
 
-**`cloud`** hands the same file list to an Eazip Public Session: the API
-fetches the sources and builds the archive server-side while the SDK polls
-the session until it's done. Because the session lives on a server, it
-survives a reload, scales past what a browser can hold, and splits huge
-exports into multiple zips automatically. See [Why Eazip Cloud](/docs/cloud).
+Both packages accept the same input shapes and use the same job lifecycle. The
+React package adds state management and a ready-made download interface around
+Core.
 
-Both strategies return the same shape of result and go through the same
-`startZip`/`createZip` functions — only `strategy: 'cloud'` and a
-`publicKey` change.
+## Choose where the job runs
 
-## `ZipJob`: one object, either strategy
+| | Local | Cloud |
+| --- | --- | --- |
+| Runs in | The browser tab | Eazip Cloud |
+| Sources | Browser files, blobs, and remote URLs | Remote URLs |
+| Lifetime | Stops when the tab closes or reloads | Can survive a reload |
+| Setup | None | Public key or backend-created session |
+| Best for | Everyday downloads that fit comfortably in the tab | Multi-gigabyte archives, thousands of URLs, or resumable jobs |
 
-Whichever strategy runs, `startZip()` hands back a `ZipJob` synchronously.
-It's the one abstraction worth understanding:
+Local is the default. Moving a URL job to Cloud changes its strategy, not the
+integration used by your application.
 
-- `getSnapshot()` / `subscribe()` — an immutable state snapshot and a
-  subscribe function, deliberately shaped for `useSyncExternalStore`.
-- `done` — a promise that resolves once the zip is ready (`'completed'` or
-  `'partial'`) and rejects only on abort or a fatal error. Safe to ignore.
-- `abort()` — cancels local fetching/zipping, or stops polling a cloud job
-  (the server-side job keeps running either way).
+<Callout type="info" title="Start Local">
+  Use Cloud when the job has a concrete scale, source-access, or persistence
+  requirement. You do not need to decide up front.
+</Callout>
 
-`createZip()` is sugar for `startZip(options).done`. See
-[`createZip`, `startZip` & `ZipJob`](/docs/concepts/zip-job) for the full API.
+## Follow one job model
 
-## Picking a strategy
+Every ZIP moves through the same basic flow:
 
-Reach for `local` first — it's the default, needs no account, and covers
-most exports: a handful to a few hundred files, tens to low hundreds of
-megabytes. Move to `cloud` when:
+1. Your application supplies files or URLs.
+2. Eazip starts a job using the selected strategy.
+3. The job reports progress and reaches `completed`, `partial`, `failed`, or
+   `aborted`.
+4. A completed or partial result exposes one or more ZIP downloads.
 
-- the export is large enough that holding it all in memory risks the tab,
-- files number in the thousands, or
-- the export needs to survive a page reload.
+Use `createZip()` when you only need the finished result. Use `startZip()` when
+you need progress or cancellation. `useEazip()` wraps the same model for React.
 
-`@eazip/react` makes switching a one-line change:
-`zip.download({ strategy: 'cloud', publicKey, files })`. Same
-`<EazipTray />`, same task shape — the tray just gains resumable progress
-and multi-zip output. See [Why Eazip Cloud](/docs/cloud) for what changes under
-the hood.
+## Continue from here
 
+- Learn the [`ZipJob` lifecycle](/docs/concepts/zip-job).
+- Understand [inputs and remote sources](/docs/concepts/inputs).
+- Decide [when to use Eazip Cloud](/docs/cloud).

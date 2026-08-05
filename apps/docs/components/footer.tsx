@@ -11,19 +11,19 @@ const COLUMNS: Array<{
     heading: 'Docs',
     links: [
       { label: 'Overview', href: '/docs' },
-      { label: 'React quickstart', href: '/docs/getting-started/react' },
-      { label: 'Vanilla JavaScript', href: '/docs/getting-started/javascript' },
-      { label: 'Scale with Cloud', href: '/docs/cloud' },
+      { label: 'React', href: '/docs/getting-started/react' },
+      { label: 'JavaScript', href: '/docs/getting-started/javascript' },
+      { label: 'Eazip Cloud', href: '/docs/cloud' },
       { label: 'Reference', href: '/docs/reference' },
     ],
   },
   {
     heading: 'Guides',
     links: [
-      { label: 'Download selected files', href: '/docs/guides/download-selected-files' },
-      { label: 'Download remote files as a ZIP', href: '/docs/guides/create-zip-from-remote-urls' },
-      { label: 'ZIP S3 or R2 objects', href: '/docs/guides/zip-s3-or-r2-objects' },
-      { label: 'Add progress, cancel, and retry', href: '/docs/guides/progress-cancel-retry' },
+      { label: 'All guides', href: '/docs/guides' },
+      { label: 'ZIP files in JavaScript', href: '/docs/guides/create-zip-file-browser-javascript' },
+      { label: 'ZIP files in React', href: '/docs/guides/download-multiple-files-as-zip-react' },
+      { label: 'Create a ZIP from remote URLs', href: '/docs/guides/create-zip-from-remote-urls' },
     ],
   },
   {
@@ -61,7 +61,9 @@ export function Footer() {
                         {link.label}
                       </a>
                     ) : (
-                      <Link href={link.href}>{link.label}</Link>
+                      <Link href={link.href} data-analytics-placement="footer_guides">
+                        {link.label}
+                      </Link>
                     )}
                   </li>
                 ))}

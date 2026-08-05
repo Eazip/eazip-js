@@ -1,25 +1,74 @@
 ---
-title: ZIP S3 or R2 objects
-description: Bundle objects from signed bucket URLs.
+title: Download S3 or R2 Objects as a ZIP
+description: Authorize Amazon S3 or Cloudflare R2 objects, then package signed URLs as one ZIP without exposing storage credentials.
 ---
 
-Generate signed (or public) URLs for your bucket objects on the server, then
-hand them to Eazip like any other remote source — no bucket credentials ever
-reach the browser. Works the same way whether the objects live in S3, R2, or
-another S3-compatible store. See [`@eazip/core`](/docs/concepts) for the underlying
-engine.
+The browser should receive short-lived object URLs, never S3, R2, or
+S3-compatible storage credentials.
 
-## In short
+## Prepare a signed source list
+
+Your backend endpoint should:
+
+1. authenticate the application user;
+2. authorize each requested object;
+3. create a short-lived signed URL; and
+4. return only `{ url, filename }` entries.
+
+The exact signing code depends on the storage provider and belongs on the
+server.
+
+## Fetch the list and create the ZIP
 
 ```ts
 import { createZip } from '@eazip/core';
 
-const result = await createZip({
-  files: presignedUrls.map((url) => ({ url })), // signed by your server, not the browser
-  zipName: 'bundle.zip',
+type SignedSource = {
+  url: string;
+  filename: string;
+};
+
+const response = await fetch('/api/exports/123/files', {
+  credentials: 'include',
 });
 
-result.download();
+if (!response.ok) {
+  throw new Error('Could not prepare export files');
+}
+
+const files = (await response.json()) as SignedSource[];
+const result = await createZip({
+  files,
+  zipName: 'project-files.zip',
+});
+
+result.downloadAll();
 ```
 
-A step-by-step walkthrough is coming soon.
+For a Local job, the bucket or CDN must allow browser CORS and each signed URL
+must remain valid until its file has been fetched.
+
+## Use Cloud for larger object sets
+
+Cloud fetches the same signed URLs outside the browser:
+
+```ts
+const result = await createZip({
+  strategy: 'cloud',
+  publicKey: 'pk_ez_...',
+  files,
+  zipName: 'project-files.zip',
+});
+```
+
+Add the bucket or CDN hostname to the Public App's allowed source hosts. Make
+the signed URL lifetime long enough for Eazip Cloud to start and finish reading
+the source.
+
+<Callout type="info" title="Keep the URL list on the server when needed">
+  If even the signed URL list is sensitive, create the Cloud session on your
+  backend and return only its session handle.
+</Callout>
+
+Continue with [Backend-created sessions](/docs/cloud/backend-sessions) or
+[Public keys and origins](/docs/cloud/keys-and-origins).

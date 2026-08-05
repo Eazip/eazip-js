@@ -1,70 +1,115 @@
 ---
-title: Vanilla JavaScript quickstart
-description: Zip files in any browser application with the framework-agnostic @eazip/core package.
+title: JavaScript
+description: "Learn the basic @eazip/core workflow: create, observe, and download ZIP jobs in any browser application."
 ---
 
-`@eazip/core` is the framework-agnostic engine behind Eazip. It works in any
-browser application with `fetch` and `Blob`, including applications that do
-not use a UI framework.
+`@eazip/core` is Eazip's framework-agnostic browser engine. Use it with your own
+interface in any application that provides `fetch` and `Blob`.
 
-## Install
+## 1. Install
 
 ```sh
 npm install @eazip/core
 ```
 
-## Zip and download
+<Callout type="info" title="Local is the default">
+  Without a `strategy`, Eazip creates the ZIP in the browser. No account, API
+  key, file upload, or backend code is required.
+</Callout>
 
-`createZip` is the one-function path: pass it files, await the result, and
-download it.
+## 2. Create and download a ZIP
 
-```ts
-import { createZip } from '@eazip/core';
+Given a file input and button in your interface:
 
-const result = await createZip({
-  files: fileInput.files ?? [],
-  zipName: 'export.zip',
-});
-
-result.download();
+```html title="index.html"
+<input id="files" type="file" multiple />
+<button id="download">Download ZIP</button>
 ```
 
-`files` accepts a `FileList`, `File` and `Blob` objects, URL strings, or
-`{ url | file, filename }` source objects. See
-[Inputs and filenames](/docs/concepts/inputs) for the complete resolution rules.
+Call `createZip(...)`, wait for the result, then download it:
 
-## Observe progress or cancel
+```js title="app.js"
+import { createZip } from '@eazip/core';
 
-Use `startZip` when you need the job before it completes:
+const fileInput = document.querySelector('#files');
+const downloadButton = document.querySelector('#download');
 
-```ts
+downloadButton.addEventListener('click', async () => {
+  const result = await createZip({
+    files: fileInput.files,
+    zipName: 'export.zip',
+  });
+
+  result.download();
+});
+```
+
+- **`createZip(...)`** is the simplest path and resolves when the ZIP is ready.
+- **`files`** is the content to package; `zipName` names the download.
+- **`result.download()`** starts the browser download.
+
+## 3. Pass files or URLs
+
+The same `files` option accepts:
+
+- browser `File`, `FileList`, and `Blob` objects;
+- URL strings such as `https://assets.example.com/hero.png`;
+- `{ file, filename }` or `{ url, filename }` when you need to control the path
+  inside the ZIP.
+
+You can mix these shapes in one array. Remote URLs used by Local jobs must allow
+browser requests; see [Inputs and sources](/docs/concepts/inputs).
+
+## 4. Track progress or cancel
+
+Use `startZip(...)` when your interface needs access to the job while it is
+running:
+
+```js
 import { startZip } from '@eazip/core';
 
 const job = startZip({
-  files: fileInput.files ?? [],
+  files: fileInput.files,
   zipName: 'export.zip',
 });
 
 const unsubscribe = job.subscribe(() => {
   const { status, progress } = job.getSnapshot();
-  console.log(status, progress?.filesCompleted, '/', progress?.filesTotal);
+  console.log(status, progress);
 });
 
-const result = await job.done;
-result.download();
-unsubscribe();
+try {
+  const result = await job.done;
+  result.download();
+} finally {
+  unsubscribe();
+}
 ```
 
-Call `job.abort()` to cancel. See
-[`createZip`, `startZip`, and `ZipJob`](/docs/concepts/zip-job) for the complete
-lifecycle.
+Call `job.abort()` from your cancel action. If an individual URL fails, Eazip
+returns the other files as a partial result by default; inspect `result.errors`
+for the skipped files.
 
-## Handle partial results
+## 5. Move larger URL jobs to Cloud
 
-By default, one failed source does not discard the rest of the archive. The
-result has a `partial` status and records per-file failures in `result.errors`.
-See [Partial results and errors](/docs/concepts/partial-results) for fail-fast and
-recovery options.
+For multi-gigabyte archives, thousands of URLs, or jobs that must survive a
+reload, keep the same function and change the execution strategy:
 
-Building with React? The [React quickstart](/docs/getting-started/react) adds a
-hook and ready-made progress UI around the same engine.
+```js
+const result = await createZip({
+  strategy: 'cloud',
+  publicKey: 'pk_ez_...',
+  files: urls,
+});
+
+result.download();
+```
+
+Cloud jobs accept remote URLs rather than browser `File` or `Blob` objects.
+Read [When to use Eazip Cloud](/docs/cloud) before configuring a public key.
+
+## Next steps
+
+- Understand [`createZip`, `startZip`, and `ZipJob`](/docs/concepts/zip-job).
+- Handle [partial results and errors](/docs/concepts/partial-results).
+- Building with React? Continue with [React](/docs/getting-started/react).

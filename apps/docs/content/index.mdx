@@ -1,48 +1,49 @@
 ---
 title: Overview
-description: Add ZIP downloads to a browser app with React or framework-agnostic JavaScript, then scale with Eazip Cloud when the browser is no longer enough.
 ---
 
-Eazip is an open-source toolkit for adding **Download all as ZIP** to a web
-application. Local jobs run entirely in the browser: no account, API key, or
-file upload is required.
+## What is Eazip?
 
-Choose the integration that matches your application. Both use the same job
-model, input rules, error behavior, and optional Cloud strategy.
+Eazip turns browser files, blobs, and remote URLs into one ZIP download in
+React or any JavaScript application.
 
-<IntegrationPicker placement="docs_overview" />
+## Why Eazip?
 
-## Try a local ZIP
+- **No backend required.** Local jobs run entirely in the browser, with no
+  account, API key, or file upload.
+- **Production-ready download UX.** In React, the drop-in tray handles progress,
+  cancel, retry, completion, and multiple ZIP downloads.
+- **Scale without a rewrite.** When a job outgrows the tab, switch it to Eazip
+  Cloud for multi-gigabyte archives and thousands of URLs.
 
-Select a few sample files and download them as a ZIP. The files are generated
-in this page and processed in your browser; their names and contents are not
-sent to Eazip.
+## Choose your integration
 
-<TrayDemo />
+Both packages use the same inputs, job states, error behavior, and Local or
+Cloud execution strategies.
 
-The demo UI uses the React integration. The JavaScript quickstart produces the
-same local ZIP with `createZip()` from `@eazip/core`.
+<OverviewIntegrationCards />
 
-## One toolkit, two decisions
+## Choose where the job runs
 
-Integration and execution strategy are separate choices:
+Local is the default. The integration package does not change when you move a
+job to Cloud.
 
-| Your app | Local — start here | Cloud — when the browser is not enough |
+| | Local | Cloud |
 | --- | --- | --- |
-| React | `@eazip/react` | `@eazip/react` with `strategy: 'cloud'` |
-| Any browser app | `@eazip/core` | `@eazip/core` with `strategy: 'cloud'` |
+| Runs in | The user's browser | Eazip Cloud |
+| Best for | Everyday ZIP downloads that fit comfortably in the tab | Multi-gigabyte archives, thousands of URLs, restricted sources, or jobs that must survive a reload |
+| Setup | No account or key | A public key or a backend-created session |
 
-Local is the default. Consider [Eazip Cloud](/docs/cloud) for thousands of
-URLs, multi-gigabyte exports, cross-origin sources you do not control, or jobs
-that must survive a reload.
+Read [How Eazip works](/docs/getting-started/how-it-works) for the shared job
+model, or [configure Eazip Cloud](/docs/cloud) when you need Cloud execution.
 
-## Where to go next
+## Find the right page
 
-- [React quickstart](/docs/getting-started/react) — add `useEazip()` and the
-  drop-in `<EazipTray />`.
-- [Vanilla JavaScript quickstart](/docs/getting-started/javascript) — call the
-  framework-agnostic browser engine directly.
-- [How Eazip works](/docs/getting-started/how-it-works) — understand the
-  shared Local / Cloud job model.
-- [Guides](/docs/guides) — solve a specific ZIP workflow.
-- [Reference](/docs/reference) — look up the public APIs for both packages.
+- **Start building:** learn the basics with [React](/docs/getting-started/react)
+  or [JavaScript](/docs/getting-started/javascript).
+- **Complete a ZIP workflow:** find a task-focused [Guide](/docs/guides).
+- **Understand the model:** read about jobs, inputs, splitting, and resume in
+  [Concepts](/docs/concepts).
+- **Scale beyond the browser:** configure [Eazip Cloud](/docs/cloud).
+- **Look up an API:** find functions, hooks, components, and types in the
+  [API Reference](/docs/reference).

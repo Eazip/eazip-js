@@ -1,0 +1,95 @@
+---
+title: Handle Failed Files and Partial ZIP Downloads
+description: Keep successful files, inspect skipped URL errors, and decide when a JavaScript or React ZIP download should fail completely.
+---
+
+By default, Eazip keeps every usable file when one or more remote URLs fail. The
+result is marked `partial` instead of discarding the complete ZIP.
+
+## Keep successful files with JavaScript
+
+```ts
+import { createZip } from '@eazip/core';
+
+const result = await createZip({
+  files: urls,
+  zipName: 'documents.zip',
+  failOnUrlError: false,
+});
+
+if (result.status === 'partial') {
+  console.table(
+    result.errors.map((error) => ({
+      filename: error.filename,
+      code: error.code,
+      message: error.message,
+    })),
+  );
+}
+
+result.downloadAll();
+```
+
+Local results include one error entry for each skipped source. Successful files
+remain available through `download()` and `downloadAll()`.
+
+## Show partial results in React
+
+The built-in tray already distinguishes partial output from a complete failure:
+
+```tsx
+import { useEazip, EazipTray } from '@eazip/react';
+
+export function ExportButton({ urls }: { urls: string[] }) {
+  const zip = useEazip();
+
+  return (
+    <>
+      <button
+        onClick={() =>
+          zip.download({
+            files: urls,
+            zipName: 'documents.zip',
+            failOnUrlError: false,
+          })
+        }
+      >
+        Download documents
+      </button>
+
+      <EazipTray />
+    </>
+  );
+}
+```
+
+For a custom interface, read `task.state === 'partial'`, `task.skippedCount`,
+and `task.skipped`. Cloud jobs expose the skipped count but not a per-file error
+list.
+
+## Fail when every file is required
+
+Set `failOnUrlError: true` only when an incomplete archive is invalid for the
+workflow:
+
+```ts
+await createZip({
+  files: urls,
+  failOnUrlError: true,
+});
+```
+
+This rejects after a URL failure instead of producing partial output. Empty
+input, invalid options, cancellation, and fatal job errors also do not produce a
+downloadable partial result.
+
+## Choose the right recovery
+
+| Result | Recommended action |
+| --- | --- |
+| `completed` | Download normally |
+| `partial` | Show the skipped count and keep the successful ZIP |
+| `failed` | Explain the failure and offer retry when the request is reusable |
+
+Continue with [Show ZIP progress and let users cancel or retry](/docs/guides/progress-cancel-retry)
+or [Partial results and errors](/docs/concepts/partial-results).

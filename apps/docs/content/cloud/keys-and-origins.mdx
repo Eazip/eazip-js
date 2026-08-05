@@ -1,49 +1,47 @@
 ---
-title: "Public keys & origins"
-description: "Creating a public key and allowing your origins and source hosts."
+title: "Public keys and origins"
+description: "Understand why a browser key can be public and how Public App policy limits where it is used."
 ---
 
-Every direct `cloud` call — one where the SDK creates the session itself,
-rather than a [backend-created session](/docs/cloud/backend-sessions) — needs a
-`publicKey`:
+A direct Cloud call identifies its Public App with a `publicKey`:
 
 ```ts
-zip.download({ strategy: 'cloud', publicKey: 'pk_ez_...', files: urls });
+zip.download({
+  strategy: 'cloud',
+  publicKey: 'pk_ez_...',
+  files: urls,
+});
 ```
 
-This page explains what the key is and what constrains it. For the click-by-click
-steps to create one, see [Get a public key](/docs/cloud/get-a-public-key).
+## Is the public key a secret?
 
-## It's meant to be public
+No. A `pk_ez_...` key is designed to ship in frontend code and remain visible
+in browser developer tools. It identifies a Public App; it does not replace
+authorization on your own backend.
 
-Unlike a secret API key, `publicKey` is designed to sit in client-side code
-— it ships in your JS bundle and is sent as a plain request header
-(`X-Eazip-Public-Key`) from the browser on every session-create call. Ship
-it the same way you'd ship a Stripe publishable key or a Google Maps
-browser key: safe to read in devtools, safe to commit alongside your
-frontend config, never a substitute for server-side authorization on your
-own endpoints.
+<Callout type="warn" title="Do not expose a secret API key">
+  Secret Cloud API keys belong on a trusted server. They are not accepted as a
+  safer substitute for `publicKey` in browser code.
+</Callout>
 
-What keeps a public key from being usable by anyone who copies it is the
-Public App policy behind it, configured on the dashboard rather than in the
-SDK:
+## What limits a copied key?
 
-- **Websites that can use this key** (allowed origins). The API validates the
-  request's exact browser origin, so copying the key into an unrelated
-  frontend does not work.
-- **Where the files come from** (allowed source hosts). Because `cloud`
-  sources are URLs the *API* fetches (see [Why Eazip Cloud](/docs/cloud)), add
-  your CDN, bucket, or asset host before pointing a session at it.
+The Public App policy checks two independent boundaries:
 
-A request from an origin or a source host outside those allowlists is
-rejected with an API error, caught the same way as any other: an
-`EazipApiError` (or a dedicated subclass) with a server-provided `code` —
-see [Partial results & errors](/docs/concepts/partial-results) for the general
-shape. If you hit one, the fix lives on the dashboard side (add the origin
-or source host), not in SDK options.
+| Policy | Contains | Protects |
+| --- | --- | --- |
+| Allowed application origins | Exact frontend origins such as `https://app.example.com` | Which browser applications may create sessions |
+| Allowed source hosts | Asset hosts such as `cdn.example.com` | Which remote files Eazip Cloud may fetch |
 
-## Scoping further
+A copied key used from another origin, or with a source outside the host policy,
+is rejected.
 
-Create separate public keys per Public App if you want different origin or
-source-host policies for different parts of your product — a key is only
-ever as permissive as the Public App behind it.
+## How should environments be separated?
+
+Add every intended origin to one Public App when the environments share the
+same source policy. Create separate Public Apps when staging and production
+need different hosts, limits, ownership, or key rotation.
+
+Policy changes belong in the dashboard, not additional SDK options. Follow
+[Get a public key](/docs/cloud/get-a-public-key) for the current dashboard
+steps.

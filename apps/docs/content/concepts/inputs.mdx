@@ -1,76 +1,69 @@
 ---
-title: "Inputs & sources"
-description: "Files, Blobs, FileLists, and remote URLs — what goes in and how names are resolved."
+title: "Inputs and sources"
+description: "Understand accepted file shapes, ZIP entry names, and how Local and Cloud fetch remote URLs."
 ---
 
-`files` is intentionally loose. It accepts any of:
+The `files` option accepts browser files and remote URLs without requiring you
+to normalize them first.
+
+## Which input shapes can I use?
+
+| Shape | Example | Use it for |
+| --- | --- | --- |
+| `FileList` | `input.files` | A browser file picker |
+| `File` or `Blob` | `selectedFile` | One browser-owned file |
+| URL string | `'https://example.com/report.pdf'` | A remote file with an inferred name |
+| Source object | `{ url, filename }` or `{ file, filename }` | A custom path inside the ZIP |
+
+Pass one item directly or mix multiple items in an array:
 
 ```ts
-type EazipSourceFile =
-  | { url: string; filename?: string }
-  | { file: File | Blob; filename?: string };
-
-type ZipInput =
-  | readonly (string | File | Blob | EazipSourceFile)[]
-  | FileList
-  | File
-  | Blob;
-```
-
-In practice: a `FileList` straight off an `<input type="file" multiple />`,
-a `File[]`/`Blob[]` array, an array of URL strings, a mix of all of the
-above in one array, or even a single bare `File`/`Blob` with no array at
-all. Use the object forms — `{ url, filename }` / `{ file, filename }` —
-when you want to name an entry explicitly.
-
-```ts
-await createZip({
+const result = await createZip({
   files: [
+    selectedFile,
     'https://cdn.example.com/report.pdf',
-    { url: 'https://cdn.example.com/data.csv', filename: 'exports/data.csv' },
-    { file: selectedBlob, filename: 'notes.txt' },
+    {
+      url: 'https://cdn.example.com/data.csv',
+      filename: 'exports/data.csv',
+    },
   ],
   zipName: 'bundle.zip',
 });
 ```
 
-An empty list throws `EazipValidationError('EMPTY_INPUT')`; an unrecognized
-item shape throws `EazipValidationError('INVALID_INPUT')` — both
-synchronously, before any job is created.
+An empty or unsupported input fails before a job starts.
 
-## Filename resolution
+## How is the ZIP entry name chosen?
 
-Every source resolves to a zip entry name in this order: an explicit
-`filename`, then (for `File`s) `webkitRelativePath` — so directory-picker
-selections keep their folder structure — then `.name`, then (for URLs) the
-last path segment, then a generic `file-N` fallback. The result is
-sanitized: backslashes become `/`, null bytes and any `..`/`.`/empty path
-segments are stripped, and a Windows drive prefix is removed, so a hostile
-or messy name can never escape the archive root. If two sources resolve to
-the same entry name, later ones get a ` (2)`, ` (3)`, … suffix inserted
-before the extension — the same way a browser dedupes downloaded files.
+Eazip uses the first available name in this order:
 
-## Remote URLs
+1. the explicit `filename` on a source object;
+2. a file's `webkitRelativePath`, preserving a selected directory structure;
+3. the file's `name`;
+4. the last path segment of a URL;
+5. a generated `file-N` fallback.
 
-For the `local` strategy, URL sources are fetched **by the browser**, with
-`credentials: 'omit'` — no cookies, no auth headers — so the source must
-allow CORS for an anonymous request. Fetches run through a small pool,
-`concurrency` at a time (default `4`), while a single writer adds them to
-the zip in your original input order, so archive ordering stays
-deterministic regardless of which fetch finishes first. Pass your own
-`fetch` (option `fetch`) to add headers, use a polyfill, or route through a
-proxy.
+Paths are sanitized so they cannot escape the archive root. Duplicate names
+receive ` (2)`, ` (3)`, and later suffixes before the extension.
 
-The `cloud` strategy only accepts URL sources — the Eazip API fetches
-them, not the browser — so a `File`/`Blob` source throws
-`EazipValidationError('CLOUD_URL_SOURCES_ONLY')`. See
-[Why Eazip Cloud](/docs/cloud) for what "fetched by the API" implies for CORS
-and allowed hosts.
+## Who fetches a remote URL?
 
-Fetching server-side also means CORS stops mattering and reachability starts:
-a host can serve a browser and still refuse Eazip's servers.
-`raw.githubusercontent.com` is the common example — it returns `403` to the
-API, so put a CDN (`cdn.jsdelivr.net` works for npm and GitHub content), your
-own asset domain, or signed bucket URLs in front of the content. See
-[Get a public key](/docs/cloud/get-a-public-key) for the allowed-source-hosts
-setup.
+| | Local | Cloud |
+| --- | --- | --- |
+| Fetches the URL | The user's browser | Eazip Cloud |
+| CORS required | Yes | No |
+| Browser cookies sent | No | Not applicable |
+| Accepted sources | Files, blobs, and URLs | URLs only |
+
+For Local jobs, the source must allow an anonymous browser request. A custom
+`fetch` can add headers or route the request through infrastructure you control.
+
+For Cloud jobs, CORS no longer applies, but the source must be reachable by
+Eazip Cloud and allowed by the Public App configuration. A host that works in a
+browser can still reject server-side requests.
+
+## Next steps
+
+- [Create a ZIP from remote URLs](/docs/guides/create-zip-from-remote-urls).
+- [Configure Cloud keys and origins](/docs/cloud/keys-and-origins).
+- Look up the exact [`ZipInput` contract](/docs/reference/core).

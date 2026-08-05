@@ -2,11 +2,14 @@
   "title": "Guides",
   "pages": [
     "index",
-    "download-selected-files",
+    "create-zip-file-browser-javascript",
+    "download-multiple-files-as-zip-react",
     "create-zip-from-remote-urls",
+    "download-selected-files",
     "zip-s3-or-r2-objects",
     "progress-cancel-retry",
+    "failed-files-partial-zip-downloads",
     "gb-scale-url-jobs",
-    "zero-egress-exports"
+    "zip-thousands-urls-javascript"
   ]
 }

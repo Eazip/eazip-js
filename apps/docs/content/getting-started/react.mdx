@@ -1,27 +1,28 @@
 ---
-title: React quickstart
-description: Install @eazip/react and ship your first ZIP download with a hook and drop-in tray.
+title: React
+description: "Learn the basic @eazip/react workflow: start a ZIP, show its progress, and move larger URL jobs to Eazip Cloud."
 ---
 
-`@eazip/react` adds a hook and progress UI on top of the shared browser engine.
-It is the shortest path when your application already uses React.
+`@eazip/react` combines the Eazip browser engine with a hook and a ready-made
+download tray. Use it when your application already uses React.
 
-## Install
+## 1. Install
 
 ```sh
 npm install @eazip/react
 ```
 
-Requires React 18+. ZIPs are created in the browser by default, so nothing is
-uploaded.
+Requires React 18 or later.
 
-## Add it to your app
+<Callout type="info" title="Local is the default">
+  Without a `strategy`, Eazip creates the ZIP in the browser. No account, API
+  key, file upload, or backend code is required.
+</Callout>
 
-`zip.download(...)` starts the export and returns immediately.
-`<EazipTray />` renders progress, cancellation, partial results, failures, and
-the completed download. `MyFileList` represents your own picker or file list;
-pass its selected files to `zip.download(...)`. No CSS import or provider is
-required.
+## 2. Add a ZIP download
+
+Call `zip.download(...)` from your existing file list or picker. Render one
+`<EazipTray />` near the root of your application.
 
 ```tsx title="App.tsx"
 import { useEazip, EazipTray } from '@eazip/react';
@@ -42,27 +43,31 @@ export default function App() {
 }
 ```
 
-`files` accepts `File[]`, a `FileList`, URL strings, or `@eazip/core` source
-objects:
+`MyFileList` represents your own UI. The three Eazip pieces have distinct jobs:
 
-```ts
-zip.download({
-  files: [
-    { file: blob, filename: 'notes.txt' },
-    { url: 'https://assets.example.com/hero.png' },
-  ],
-  zipName: 'assets.zip',
-});
-```
+- **`useEazip()`** gives your component the download commands and current task.
+- **`zip.download(...)`** starts a job and returns its task ID immediately.
+- **`<EazipTray />`** handles progress, cancel, retry, partial results, and the
+  completed download.
 
-See the [`useEazip()` guide](/docs/react/use-eazip) and
-[`<EazipTray />` guide](/docs/react/eazip-tray) for lifecycle and configuration
-details.
+No provider or CSS import is required for this basic setup.
 
-## Scale when the browser is not enough
+## 3. Pass files or URLs
 
-For thousands of URLs, multi-gigabyte exports, or reload-resumable jobs, use
-the same call with the Cloud strategy:
+The same `files` option accepts:
+
+- browser `File`, `FileList`, and `Blob` objects;
+- URL strings such as `https://assets.example.com/hero.png`;
+- `{ file, filename }` or `{ url, filename }` when you need to control the path
+  inside the ZIP.
+
+You can mix these shapes in one array. Remote URLs used by Local jobs must allow
+browser requests; see [Inputs and sources](/docs/concepts/inputs).
+
+## 4. Move larger URL jobs to Cloud
+
+For multi-gigabyte archives, thousands of URLs, or jobs that must survive a
+reload, keep the same hook and tray and change the execution strategy:
 
 ```tsx
 zip.download({
@@ -72,8 +77,11 @@ zip.download({
 });
 ```
 
-Start with [When to use Cloud](/docs/cloud) to see what changes, then
-[Get a public key](/docs/cloud/get-a-public-key) for the dashboard steps.
+Cloud jobs accept remote URLs rather than browser `File` or `Blob` objects.
+Read [When to use Eazip Cloud](/docs/cloud) before configuring a public key.
 
-Account setup, billing, and the Cloud HTTP API live in the separate
-[Eazip Cloud documentation](https://eazip.io/cloud/getting-started/quickstart/?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=react_quickstart_cloud_docs).
+## Next steps
+
+- Customize the [`<EazipTray />`](/docs/react/eazip-tray).
+- Control tasks directly with [`useEazip()`](/docs/react/use-eazip).
+- Learn the shared [Local and Cloud job model](/docs/getting-started/how-it-works).

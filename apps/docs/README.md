@@ -19,6 +19,11 @@ Content lives in [content/](content/) (MDX + `meta.json` per section) — docs
 fixes and improvements are welcome. Style note: display text says “Eazip” /
 “Eazip Cloud”; package names, commands, and domains stay lowercase.
 
+Before adding or reorganizing content, read the
+[documentation guide](CONTENT_GUIDE.md). It defines the target information
+architecture, the role of each section, page-placement rules, writing
+conventions, and the review checklist.
+
 ## Build
 
 ```sh

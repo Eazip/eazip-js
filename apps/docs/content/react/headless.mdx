@@ -1,69 +1,83 @@
 ---
-title: "Headless usage"
-description: "Task state without the tray — build your own UI on useEazip()."
+title: "Build a headless React UI"
+description: "Render Eazip task state inside your own component library without the ready-made tray."
 ---
 
-`<EazipTray />` is optional — everything it renders is derived from
-`useEazip()`'s `task`, so any part of it (or all of it) is easy to
-reimplement in your own design system.
+Go headless when ZIP state must appear inside an existing panel or design
+system. Keep `<EazipTray />` when a floating, complete download interface is
+acceptable.
 
-```tsx
+## Render the task states
+
+```tsx title="ExportButton.tsx"
 import { useEazip } from '@eazip/react';
 
-function ExportButton({ files }: { files: File[] }) {
+export function ExportButton({ files }: { files: File[] }) {
   const zip = useEazip();
   const task = zip.task;
 
   if (!task) {
     return (
-      <button disabled={zip.isBusy} onClick={() => zip.download({ files })}>
+      <button onClick={() => zip.download({ files })}>
         Download as ZIP
       </button>
     );
   }
 
-  return (
-    <div>
-      {task.state === 'processing' ? (
-        <>
-          {task.progress ? (
-            <progress value={task.progress.filesCompleted} max={task.progress.filesTotal} />
-          ) : (
-            <progress />
-          )}
-          <button onClick={() => zip.cancel()}>Cancel</button>
-        </>
-      ) : null}
-
-      {task.state === 'completed' || task.state === 'partial' ? (
-        <button onClick={() => zip.downloadAll()}>
-          {task.zips.length > 1 ? `Download ${task.zips.length} zips` : 'Save file'}
+  if (task.state === 'processing') {
+    return (
+      <div>
+        {task.progress ? (
+          <progress
+            value={task.progress.filesCompleted}
+            max={task.progress.filesTotal}
+          />
+        ) : (
+          <progress />
+        )}
+        <button onClick={() => zip.cancel(task.id)}>
+          Cancel
         </button>
-      ) : null}
+      </div>
+    );
+  }
 
-      {task.state === 'failed' && task.canRetry ? (
-        <button onClick={() => zip.retry()}>Try again</button>
-      ) : null}
-    </div>
-  );
+  if (task.state === 'failed' && task.canRetry) {
+    return (
+      <button onClick={() => zip.retry(task.id)}>
+        Try again
+      </button>
+    );
+  }
+
+  if (task.state === 'completed' || task.state === 'partial') {
+    return (
+      <button onClick={() => zip.downloadAll(task.id)}>
+        Download {task.zips.length > 1 ? 'all ZIPs' : 'ZIP'}
+      </button>
+    );
+  }
+
+  return null;
 }
 ```
 
-A few things worth knowing before you build on this:
+<Callout type="info" title="Cloud progress is indeterminate">
+  `task.progress` is populated for Local jobs. Cloud tasks currently expose a
+  processing state but not per-file or byte progress.
+</Callout>
 
-- `task.progress` is only ever populated for `local` jobs — cloud jobs poll
-  a session, not a byte stream, so render an indeterminate spinner for
-  `task.strategy === 'cloud'` instead of a percentage.
-- `task.zips[]` carries `filename`/`size`/`downloadUrl` per part; use
-  `downloadZip(task.id, index)` to trigger one specific part instead of
-  `downloadAll()`.
-- `task.skipped` (populated once `state` is `'partial'`) is the per-file
-  reason list — see [Partial results & errors](/docs/concepts/partial-results) for
-  what `reason` means on `local` versus `cloud`, where only a count is
-  available.
-- `task.canRetry` reflects whether the original request is still
-  replayable — see [Persistence & reload-resume](/docs/react/persistence) for
-  the one case (a restored, backend-created session) where it isn't.
+## Preserve the important behavior
 
-`isBusy` is just `task?.state === 'processing'` — reach for it when all you
-need is a boolean, and `task` directly for anything richer.
+A complete custom UI should account for:
+
+- cancel while processing;
+- retry only when `task.canRetry` is true;
+- skipped counts on partial output;
+- every ZIP part rather than only the first;
+- Cloud expiry; and
+- an accessible status announcement.
+
+Use [Show ZIP progress and let users cancel or retry](/docs/guides/progress-cancel-retry) for a
+task-focused example and the [React Reference](/docs/reference/react) for exact
+task fields.

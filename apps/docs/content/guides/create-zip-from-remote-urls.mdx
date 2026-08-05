@@ -1,30 +1,20 @@
 ---
-title: Download multiple files as a ZIP from URLs in JavaScript
-description: Download multiple remote files as one ZIP in JavaScript, preserve filenames, handle CORS and failed URLs, and move large jobs to Eazip Cloud.
+title: Create a ZIP from remote URLs
+description: Fetch multiple browser-readable URLs, preserve useful filenames, and download one ZIP with JavaScript.
 ---
 
-If your app already has a list of file URLs, you can download them in the browser,
-add them to one ZIP, and start a single download with `@eazip/core`. You do not
-need to proxy every file through your own ZIP endpoint for small and medium
-exports.
+Use this workflow when your application already has a list of remote file URLs
+and the archive fits comfortably in the browser tab.
 
-## Install the ZIP library
+## Before you start
 
-```bash
+Install Core and make sure each source allows the browser to fetch it:
+
+```sh
 npm install @eazip/core
 ```
 
-<a
-  href="https://www.npmjs.com/package/@eazip/core"
-  data-analytics-placement="remote_urls_recipe_install"
->
-  View @eazip/core on npm
-</a>
-
-## Fetch multiple URLs and download one ZIP
-
-Pass URL strings directly, or use `{ url, filename }` when the archive
-needs a specific folder structure.
+## Create and download the ZIP
 
 ```ts
 import { createZip } from '@eazip/core';
@@ -40,148 +30,68 @@ const files = [
 const result = await createZip({
   files,
   zipName: 'invoices.zip',
-  concurrency: 4,
 });
 
 result.download();
 ```
 
-Eazip fetches up to four URLs at a time by default, but writes entries in the
-same order as the input list. Duplicate filenames receive a ` (2)`, ` (3)`, …
-suffix instead of overwriting an earlier file. Call `result.dispose()` when
-your UI no longer needs the local download URLs.
+URL strings infer their name from the URL path. Use `{ url, filename }` when
+you need a specific filename or folder inside the archive.
 
-## Make the source URLs browser-readable
+## Make the URLs browser-readable
 
-With the local strategy, the visitor's browser fetches every URL. Each source
-must therefore allow the page's origin through CORS. Eazip's default fetch
-does not send cookies or browser credentials.
-
-A typical CDN response includes:
+Local jobs fetch from the visitor's browser without cookies. The source must
+allow the application's origin through CORS, for example:
 
 ```http
-Access-Control-Allow-Origin: https://your-app.example
+Access-Control-Allow-Origin: https://app.example.com
 ```
 
-Public files can also use `Access-Control-Allow-Origin: *`. If the files are
-private, generate short-lived signed URLs in your backend and return those URLs
-to the browser. Do not put S3, R2, or other storage credentials in front-end
-code.
+For private files, have your backend return short-lived signed URLs. Never send
+bucket credentials or a general-purpose bearer token to frontend code.
 
-When a trusted private CDN needs a custom request header, pass a `fetch`
-implementation and scope the credential to that CDN's exact origin. The source
-server must allow the header in its CORS policy as well. Never attach a bearer
-token to every URL when the URL list can contain untrusted hosts.
+<Callout type="warn" title="Scope custom authorization">
+  If you pass a custom `fetch`, add credentials only for a trusted, exact source
+  origin. A mixed URL list must not receive the same authorization blindly.
+</Callout>
+
+## Keep usable files when one URL fails
+
+The default behavior returns a partial ZIP rather than discarding successful
+files:
 
 ```ts
-const privateCdnOrigin = 'https://private-cdn.example.com';
-
 const result = await createZip({
   files: urls,
-  fetch: (input, init) => {
-    const url = new URL(
-      input instanceof Request ? input.url : input.toString(),
-      window.location.href,
-    );
-
-    if (url.origin !== privateCdnOrigin) {
-      return fetch(input, init);
-    }
-
-    const headers = new Headers(init?.headers);
-    headers.set('Authorization', `Bearer ${accessToken}`);
-
-    return fetch(input, {
-      ...init,
-      headers,
-    });
-  },
+  zipName: 'export.zip',
 });
-```
-
-## Keep the useful files when one URL fails
-
-By default, a failed URL is skipped and the rest of the archive is still
-created. Check `status` and `errors` before telling the user that every file was
-included.
-
-```ts
-const result = await createZip({ files: urls, zipName: 'export.zip' });
 
 if (result.status === 'partial') {
-  console.warn(`${result.skippedCount} files were skipped`, result.errors);
+  console.warn(`${result.skippedCount} files were skipped`);
 }
 
 result.downloadAll();
 ```
 
-Set `failOnUrlError: true` when the export is only valid if every file is
-present. If every source fails, the job rejects instead of producing an empty
-ZIP. See [Partial results and errors](/docs/concepts/partial-results) for the error
-types and recovery choices.
+Set `failOnUrlError: true` only when every source is required. Use `startZip()`
+instead of `createZip()` when you need custom progress or cancellation.
 
-## Show progress or cancel a long export
+## Move the job beyond the browser
 
-Use `startZip()` when the UI needs progress and cancellation. It returns a job
-immediately; `job.done` resolves with the same result shape as `createZip()`.
+Switch to Cloud when CORS, memory, URL count, or tab lifetime becomes a
+constraint:
 
 ```ts
-import { startZip } from '@eazip/core';
-
-const job = startZip({ files: urls, zipName: 'photos.zip' });
-
-const unsubscribe = job.subscribe(() => {
-  const { status, progress } = job.getSnapshot();
-  console.log(status, progress?.filesCompleted, progress?.filesTotal);
-});
-
-try {
-  const result = await job.done;
-  result.downloadAll();
-} finally {
-  unsubscribe();
-}
-
-// Call job.abort() from your Cancel button.
-```
-
-## Choose browser ZIP or Cloud ZIP
-
-| Use the browser when… | Use Eazip Cloud when… |
-| --- | --- |
-| The export comfortably fits in the user's memory | The archive can reach multiple gigabytes |
-| The page will stay open until completion | The job must survive a reload or closed tab |
-| The source allows browser CORS | The API should fetch the source URLs |
-| One immediate download is enough | You need resumable or stored results |
-
-The SDK call stays almost the same when a job outgrows the browser:
-
-```ts
-import { startZip } from '@eazip/core';
-
-const job = startZip({
+const result = await createZip({
   strategy: 'cloud',
   publicKey: 'pk_ez_...',
   files: urls,
-  zipName: 'customer-export.zip',
-  mode: 'stored',
+  zipName: 'invoices.zip',
 });
 
-const result = await job.done;
 result.downloadAll();
 ```
 
-Cloud jobs accept URL sources, run outside the browser, and can split large
-outputs into multiple ZIPs. Public Apps restrict which page origins and source
-hosts may create jobs.
-
-<a
-  href="https://eazip.io/cloud/?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=remote_urls_recipe_cta"
-  data-analytics-placement="remote_urls_recipe_cloud_cta"
->
-  Create a Public App and try the Cloud strategy
-</a>
-
-For private URL lists that should never reach the browser, continue with
-[backend-created sessions](/docs/cloud/backend-sessions). For large many-file
-exports, see [Zip GB-scale URL jobs](/docs/guides/gb-scale-url-jobs).
+Cloud URLs must be allowed by the Public App and reachable from Eazip's servers.
+Continue with [When to use Eazip Cloud](/docs/cloud) or
+[Create multi-GB ZIP archives with JavaScript](/docs/guides/gb-scale-url-jobs).

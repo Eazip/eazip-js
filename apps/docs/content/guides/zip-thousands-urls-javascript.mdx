@@ -1,0 +1,117 @@
+---
+title: Zip Thousands of URLs with JavaScript
+description: Package thousands of remote URLs with JavaScript and Eazip Cloud, with React code, partial results, and resumable job state.
+---
+
+Large URL lists can outlive a browser tab or exceed its practical memory and
+network limits. This workflow moves the job to Eazip Cloud while the application
+keeps using the JavaScript SDK.
+
+## Before you start
+
+- [Get a public key](/docs/cloud/get-a-public-key).
+- Add every source hostname to the Public App.
+- Use URLs that remain reachable until Cloud has fetched them.
+- Decide whether unavailable sources may produce a partial ZIP.
+
+## Start the URL job
+
+<GuideCodeTabs defaultValue="javascript">
+  <GuideCodeTab value="javascript">
+
+```ts title="export.ts"
+import { startZip } from '@eazip/core';
+
+export async function downloadUrlArchive(
+  urls: string[],
+  publicKey: string,
+) {
+  const job = startZip({
+    strategy: 'cloud',
+    publicKey,
+    files: urls,
+    zipName: 'documents.zip',
+    failOnUrlError: false,
+    onChange(snapshot) {
+      console.log(snapshot.status, snapshot.filesTotal);
+    },
+  });
+
+  const result = await job.done;
+
+  if (result.status === 'partial') {
+    console.warn(`${result.skippedCount} URLs were skipped`);
+  }
+
+  result.downloadAll();
+}
+```
+
+  </GuideCodeTab>
+  <GuideCodeTab value="react">
+
+```tsx title="UrlArchiveButton.tsx"
+import { useEazip, EazipTray } from '@eazip/react';
+
+export function UrlArchiveButton({
+  urls,
+  publicKey,
+}: {
+  urls: string[];
+  publicKey: string;
+}) {
+  const zip = useEazip();
+
+  return (
+    <>
+      <button
+        disabled={zip.isBusy}
+        onClick={() =>
+          zip.download({
+            strategy: 'cloud',
+            publicKey,
+            files: urls,
+            zipName: 'documents.zip',
+            failOnUrlError: false,
+          })
+        }
+      >
+        Download URL archive
+      </button>
+
+      <EazipTray />
+    </>
+  );
+}
+```
+
+  </GuideCodeTab>
+</GuideCodeTabs>
+
+The public key is browser-safe. Do not place a secret key or storage credential
+in either example.
+
+## Name entries before starting
+
+URL strings infer names from their path. For stable folders and filenames, map
+the list before sending it:
+
+```ts
+const files = urls.map((url, index) => ({
+  url,
+  filename: `documents/document-${index + 1}.pdf`,
+}));
+```
+
+## Expect individual URLs to fail
+
+Keep `failOnUrlError: false` when a usable archive is better than no archive.
+Cloud reports how many URLs were skipped; it does not currently return the
+per-file error detail available to Local jobs.
+
+React integrations retain Cloud session state and reconnect after a reload.
+Core integrations can persist the returned session credentials and reconnect
+with `resumeZip()` when the application owns that lifecycle.
+
+For very large output by byte size, continue with
+[Create multi-GB ZIP archives with JavaScript](/docs/guides/gb-scale-url-jobs).

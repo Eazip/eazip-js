@@ -1,36 +1,57 @@
 ---
-title: Download selected files
-description: Turn a gallery or asset picker into a single ZIP.
+title: Download Selected Files as a ZIP in React
+description: Turn selected gallery, asset picker, or document items into one browser-generated ZIP with React and EazipTray.
 ---
 
-Track a selection with a `Set`, map the selected items to `files`, and hand
-that to `zip.download()`. `<EazipTray />` handles progress, completion, and
-retries — selection UI is the only part left to you.
+This guide adds a **Download as ZIP** action to a list of browser `File`
+objects. Eazip handles the archive and download state; your component owns the
+selection.
 
-```tsx
+## Before you start
+
+- Complete the [React basics](/docs/getting-started/react).
+- Have an array of items containing a stable ID, display name, and `File`.
+
+## Build the selection and download
+
+```tsx title="Gallery.tsx"
 import { useState } from 'react';
 import { useEazip, EazipTray } from '@eazip/react';
 
-type GalleryItem = { id: string; name: string; file: File };
+type GalleryItem = {
+  id: string;
+  name: string;
+  file: File;
+};
 
-function Gallery({ items }: { items: GalleryItem[] }) {
+export function Gallery({ items }: { items: GalleryItem[] }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const zip = useEazip();
 
   const toggle = (id: string) => {
     setSelected((previous) => {
       const next = new Set(previous);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   };
 
-  const handleDownload = () => {
+  const downloadSelected = () => {
     const files = items
       .filter((item) => selected.has(item.id))
-      .map((item) => ({ file: item.file, filename: item.name }));
-    zip.download({ files, zipName: 'selected.zip' });
+      .map((item) => ({
+        file: item.file,
+        filename: item.name,
+      }));
+
+    zip.download({
+      files,
+      zipName: 'selected.zip',
+    });
   };
 
   return (
@@ -50,7 +71,10 @@ function Gallery({ items }: { items: GalleryItem[] }) {
         ))}
       </ul>
 
-      <button disabled={selected.size === 0} onClick={handleDownload}>
+      <button
+        disabled={selected.size === 0}
+        onClick={downloadSelected}
+      >
         Download as ZIP
       </button>
 
@@ -60,9 +84,19 @@ function Gallery({ items }: { items: GalleryItem[] }) {
 }
 ```
 
-The same component works with remote sources instead of local `File`s —
-give `GalleryItem` a `url: string` instead of `file: File` and map to
-`{ url: item.url, filename: item.name }`. See
-[Inputs & sources](/docs/concepts/inputs) for every shape `files` accepts, and
-[React quickstart](/docs/getting-started/react) for the underlying `useEazip()` +
-`<EazipTray />` pattern this recipe builds on.
+## How it works
+
+1. A `Set` stores selected IDs without duplicating them.
+2. `downloadSelected` maps only those items to Eazip source objects.
+3. `filename` controls each path inside the ZIP.
+4. The disabled button prevents an empty job.
+5. `<EazipTray />` handles progress, cancel, retry, and completion.
+
+## Use remote items instead
+
+Replace `file: File` with `url: string`, then map each item to
+`{ url: item.url, filename: item.name }`. Local URL jobs require browser CORS;
+large URL selections can use Eazip Cloud without changing the selection UI.
+
+See [Inputs and sources](/docs/concepts/inputs) for naming and URL rules, or
+[add custom progress controls](/docs/guides/progress-cancel-retry).

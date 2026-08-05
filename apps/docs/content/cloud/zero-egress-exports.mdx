@@ -1,0 +1,71 @@
+---
+title: Understand Zero-Egress ZIP Exports
+description: Compare Local, Eazip Cloud stream, and stored ZIP delivery across Cloud usage, retention, repeat downloads, and source-provider costs.
+---
+
+Eazip Cloud does not add a separate outbound-bandwidth fee to ZIP downloads.
+Cloud usage is still metered, and the selected mode determines which meter
+applies.
+
+<Callout type="warn" title="Zero egress does not mean unmetered">
+  Stream delivery and stored retention consume Cloud quota. Your bucket or CDN
+  may also charge when Eazip fetches the source files.
+</Callout>
+
+## Choose the execution model
+
+| Strategy or mode | What happens | Main usage |
+| --- | --- | --- |
+| Local | The browser fetches and creates the ZIP | No Eazip Cloud usage |
+| Cloud `stream` | The ZIP is generated as each download starts | Delivered GB |
+| Cloud `stored` | The ZIP is prepared once and retained | Stored GB-days |
+
+A GB-day is archive size multiplied by retention time. Plan-specific included
+usage and overage prices belong on the
+[pricing page](https://eazip.io/cloud/?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=zero_egress_recipe#pricing).
+
+## Use stream for immediate downloads
+
+```ts
+zip.download({
+  strategy: 'cloud',
+  publicKey,
+  files: urls,
+});
+```
+
+Stream is the SDK default. It avoids retained archive storage, but every repeat
+download regenerates and redelivers the ZIP.
+
+## Use stored for a reusable artifact
+
+```ts
+zip.download({
+  strategy: 'cloud',
+  publicKey,
+  files: urls,
+  mode: 'stored',
+});
+```
+
+Stored is a better fit when the same export will be downloaded repeatedly or
+when the original sources may expire after the archive is prepared.
+
+## Keep usage predictable
+
+- Use Local when the job comfortably fits in the tab.
+- Choose the shortest useful retention for stored archives.
+- Avoid rebuilding a stored export only to refresh its link; create a new job
+  only after the old output expires or the source set changes.
+- Use partial output when a few failed URLs should not force a complete rebuild.
+- Split output for usability, not as a way to reduce total stored bytes.
+
+## Account for source-provider costs
+
+Eazip must read every source. With stored mode, sources are normally fetched
+while the archive is prepared. With stream mode, they are fetched again for
+each download. Any egress charged by your bucket, CDN, or origin remains outside
+Eazip's pricing.
+
+See [Stream or stored](/docs/cloud/stream-vs-stored) for behavior and
+[When to use Eazip Cloud](/docs/cloud) for the Local-to-Cloud boundary.

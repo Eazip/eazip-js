@@ -3,6 +3,7 @@
 import Script from 'next/script';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { getGuideLinkAnalyticsEvent } from '@/lib/guide-analytics';
 import { getOutboundAnalyticsEvent } from '@/lib/outbound-analytics';
 
 const GA_MEASUREMENT_ID = 'G-JMZW6S8J9J';
@@ -42,6 +43,14 @@ export function Analytics() {
       if (!link) return;
 
       const destination = new URL(link.href, window.location.href);
+      const guideEvent = getGuideLinkAnalyticsEvent(destination, {
+        currentOrigin: window.location.origin,
+        linkText: link.textContent || undefined,
+        placement: link.dataset.analyticsPlacement,
+        sourcePage: window.location.pathname,
+      });
+      if (guideEvent) window.gtag?.('event', guideEvent.name, guideEvent.params);
+
       const analyticsEvent = getOutboundAnalyticsEvent(destination, {
         linkText: link.textContent || undefined,
         placement: link.dataset.analyticsPlacement || 'docs_link',

@@ -1,45 +1,47 @@
 ---
-title: '@eazip/core'
-description: The framework-agnostic engine behind Eazip.
+title: Concepts
+description: Understand the shared models behind Local, Cloud, React, and framework-agnostic JavaScript integrations.
 ---
 
-`@eazip/core` is the framework-agnostic engine behind eazip: feed it files,
-blobs, or remote URLs and get back a ZIP the browser downloads. It's
-ESM-only, tree-shakeable, and needs zero configuration to start zipping
-locally in the browser. [`@eazip/react`](/docs/react) wraps this package with a
-hook and a UI component; everything it does is built on the primitives
-documented here.
+Concepts explain how Eazip behaves across integrations. Read only the topic you
+need; setup instructions stay in Getting Started and exact signatures stay in
+Reference.
 
-```sh
-npm install @eazip/core
-```
+## Choose a topic
 
-## In this section
+<Cards>
+  <Card
+    title="ZIP jobs"
+    description="Choose createZip or startZip and understand the shared lifecycle."
+    href="/docs/concepts/zip-job"
+  />
+  <Card
+    title="Inputs and sources"
+    description="See accepted file shapes, filename rules, and Local versus Cloud URL fetching."
+    href="/docs/concepts/inputs"
+  />
+  <Card
+    title="Partial results"
+    description="Keep successful files when one source fails and decide when to fail fast."
+    href="/docs/concepts/partial-results"
+  />
+  <Card
+    title="Multi-ZIP splitting"
+    description="Split large output into predictable ZIP parts."
+    href="/docs/concepts/splitting"
+  />
+  <Card
+    title="Sessions and resume"
+    description="Reconnect to a Cloud job after a reload."
+    href="/docs/concepts/resume"
+  />
+</Cards>
 
-- [`createZip`, `startZip` & `ZipJob`](/docs/concepts/zip-job) — the one-shot
-  promise, the subscribable job, and the object that unifies both
-  strategies.
-- [Inputs & sources](/docs/concepts/inputs) — every shape `files` accepts, and how
-  entry names get resolved and de-duplicated.
-- [Partial results & errors](/docs/concepts/partial-results) — the `partial`
-  status, per-file errors, and the full error class taxonomy.
-- [Multi-zip splitting](/docs/concepts/splitting) — `maxZipSizeBytes`, part naming,
-  and why ZIP64 is always on.
-- [Sessions & resume](/docs/concepts/resume) — picking a cloud job back up after a
-  reload with `resumeZip`.
+## Start with the job model
 
-Prefer a walkthrough first? The
-[JavaScript quickstart](/docs/getting-started/javascript) covers the same ground
-with a working example. Using React? Skip straight to
-[`@eazip/react`](/docs/react).
+If you are unsure where to begin, read [ZIP jobs](/docs/concepts/zip-job). It
+connects inputs, progress, partial results, splitting, and Cloud sessions into
+one lifecycle.
 
-## Entry points
-
-Four entry points, so a bundler only pulls in what you actually use:
-
-| Import from | Contents |
-| --- | --- |
-| `@eazip/core` | Everything — `local` and `cloud`, dispatched by `strategy`. |
-| `@eazip/core/local` | Browser zipping only — no cloud code in your bundle. |
-| `@eazip/core/cloud` | Cloud sessions only — no `@zip.js/zip.js` in your bundle. |
-| `@eazip/core/shared` | Types, errors, and the input/download utilities both engines share. |
+Looking for code first? Start with [React](/docs/getting-started/react) or
+[JavaScript](/docs/getting-started/javascript) in Getting Started.

@@ -1,64 +1,81 @@
 ---
-title: "Sessions & resume"
-description: "resumeZip, session snapshots, and picking a cloud job back up after a reload."
+title: "Sessions and resume"
+description: "Understand which Cloud credentials to retain and how to reconnect to a job after a reload."
 ---
 
-Cloud jobs run on the server, so unlike a local export, they don't die with
-the tab. `@eazip/core` exposes just enough of the session to pick a job
-back up: the moment a cloud job's Public Session is created — not when the
-zip finishes — `job.getSnapshot().session` is populated:
+Cloud jobs continue outside the browser tab. Once Eazip Cloud creates a session,
+your application can retain its session credentials and reconnect later.
+
+<Callout type="warn" title="Cloud only">
+  Local jobs run inside the tab and cannot resume after it closes or reloads.
+</Callout>
+
+## What should I save?
+
+A Cloud `ZipJob` snapshot exposes `session` as soon as the server creates it:
 
 ```ts
-const job = startZip({ strategy: 'cloud', publicKey, files });
+const job = startZip({
+  strategy: 'cloud',
+  publicKey,
+  files: urls,
+});
 
-job.getSnapshot().session;
-// { sessionId, clientSecret, apiBaseUrl, createdAt, expiresAt, jobStatus, job }
+const unsubscribe = job.subscribe(() => {
+  const session = job.getSnapshot().session;
+  if (session) {
+    sessionStorage.setItem('eazip-session', JSON.stringify(session));
+  }
+});
+
+try {
+  await job.done;
+} finally {
+  unsubscribe();
+}
 ```
 
-Persist `sessionId` and `clientSecret` (session storage, a cookie, wherever
-survives your reload) as soon as they appear, and hand them to `resumeZip`
-after the reload to attach a fresh `ZipJob` to the same server-side job:
+Retain `sessionId`, `clientSecret`, and `apiBaseUrl`. Treat `clientSecret` as a
+credential: do not put it in a URL, analytics event, or log.
+
+## How do I resume the job?
+
+Pass the saved credentials to `resumeZip()` after the reload:
 
 ```ts
 import { resumeZip } from '@eazip/core';
 
-const job = resumeZip({ sessionId, clientSecret });
-const result = await job.done; // polling picks up where it left off
+const value = sessionStorage.getItem('eazip-session');
+if (!value) throw new Error('No Eazip session found');
+
+const saved = JSON.parse(value);
+const job = resumeZip({
+  sessionId: saved.sessionId,
+  clientSecret: saved.clientSecret,
+  apiBaseUrl: saved.apiBaseUrl,
+});
+
+const result = await job.done;
 result.download();
 ```
 
-`resumeZip` doesn't care who created the session — the SDK itself, or a
-`createSession` callback backed by your own server (see
-[Backend-created sessions](/docs/cloud/backend-sessions)) — so the same call
-works either way. It returns a `ZipJob` exactly like `startZip`, with one
-difference: there's no create step, so `session` is present in the snapshot
-immediately, before the first poll resolves it. Status is polling-only
-today — there's no webhook or SSE channel.
+The resumed job has the same snapshots, `done` promise, and download methods as
+a job returned by `startZip()`.
 
-`@eazip/react` builds exactly this on top of `localStorage` — see
-[Persistence & reload-resume](/docs/react/persistence) if you're using the hook
-instead of `@eazip/core` directly.
+## What happens when polling stops?
 
-## Expiry
+Calling `job.abort()` stops this browser from polling; it does not cancel the
+server-side Cloud job. A later `resumeZip()` can reconnect while the session is
+valid.
 
-Sessions don't live forever. Resuming (or polling) a session past its
-`expiresAt` rejects `job.done` with `EazipSessionExpiredError`
-(`SESSION_EXPIRED`); a session an operator revoked rejects with
-`EazipSessionRevokedError` (`SESSION_REVOKED`). Both mean the same thing in
-practice — the credentials are no longer good — so re-run the export
-rather than trying to resume the old one.
+Expired or revoked credentials cannot be resumed. Start a new export instead of
+retrying the old session.
 
-## Lower-level access: `SessionsClient`
+## React applications
 
-For anything `startZip`/`resumeZip` don't cover — managing sessions outside
-the `ZipJob` lifecycle entirely — `SessionsClient` wraps the raw Public
-Sessions API: create, get, and poll, with the same backoff `resumeZip` uses
-internally.
+`@eazip/react` persists resumable Cloud task metadata for you by default. See
+[Persistence and reload-resume](/docs/react/persistence) before building custom
+storage around the hook.
 
-```ts
-import { SessionsClient } from '@eazip/core/cloud';
-
-const client = new SessionsClient({ publicKey, apiBaseUrl: 'https://api.eazip.io' });
-const created = await client.create({ files });
-const session = await client.poll(created.id, { clientSecret: created.clientSecret });
-```
+For sessions created by your own backend, see
+[Backend-created sessions](/docs/cloud/backend-sessions).

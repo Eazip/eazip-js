@@ -1,81 +1,72 @@
 ---
-title: "useEazip()"
-description: "The hook: download, task state, and the actions around them."
+title: "Control tasks with useEazip()"
+description: "Start ZIP downloads, read the current React task, and share defaults without duplicating engine state."
 ---
 
-```ts
-const zip = useEazip();
+`useEazip()` connects a component to the current Eazip task and its actions. Use
+it whether you render `<EazipTray />` or your own interface.
+
+## Start a download
+
+```tsx
+import { useEazip } from '@eazip/react';
+
+function DownloadButton({ files }: { files: File[] }) {
+  const zip = useEazip();
+
+  return (
+    <button
+      disabled={zip.isBusy}
+      onClick={() =>
+        zip.download({
+          files,
+          zipName: 'export.zip',
+        })
+      }
+    >
+      Download as ZIP
+    </button>
+  );
+}
 ```
 
-returns:
+`download()` starts the task and returns its ID immediately. Processing and
+network failures appear on `task`; they are not asynchronous exceptions from
+the call.
 
-| Member | Description |
-| --- | --- |
-| `download(options)` | Starts an export. Fire & forget — returns the new task's id immediately. |
-| `task` | The current task, or `null` if nothing has run yet. |
-| `tasks` | The same task as a one-element array (`useEazip` is single-task today; the array shape is forward-compatible). |
-| `isBusy` | `true` while `task.state === 'processing'`. |
-| `cancel(taskId?)` | Aborts the job and clears the task. |
-| `retry(taskId?)` | Re-runs the original `download()` call, if it's still retryable (`task.canRetry`). |
-| `dismiss(taskId?)` | Clears the task. Today, identical to `cancel()`. |
-| `downloadZip(taskId, zipIndex)` | Triggers one zip's download from a multi-zip result. |
-| `downloadAll(taskId?)` | Triggers every zip's download. |
+<Callout type="warn" title="Validate an optional selection first">
+  An empty or unsupported `files` value fails synchronously. Disable the action
+  or validate the selection when an empty list is a normal UI state.
+</Callout>
 
-`taskId` is optional on every action — pass it if you're tracking your own
-reference; otherwise it defaults to whatever the current task is.
+## Read the current task
 
-## `download(options)`
+| State | Meaning | Typical UI |
+| --- | --- | --- |
+| `processing` | The Local or Cloud job is running | Progress or an indeterminate status, plus cancel |
+| `completed` | All output is ready | Download action |
+| `partial` | Output is ready with skipped files | Download plus a skipped-count notice |
+| `failed` | No usable output was produced | Error and retry when `canRetry` is true |
+| `expired` | Cloud output is no longer available | Start a new export |
 
-`options` is one of three shapes:
+`isBusy` is the short form of checking for a processing task. Use `task` when
+the interface needs progress, ZIP parts, errors, or expiry.
 
-```ts
-// 1. Local (default strategy)
-zip.download({ files, zipName: 'export.zip' });
+## Choose the session path
 
-// 2. Cloud, SDK-created session — files go to the browser
-zip.download({ strategy: 'cloud', publicKey: 'pk_ez_...', files: urls });
+- **Local:** `download({ files })` runs in the browser.
+- **Frontend-created Cloud:** add `strategy: 'cloud'`, `publicKey`, and URL
+  sources.
+- **Backend-created Cloud:** pass `createSession` instead of `files` and
+  `publicKey`.
 
-// 3. Cloud, backend-created session — files never reach the browser
-zip.download({
-  strategy: 'cloud',
-  zipName: 'export.zip',
-  filesTotal: 50_000,
-  createSession: async ({ signal, zipName, mode }) => {
-    const response = await fetch('/api/eazip-session', {
-      method: 'POST',
-      signal,
-      body: JSON.stringify({ zipName, mode }),
-    });
-    return response.json(); // { sessionId, clientSecret, apiBaseUrl? }
-  },
-});
-```
+See [Backend-created sessions](/docs/cloud/backend-sessions) for the trusted
+server boundary.
 
-Shapes 1 and 2 take `files: ZipInput` — see [Inputs & sources](/docs/concepts/inputs)
-for everything that accepts. Shape 3 takes a `createSession` callback
-instead of `files`/`publicKey`; see
-[Backend-created sessions](/docs/cloud/backend-sessions). All three share
-`zipName`, `failOnUrlError`, `maxZipSizeBytes`, `signal`, `fetch`,
-`onChange`, and `autoDownload` (default `true` — set it `false` to skip the
-automatic browser download and drive it yourself via
-`downloadZip`/`downloadAll`).
+## Share defaults when needed
 
-## Fire-and-forget, with one exception
-
-Engine and network errors never throw from `download()` — they land on
-`task.error` and render as a recoverable state, in the tray or in your own
-UI. The one exception is an empty or unrecognized `files` list
-(`EMPTY_INPUT` / `INVALID_INPUT`): that throws synchronously from
-`download()` itself, the same way passing garbage to any other function
-would — validate `files` before calling it if the list can legitimately be
-empty.
-
-## Provider-optional
-
-`useEazip()` works with no setup — it falls back to a shared, lazily
-created store. Wrap your app in `EazipProvider` to share config (so every
-`download()` call doesn't need to repeat `publicKey`), or to isolate state
-between roots/tests:
+No provider is required. Add `EazipProvider` when several components need the
+same defaults or a test needs isolated state:
 
 ```tsx
 import { EazipProvider } from '@eazip/react';
@@ -88,9 +79,9 @@ import { EazipProvider } from '@eazip/react';
   }}
 >
   <App />
-</EazipProvider>;
+</EazipProvider>
 ```
 
-`config` fields (`publicKey`, `apiBaseUrl`, `strategy`, `defaults`,
-`autoDownload`, `persist`, `storageKey`) all act as fallbacks — anything
-passed directly to `download()` takes precedence.
+Per-download options take precedence over provider defaults. See the
+[React Reference](/docs/reference/react) for every action, option, task field,
+and provider setting.

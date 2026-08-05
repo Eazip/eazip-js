@@ -1,58 +1,47 @@
 ---
-title: "Stream vs stored"
-description: "The two delivery modes, the stream default, and link expiry."
+title: "Stream or stored"
+description: "Choose whether Eazip Cloud generates an archive on download or prepares and retains it ahead of time."
 ---
 
-Cloud sessions build the archive one of two ways, chosen with `mode`:
+Cloud supports two delivery modes. The SDK defaults to `stream`; set `mode` only
+when `stored` better matches the download lifecycle.
 
 ```ts
-zip.download({ strategy: 'cloud', publicKey, files: urls, mode: 'stored' });
+zip.download({
+  strategy: 'cloud',
+  publicKey,
+  files: urls,
+  mode: 'stored',
+});
 ```
 
-**`'stream'`** — the SDK's default whenever it creates the session for you
-— generates the zip on demand, at download time, so there's no storage
-upload to wait for and the session tends to be ready sooner. Each download
-regenerates the archive from the same source list; nothing sits in storage
-between downloads.
+## Which mode should I choose?
 
-**`'stored'`** builds the archive once and keeps it, so repeat downloads of
-the same session serve the same bytes instead of rebuilding. Reach for it
-when the same export gets downloaded more than once, or when you want a
-stable artifact independent of the original sources still being reachable.
+| | Stream | Stored |
+| --- | --- | --- |
+| Archive generation | When a download starts | Before the download is offered |
+| Repeat download | Regenerates the archive | Reuses the prepared archive |
+| Source availability | Sources must remain reachable for each download | Sources are needed while the stored archive is built |
+| Best for | One-time or immediate downloads | Repeat downloads or a stable prepared artifact |
 
-Either way it's the same `EazipZipOutput[]` shape in `result.zips` /
-`session.job.zips` — `mode` only changes how the bytes behind
-`downloadUrl` get produced, not the shape of the result. Your Public App's
-allowed modes still apply, so a `mode` your dashboard policy doesn't permit
-is rejected the same way an invalid origin would be — see
-[Public keys & origins](/docs/cloud/keys-and-origins).
+Your Public App must allow the selected mode. The result still exposes the same
+ZIP outputs and download methods.
 
-## Expiry
+## What expires?
 
-Both modes' download links — and the session itself — are valid for a
-limited time (24 hours by default). The expiry lives on the job, not just
-the session: `result.expiresAt` reflects it, and `@eazip/react`'s tray
-watches it and switches to a calm `'expired'` state once it passes rather
-than leaving a dead link behind. Re-run the export for fresh links; see
-[Sessions & resume](/docs/concepts/resume) for resuming a still-in-progress job
-instead.
+The session and its download access have a configured lifetime. Once access
+expires, start a new export for fresh links. Resume is for a still-valid,
+in-progress session; it does not renew expired output.
 
-## Zero egress either way
+React's tray converts expired Cloud output into an `expired` task state instead
+of leaving a dead download action.
 
-Downloads through Eazip Cloud carry no egress fees regardless of `mode` —
-you pay for the zip job, not for bandwidth out. See
-[Zero-egress exports](/docs/guides/zero-egress-exports) and
-[pricing](https://eazip.io/cloud/?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=stream_vs_stored_pricing#pricing).
+## How does usage differ?
 
-## Using `SessionsClient` directly
+Stream and stored consume different Cloud usage meters. Stream is based on
+delivered data; stored is based on archive size and retention. Use the current
+dashboard and [pricing page](https://eazip.io/cloud/?utm_source=eazip_js_docs&utm_medium=docs&utm_campaign=cloud_activation&utm_content=stream_vs_stored_pricing#pricing)
+for plan-specific quotas and prices.
 
-The engine's `mode: 'stream'` default is an SDK-level choice, not a server
-one — call [`SessionsClient`](/docs/concepts/resume) directly and omit `mode`
-entirely, and the API's own default applies instead:
-
-```ts
-import { SessionsClient } from '@eazip/core/cloud';
-
-const client = new SessionsClient({ publicKey, apiBaseUrl: 'https://api.eazip.io' });
-await client.create({ files }); // no `mode` sent — server default applies
-```
+For keeping stored usage predictable, see
+[Understand zero-egress ZIP exports](/docs/cloud/zero-egress-exports).

@@ -1,0 +1,81 @@
+---
+title: Create a ZIP File in the Browser with JavaScript
+description: Create and download a ZIP from browser files with JavaScript, without uploading files or writing backend ZIP code.
+---
+
+This guide adds a working **Download as ZIP** button to a browser application.
+The selected files stay in the browser and are packaged locally.
+
+## Before you start
+
+Install the framework-agnostic Core package:
+
+```sh
+npm install @eazip/core
+```
+
+## Add the file picker
+
+```html title="index.html"
+<input id="files" type="file" multiple />
+<button id="download" type="button">Download as ZIP</button>
+```
+
+## Create and download the ZIP
+
+```js title="export.js"
+import { createZip } from '@eazip/core';
+
+const fileInput = document.querySelector('#files');
+const downloadButton = document.querySelector('#download');
+
+if (!(fileInput instanceof HTMLInputElement)) {
+  throw new Error('File input not found');
+}
+
+if (!(downloadButton instanceof HTMLButtonElement)) {
+  throw new Error('Download button not found');
+}
+
+downloadButton.addEventListener('click', async () => {
+  if (!fileInput.files?.length) return;
+
+  const result = await createZip({
+    files: fileInput.files,
+    zipName: 'selected-files.zip',
+  });
+
+  result.download();
+});
+```
+
+`createZip()` resolves when the browser-generated ZIP is ready. `FileList` is
+accepted directly, so no upload or format conversion is required.
+
+## Control names and folders
+
+Pass source objects when the path inside the ZIP should differ from the browser
+filename:
+
+```js
+const result = await createZip({
+  files: [
+    { file: reportFile, filename: 'reports/annual.pdf' },
+    { file: chartBlob, filename: 'reports/chart.png' },
+  ],
+  zipName: 'reports.zip',
+});
+```
+
+Eazip also accepts `File`, `Blob`, remote URL strings, and
+`{ url, filename }` objects. See [Inputs and sources](/docs/concepts/inputs) for
+the complete input model.
+
+## Know when to use Cloud
+
+Local creation is the shortest path for files already present in the browser.
+For multi-GB archives or very large URL lists, move the URL job to Eazip Cloud
+instead of keeping all work inside one tab.
+
+Continue with [Create a ZIP from remote URLs](/docs/guides/create-zip-from-remote-urls)
+or [Create multi-GB ZIP archives with JavaScript](/docs/guides/gb-scale-url-jobs).

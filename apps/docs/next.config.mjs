@@ -32,6 +32,11 @@ const config = {
         destination: '/docs/concepts/:path*',
         permanent: true,
       },
+      {
+        source: '/docs/guides/zero-egress-exports',
+        destination: '/docs/cloud/zero-egress-exports',
+        permanent: true,
+      },
     ];
   },
   // Served at the eazip.io root: the homepage is app/page.tsx and all

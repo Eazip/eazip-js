@@ -1,80 +1,94 @@
 ---
-title: Zip GB-scale, 1,000+ URL jobs
-description: Offload huge, many-file archives to the cloud strategy — splitting, reload-resume, and the limits that actually bite.
+title: Create Multi-GB ZIP Archives from URLs with JavaScript
+description: Create multi-GB ZIP archives from remote URLs with JavaScript or React, split large output, and run the work with Eazip Cloud.
 ---
 
-Browser-side zipping holds everything in tab memory and dies with the tab. At
-some point — usually somewhere past a few hundred megabytes, or a few thousand
-files — that stops being a tradeoff and becomes the reason the export fails.
-`strategy: 'cloud'` hands the same `files` list to Eazip Cloud, which fetches
-the sources and builds the archive server-side.
+Use this workflow when the total archive size is too large for the memory and
+lifetime of a browser tab. Eazip Cloud fetches the remote URLs and creates the
+ZIP outside the visitor's device.
 
-Everything else stays: the same call, the same tray, the same result shape.
+## Before you start
 
-## What you need first
+- [Get a public key](/docs/cloud/get-a-public-key).
+- Add every source hostname to the Public App.
+- Use remote URLs rather than browser `File` or `Blob` objects.
+- Choose [stream or stored](/docs/cloud/stream-vs-stored).
 
-- A public key (`pk_ez_…`) — see [Get a public key](/docs/cloud/get-a-public-key)
-- Your file **URLs**. Cloud sources are fetched by the API, so `File`/`Blob`
-  inputs throw `EazipValidationError('CLOUD_URL_SOURCES_ONLY')`
-- The hosts serving those URLs added to your Public App's allowed source hosts
+## Create the Cloud archive
 
-## Start the job
+<GuideCodeTabs defaultValue="javascript">
+  <GuideCodeTab value="javascript">
 
-```tsx title="ExportAll.tsx"
-'use client';
+```ts title="export.ts"
+import { createZip } from '@eazip/core';
 
-import { EazipTray, useEazip } from '@eazip/react';
+export async function downloadLargeArchive(
+  urls: string[],
+  publicKey: string,
+) {
+  const result = await createZip({
+    strategy: 'cloud',
+    publicKey,
+    files: urls,
+    zipName: 'media-export.zip',
+    mode: 'stored',
+    maxZipSizeBytes: 2_000_000_000,
+  });
 
-function ExportAll({ urls }) {
+  result.downloadAll();
+}
+```
+
+  </GuideCodeTab>
+  <GuideCodeTab value="react">
+
+```tsx title="LargeArchiveButton.tsx"
+import { useEazip, EazipTray } from '@eazip/react';
+
+export function LargeArchiveButton({
+  urls,
+  publicKey,
+}: {
+  urls: string[];
+  publicKey: string;
+}) {
   const zip = useEazip();
 
   return (
     <>
       <button
+        disabled={zip.isBusy}
         onClick={() =>
           zip.download({
             strategy: 'cloud',
-            publicKey: process.env.NEXT_PUBLIC_EAZIP_KEY,
-            files: urls, // thousands of URLs is the normal case here
-            zipName: 'customer-export.zip',
+            publicKey,
+            files: urls,
+            zipName: 'media-export.zip',
             mode: 'stored',
+            maxZipSizeBytes: 2_000_000_000,
           })
         }
       >
-        Export all files
+        Create ZIP archive
       </button>
+
       <EazipTray />
     </>
   );
 }
 ```
 
-`mode: 'stored'` builds the archive once and keeps it, so a customer who
-downloads the same export twice gets the same bytes without rebuilding. The
-SDK's default is `'stream'`, which regenerates on each download and is usually
-ready sooner — see [Stream vs stored](/docs/cloud/stream-vs-stored).
+  </GuideCodeTab>
+</GuideCodeTabs>
 
-With `@eazip/core` instead of React, it's the same options through `startZip`:
+Use `stored` when the prepared archive will be downloaded more than once. Omit
+`mode` to use the SDK's `stream` default. The public key is safe for browser
+code; secret credentials are not.
 
-```ts
-import { startZip } from '@eazip/core';
+## Split large output
 
-const job = startZip({
-  strategy: 'cloud',
-  publicKey,
-  files: urls,
-  zipName: 'customer-export.zip',
-  mode: 'stored',
-});
-
-const result = await job.done;
-result.downloadAll(); // one download per output zip
-```
-
-## Split the output instead of shipping one huge file
-
-A 40 GB single archive is hostile to download and, on some file systems,
-hostile to unzip. Pass `maxZipSizeBytes` and the export comes back as parts:
+Set a practical part size for the people and systems receiving the export. The
+example above requests parts of approximately 2 GB:
 
 ```ts
 zip.download({
@@ -82,126 +96,52 @@ zip.download({
   publicKey,
   files: urls,
   zipName: 'export.zip',
-  maxZipSizeBytes: 2_000_000_000, // 2 GB per part
+  maxZipSizeBytes: 2_000_000_000,
 });
 ```
 
-You get one `zips[]` entry per part, each with its own `downloadUrl`, and
-`multiZip` / `zipCount` on the job tell you it split. Parts are named
-`export_part01.zip`, `export_part02.zip`, … A single file larger than the cap
-gets a part of its own, over the cap, rather than failing the export — see
-[Multi-zip splitting](/docs/concepts/splitting).
+The result exposes one `zips` entry per part. A file larger than the cap remains
+whole in its own oversized part. See [Multi-ZIP splitting](/docs/concepts/splitting).
 
-Iterate `zips[]` even when you don't pass `maxZipSizeBytes`: it's always an
-array, so code written this way keeps working the day you add splitting.
+## Keep the job across a reload
 
-## Surviving a reload
+`@eazip/react` persists a created Cloud session and reconnects when the
+application mounts again. Core applications must save the session handle and
+call `resumeZip()` themselves.
 
-This is the part a local export can't do at all. The job runs on the server, so
-a reload only loses the *client's* attachment to it, and that's recoverable.
+<Callout type="info" title="Cloud progress is session-based">
+  The browser SDK polls Cloud job state. It does not currently receive Local's
+  per-file or byte progress, so show a processing state rather than a false
+  percentage.
+</Callout>
 
-`@eazip/react` handles it for you — `useEazip()` persists the session and
-reattaches on mount, so a reload mid-export comes back with the tray still
-narrating. Nothing to wire up; see
-[Persistence & reload-resume](/docs/react/persistence).
+## Plan for partial output
 
-With `@eazip/core`, persist the session yourself as soon as it appears and
-resume with it:
-
-```ts
-const job = startZip({ strategy: 'cloud', publicKey, files: urls });
-
-const { session } = job.getSnapshot();
-if (session) {
-  sessionStorage.setItem('export', JSON.stringify({
-    sessionId: session.sessionId,
-    clientSecret: session.clientSecret,
-  }));
-}
-```
-
-```ts
-import { resumeZip } from '@eazip/core';
-
-const saved = JSON.parse(sessionStorage.getItem('export') ?? 'null');
-if (saved) {
-  const job = resumeZip(saved);
-  const result = await job.done; // polling picks up where it left off
-  result.downloadAll();
-}
-```
-
-The session appears immediately on create — before the zip is built — so save
-it then, not on completion. See [Sessions & resume](/docs/concepts/resume).
-
-## Progress at this scale
-
-`filesTotal` comes from your input list, so progress is meaningful from the
-first poll rather than creeping up as the server discovers work:
-
-```tsx
-const { task } = useEazip();
-
-task?.progress?.filesCompleted; // e.g. 812
-task?.progress?.filesTotal;     // e.g. 4000
-```
-
-Status is polling-only today — the SDK backs off between polls and pauses while
-the tab is hidden. There's no webhook or SSE channel for the browser SDK.
-
-## The limits that actually bite
-
-| Limit | Where it comes from | What to do |
-| --- | --- | --- |
-| Max files per session | Your Public App (and your plan) | Raise it on the dashboard, or split into several exports |
-| Max total size per session | Your Public App or plan default | Raise it, or drop `maxZipSizeBytes` to keep parts small |
-| Retention / link expiry | Your plan (24h by default) | Re-run the export for fresh links |
-| One unreachable URL | `failOnUrlError` | See below |
-
-A session that exceeds a ceiling is rejected at create time, before any work
-starts — the fix is on the dashboard, not in SDK options.
-
-## Failures in a 4,000-file job
-
-At this scale, assume some URLs will fail. By default a cloud job is
-all-or-nothing on fetch errors, which is rarely what a customer-facing export
-wants — one dead link shouldn't discard 3,999 good files. Decide explicitly:
+Large URL lists should expect an occasional unavailable source. Keep successful
+files unless the archive is invalid without every item:
 
 ```ts
 zip.download({
   strategy: 'cloud',
   publicKey,
   files: urls,
-  failOnUrlError: false, // keep the archive, report what was skipped
+  failOnUrlError: false,
 });
 ```
 
-Then tell the user what they got, rather than implying completeness:
+The tray reports a partial result and its skipped count. Cloud does not
+currently return the per-file error list exposed by Local jobs.
 
-```tsx
-const { task } = useEazip();
+## Check policy before changing code
 
-if (task?.state === 'partial') {
-  // task.skippedCount files are missing from the archive
-}
-```
+| Symptom | Check |
+| --- | --- |
+| Session is rejected immediately | Public App file, size, mode, and origin policy |
+| Job cannot fetch sources | Allowed source hosts, URL lifetime, and server-side reachability |
+| Download is no longer available | Session and output expiry |
+| Output is inconveniently large | `maxZipSizeBytes` and the receiving system's limits |
 
-`<EazipTray />` already narrates the partial state for you. See
-[Partial results & errors](/docs/concepts/partial-results) for the taxonomy.
-
-<Callout type="warn" title="A URL that opens in your browser can still fail server-side">
-  Cloud fetches come from Eazip's servers, so CORS stops mattering and plain
-  reachability starts. `raw.githubusercontent.com` is the usual surprise — it
-  serves a browser fine and returns `403` to our fetchers. Use a CDN
-  (`cdn.jsdelivr.net` works for npm and GitHub content), your own asset domain,
-  or signed bucket URLs.
-</Callout>
-
-## Next
-
-- [Zero-egress exports](/docs/guides/zero-egress-exports) — what repeat
-  downloads cost
-- [Backend-created sessions](/docs/cloud/backend-sessions) — when the browser
-  shouldn't see the URL list
-- [ZIP S3 or R2 objects](/docs/guides/zip-s3-or-r2-objects) — signed bucket
-  sources
+For jobs driven by URL count rather than total bytes, continue with
+[Zip thousands of URLs with JavaScript](/docs/guides/zip-thousands-urls-javascript).
+You can also read [Sessions and resume](/docs/concepts/resume) or
+[Download S3 or R2 objects as a ZIP](/docs/guides/zip-s3-or-r2-objects).

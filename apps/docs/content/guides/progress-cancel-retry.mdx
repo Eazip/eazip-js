@@ -1,30 +1,91 @@
 ---
-title: Add progress, cancel, and retry
-description: Let the tray narrate every state for you.
+title: Show ZIP Progress and Let Users Cancel or Retry
+description: Show ZIP progress in React, let users cancel active work, and retry failed downloads with EazipTray or useEazip.
 ---
 
-`<EazipTray />` already renders progress, completion, partial results,
-failures, and expiry — drop it in once and it owns its own states. Reach for
-`useEazip()`'s `task`, `isBusy`, `cancel()`, and `retry()` directly when you
-need custom UI instead of (or alongside) the tray. See
-[React quickstart](/docs/getting-started/react) for the basic
-`<EazipTray />` setup.
+`<EazipTray />` is the recommended default. Build custom controls only when ZIP
+state must live inside an existing panel, toolbar, or product workflow.
 
-## In short
+## Use the built-in tray
+
+Render one tray near the root of the application. It handles processing,
+cancel, retry, partial output, completion, and Cloud expiry without additional
+state.
 
 ```tsx
+const zip = useEazip();
+
+zip.download({ files });
+
+return <EazipTray />;
+```
+
+## Build focused custom controls
+
+```tsx title="ExportControls.tsx"
 import { useEazip } from '@eazip/react';
 
-function ExportControls() {
-  const { task, cancel, retry } = useEazip();
+export function ExportControls({ files }: { files: File[] }) {
+  const {
+    task,
+    isBusy,
+    download,
+    cancel,
+    retry,
+  } = useEazip();
+
+  const progress = task?.progress;
 
   return (
-    <>
-      {task && task.state === 'processing' && <button onClick={() => cancel()}>Cancel</button>}
-      {task && task.state === 'failed' && task.canRetry && <button onClick={() => retry()}>Retry</button>}
-    </>
+    <section aria-label="ZIP export">
+      <button
+        disabled={isBusy}
+        onClick={() => download({ files })}
+      >
+        Download as ZIP
+      </button>
+
+      {task?.state === 'processing' && (
+        <>
+          <p role="status">
+            {progress
+              ? `${progress.filesCompleted} of ${progress.filesTotal}`
+              : 'Preparing ZIP…'}
+          </p>
+          <button onClick={() => cancel(task.id)}>
+            Cancel
+          </button>
+        </>
+      )}
+
+      {task?.state === 'failed' && task.canRetry && (
+        <button onClick={() => retry(task.id)}>
+          Retry
+        </button>
+      )}
+
+      {task?.state === 'partial' && (
+        <p>{task.skippedCount} files were skipped.</p>
+      )}
+    </section>
   );
 }
 ```
 
-A step-by-step walkthrough is coming soon.
+Local jobs expose file and byte progress. Cloud jobs currently expose processing
+state through polling, but not per-file progress.
+
+## Understand the actions
+
+| Action | Local | Cloud |
+| --- | --- | --- |
+| `cancel()` | Stops browser fetching and ZIP creation | Stops this client and removes the task; the server job may continue |
+| `retry()` | Starts the retained request again | Reuses a retained URL request when available |
+| `downloadAll()` | Downloads every split Local ZIP | Downloads every Cloud ZIP output |
+
+`task.canRetry` is the source of truth for showing a retry action. A restored
+backend-created session may resume, but cannot recreate its original callback
+after a reload.
+
+For complete task fields, see the [React Reference](/docs/reference/react). For
+headless rendering patterns, see [Headless usage](/docs/react/headless).

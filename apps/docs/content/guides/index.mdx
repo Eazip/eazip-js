@@ -1,20 +1,82 @@
 ---
-title: Guides
-description: Common Eazip jobs, ready to copy.
+title: JavaScript and React ZIP Guides
+description: Build browser ZIP downloads with JavaScript or React, connect remote files and object storage, handle failures, and scale large URL archives.
 ---
 
-Short, copy-pasteable guides for the jobs people reach for Eazip to do most
-often — from a plain asset picker to zero-egress cloud exports.
+Choose the result you need. Each guide gives you a complete JavaScript or React
+path, the constraints that matter, and the next step when a browser job needs to
+scale.
 
-- [Download selected files](/docs/guides/download-selected-files) — turn a
-  gallery or asset picker into a single ZIP.
-- [Download multiple files as a ZIP from URLs](/docs/guides/create-zip-from-remote-urls) —
-  fetch remote files in the browser and start one download.
-- [ZIP S3 or R2 objects](/docs/guides/zip-s3-or-r2-objects) — bundle objects from
-  signed bucket URLs.
-- [Add progress, cancel, and retry](/docs/guides/progress-cancel-retry) — let the
-  tray narrate every state for you.
-- [Zip GB-scale, 1,000+ URL jobs](/docs/guides/gb-scale-url-jobs) — offload huge,
-  many-file archives to the cloud strategy.
-- [Zero-egress exports](/docs/guides/zero-egress-exports) — Eazip Cloud ships
-  downloads with zero egress fees.
+## Create ZIP archives
+
+<Cards>
+  <Card
+    title="Create a ZIP file in the browser with JavaScript"
+    description="Package files locally with no backend ZIP code."
+    href="/docs/guides/create-zip-file-browser-javascript"
+    data-analytics-placement="guides_index"
+  />
+  <Card
+    title="Download multiple files as a ZIP in React"
+    description="Add a multiple-file picker, download action, and tray."
+    href="/docs/guides/download-multiple-files-as-zip-react"
+    data-analytics-placement="guides_index"
+  />
+  <Card
+    title="Create a ZIP from remote URLs"
+    description="Fetch browser-readable URLs and preserve useful filenames."
+    href="/docs/guides/create-zip-from-remote-urls"
+    data-analytics-placement="guides_index"
+  />
+  <Card
+    title="Download selected files as a ZIP in React"
+    description="Connect an existing gallery, asset picker, or document list."
+    href="/docs/guides/download-selected-files"
+    data-analytics-placement="guides_index"
+  />
+</Cards>
+
+## Connect file sources
+
+<Cards>
+  <Card
+    title="Download S3 or R2 objects as a ZIP"
+    description="Bundle signed object URLs without exposing storage credentials."
+    href="/docs/guides/zip-s3-or-r2-objects"
+    data-analytics-placement="guides_index"
+  />
+</Cards>
+
+## Build the download experience
+
+<Cards>
+  <Card
+    title="Show ZIP progress and let users cancel or retry"
+    description="Use the React tray or build focused custom controls."
+    href="/docs/guides/progress-cancel-retry"
+    data-analytics-placement="guides_index"
+  />
+  <Card
+    title="Handle failed files and partial ZIP downloads"
+    description="Keep successful files and choose when the entire job should fail."
+    href="/docs/guides/failed-files-partial-zip-downloads"
+    data-analytics-placement="guides_index"
+  />
+</Cards>
+
+## Handle large URL archives
+
+<Cards>
+  <Card
+    title="Create multi-GB ZIP archives from URLs with JavaScript"
+    description="Move large output to Cloud and split it into practical parts."
+    href="/docs/guides/gb-scale-url-jobs"
+    data-analytics-placement="guides_index"
+  />
+  <Card
+    title="Zip thousands of URLs with JavaScript"
+    description="Run high-count URL jobs with partial results and resumable state."
+    href="/docs/guides/zip-thousands-urls-javascript"
+    data-analytics-placement="guides_index"
+  />
+</Cards>
