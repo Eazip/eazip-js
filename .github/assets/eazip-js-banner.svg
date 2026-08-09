@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title id="title">Eazip JavaScript SDK</title>
+  <desc id="desc">ZIP downloads for JavaScript and React, locally in the browser or with Eazip Cloud.</desc>
+  <defs>
+    <linearGradient id="background" x1="80" y1="20" x2="1180" y2="620" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10131d"/>
+      <stop offset="0.54" stop-color="#17152a"/>
+      <stop offset="1" stop-color="#231844"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(1025 260) rotate(133) scale(510 500)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7c3aed" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#ffffff" stroke-opacity="0.045"/>
+    </pattern>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#05060b" flood-opacity="0.42"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="640" rx="32" fill="url(#background)"/>
+  <rect width="1280" height="640" rx="32" fill="url(#glow)"/>
+  <rect width="1280" height="640" rx="32" fill="url(#grid)"/>
+
+  <g transform="translate(82 68)">
+    <rect width="48" height="48" rx="11" fill="url(#brand)"/>
+    <g transform="translate(4.5 4.5) scale(.305)">
+      <path d="M74 14 34 70h28l-24 44 56-56H66Z" fill="#fff"/>
+    </g>
+    <text x="64" y="34" fill="#fafafa" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="31" font-weight="720" letter-spacing="-0.8">Eazip</text>
+    <rect x="162" y="5" width="168" height="38" rx="19" fill="#ffffff" fill-opacity="0.07" stroke="#ffffff" stroke-opacity="0.12"/>
+    <text x="246" y="30" text-anchor="middle" fill="#c7c9d4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16">JavaScript SDK</text>
+  </g>
+
+  <g transform="translate(82 178)">
+    <text fill="#ffffff" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="62" font-weight="760" letter-spacing="-2.7">
+      <tspan x="0" y="0">ZIP downloads for</tspan>
+      <tspan x="0" y="72">JavaScript and React.</tspan>
+    </text>
+    <text x="0" y="188" fill="#bbbccc" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="25" letter-spacing="-0.35">
+      <tspan x="0">Local in the browser. Cloud for multi-GB archives</tspan>
+      <tspan x="0" dy="36">and thousands of URLs. No backend code required.</tspan>
+    </text>
+  </g>
+
+  <g transform="translate(82 512)" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16">
+    <rect width="166" height="46" rx="23" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.14"/>
+    <text x="83" y="29" text-anchor="middle" fill="#ddddea">@eazip/react</text>
+    <rect x="178" width="154" height="46" rx="23" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.14"/>
+    <text x="255" y="29" text-anchor="middle" fill="#ddddea">@eazip/core</text>
+    <rect x="344" width="78" height="46" rx="23" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.14"/>
+    <text x="383" y="29" text-anchor="middle" fill="#ddddea">MIT</text>
+  </g>
+
+  <g transform="translate(790 176)" filter="url(#shadow)" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+    <rect width="408" height="286" rx="24" fill="#12131b" stroke="#ffffff" stroke-opacity="0.14"/>
+    <g transform="translate(24 24)">
+      <circle cx="5" cy="5" r="5" fill="#fb7185"/>
+      <circle cx="25" cy="5" r="5" fill="#fbbf24"/>
+      <circle cx="45" cy="5" r="5" fill="#4ade80"/>
+      <text x="0" y="62" fill="#c4b5fd" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">import { useEazip } from '@eazip/react';</text>
+      <text x="0" y="94" fill="#ececf4" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15">const zip = useEazip();</text>
+      <text x="0" y="126" fill="#a5b4fc" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15">zip.download({ files });</text>
+      <path d="M1 151h358" stroke="#ffffff" stroke-opacity="0.09"/>
+
+      <g transform="translate(0 181)">
+        <rect width="88" height="44" rx="11" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.12"/>
+        <text x="44" y="28" text-anchor="middle" fill="#ddddE8" font-size="14" font-weight="600">Files</text>
+        <path d="M100 22h32" stroke="#777b90" stroke-width="2" stroke-linecap="round"/>
+        <path d="m126 16 7 6-7 6" fill="none" stroke="#777b90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="144" width="88" height="44" rx="11" fill="url(#brand)"/>
+        <text x="188" y="28" text-anchor="middle" fill="#fff" font-size="14" font-weight="650">Eazip</text>
+        <path d="M244 22h20" stroke="#777b90" stroke-width="2" stroke-linecap="round"/>
+        <path d="m258 16 7 6-7 6" fill="none" stroke="#777b90" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="276" width="44" height="44" rx="11" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.12"/>
+        <path d="M289 13h14l5 5v13h-19z" fill="none" stroke="#e5e7eb" stroke-width="1.7" stroke-linejoin="round"/>
+        <path d="M303 13v6h5" fill="none" stroke="#e5e7eb" stroke-width="1.7" stroke-linejoin="round"/>
+        <text x="298" y="38" text-anchor="middle" fill="#a5b4fc" font-size="9" font-weight="750">ZIP</text>
+      </g>
+    </g>
+  </g>
+</svg>

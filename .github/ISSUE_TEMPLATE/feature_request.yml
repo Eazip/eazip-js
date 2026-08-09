@@ -1,0 +1,59 @@
+name: Feature request
+description: Suggest an improvement to an Eazip package, example, or documentation.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Start with the problem or workflow. That context helps us evaluate more than one possible solution.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - "@eazip/react"
+        - "@eazip/core"
+        - Documentation
+        - Example app
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      placeholder: Describe the user problem, workflow, or limitation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like Eazip to do?
+      placeholder: Describe the outcome or interface you have in mind.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Current workaround or alternatives
+      placeholder: How do you handle this today?
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add examples, screenshots, related libraries, or implementation constraints.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and discussions for a similar request.
+          required: true

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and support
+    url: https://github.com/Eazip/eazip-js/discussions
+    about: Ask for help, share an integration, or discuss an idea with the community.
+  - name: Documentation
+    url: https://eazip.io/docs
+    about: Read the getting-started guides, concepts, and API reference.
+  - name: Security vulnerability
+    url: https://github.com/Eazip/eazip-js/security/policy
+    about: Report security issues privately instead of opening a public issue.

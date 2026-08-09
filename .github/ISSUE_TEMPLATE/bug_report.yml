@@ -1,0 +1,84 @@
+name: Bug report
+description: Report a reproducible problem in an Eazip package, example, or documentation.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Eazip. Please share the smallest reproduction you can.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - "@eazip/react"
+        - "@eazip/core"
+        - Documentation
+        - Example app
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      description: Run `npm list @eazip/react @eazip/core` if you are unsure.
+      placeholder: "@eazip/react 0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Include your browser, framework, and relevant versions.
+      placeholder: "Chrome 140, React 19, Vite 7, macOS"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      placeholder: Tell us what you observed and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Install ...
+        2. Call ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: input
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: A StackBlitz, CodeSandbox, or small public repository helps us investigate quickly.
+      placeholder: https://stackblitz.com/...
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Remove public keys, session credentials, signed URLs, and private file names first.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues for the same problem.
+          required: true
+        - label: This is not a security vulnerability or a request for private support.
+          required: true
